@@ -1,0 +1,29 @@
+INFO        2025-05-17 00:28:10.555694 EST  login           : logging in using static token
+INFO        2025-05-17 00:28:11.130645 EST  setup_cogs      : Loaded cog Memory.py
+INFO        2025-05-17 00:28:11.132813 EST  setup_cogs      : Loaded cog Math_Quiz.py
+INFO        2025-05-17 00:28:12.087099 EST  setup_cogs      : Loaded cog Level.py
+INFO        2025-05-17 00:28:12.183488 EST  setup_cogs      : Loaded cog Add_Xp.py
+INFO        2025-05-17 00:28:12.184600 EST  setup_cogs      : Loaded cog Wipe_Levels.py
+INFO        2025-05-17 00:28:12.570220 EST  setup_cogs      : Loaded cog Trivia.py
+INFO        2025-05-17 00:28:12.571717 EST  setup_cogs      : Loaded cog Sendgames.py
+INFO        2025-05-17 00:28:12.573112 EST  setup_cogs      : Loaded cog Unscramble.py
+INFO        2025-05-17 00:28:12.574440 EST  setup_cogs      : Loaded cog Tictactoe.py
+INFO        2025-05-17 00:28:12.575294 EST  setup_cogs      : Loaded cog Game_Manager.py
+INFO        2025-05-17 00:28:12.581352 EST  setup_cogs      : Loaded cog Flag_Guesser.py
+INFO        2025-05-17 00:28:12.647910 EST  setup_cogs      : Loaded cog _2048.py
+INFO        2025-05-17 00:28:12.651728 EST  setup_cogs      : Loaded cog Connect_Four.py
+INFO        2025-05-17 00:28:12.652667 EST  setup_cogs      : Loaded cog Mine_Sweeper.py
+INFO        2025-05-17 00:28:12.653305 EST  setup_cogs      : Loaded cog Wordle.py
+INFO        2025-05-17 00:28:12.658535 EST  chat_game_refresh : Waiting 681 seconds before sending a new random chat game.
+INFO        2025-05-17 00:28:12.663784 EST  add_views       : Added view DMGames
+INFO        2025-05-17 00:28:12.664697 EST  add_views       : Added view ViewMore
+INFO        2025-05-17 00:28:12.665312 EST  add_views       : Added view MemoryButtons
+INFO        2025-05-17 00:28:12.665944 EST  add_views       : Added view TicTacToeButtons
+INFO        2025-05-17 00:28:12.666589 EST  add_views       : Added view ConnectFourButtons
+INFO        2025-05-17 00:28:12.667252 EST  add_views       : Added view _2048Buttons
+INFO        2025-05-17 00:28:12.679768 EST  dm_game_refresh : Waiting 2577 seconds before refreshing Wordle → Connect Four.
+INFO        2025-05-17 00:28:12.868948 EST  received_message : Shard ID None has connected to Gateway (Session ID: 505434396e2d06393f015b0350b73085).
+INFO        2025-05-17 00:28:15.621107 EST  update_presence : Updated the bot's presence to play.minecadia.com
+INFO        2025-05-17 00:28:15.875790 EST  sync_command_tree : Synced 10 commands games-reload, math-quiz, level, add-xp, wipe-levels, trivia, send-games, unscramble, game-manager, flag-guesser
+INFO        2025-05-17 00:28:15.876821 EST  on_ready        : Logged in as Minecadia Games#3661 (1373128699238682725)
+INFO        2025-05-17 00:28:47.681107 EST  game            : Flag Guesser 'Syria' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍

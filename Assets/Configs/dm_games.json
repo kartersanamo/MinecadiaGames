@@ -1,0 +1,55 @@
+{
+    "DELAY": 7200,
+    "GAMES": {
+        "TicTacToe": {
+            "COOLDOWN": 21600,
+            "BUTTON_COOLDOWN": 1.5,
+            "IMAGE": "https://i.imgur.com/ujqg8h1.png"
+        },
+        "Memory": {
+            "COOLDOWN": 43200,
+            "BUTTON_COOLDOWN": 1.5,
+            "MATCH_XP": {
+                "LOWER": 10,
+                "UPPER": 20
+            },
+            "WIN_XP": {
+                "LOWER": 60,
+                "UPPER": 70
+            },
+            "IMAGE": "https://i.imgur.com/a7qo0qJ.png",
+            "TRIES": 7,
+            "EMOJIS": [
+                "<:MeeZoid:934656446942036038>",
+                "<:Minecadia_Pirate_Smirk:1037392719288467539>",
+                "<:Minecadia_Arkham_Angry:1037394395374301194>",
+                "<:Minecadia_Arkham_Batman:1037394345688572025>",
+                "<:Minecadia_Arkham_ROFL:1037394505466392638>",
+                "<:Minecadia_Arkham_Wink:1037394478878691368>",
+                "<:Minecadia_Pirate_Thinking:1037392977317863444>",
+                "<:Minecadia_Pirate_Dead:1037392830273966110>",
+                "<:Minecadia_Dracula_Thinking:1037393201406939217>",
+                "<:Minecadia_Galaxy_Alien:1037394289749139496>"
+            ]
+        },
+        "Wordle": {
+            "COOLDOWN": 43200,
+            "IMAGE": "https://i.imgur.com/cFJkVEl.png",
+            "WORDS_FILE": "MinecadiaGames/Assets/Configs/words.txt"
+        },
+        "Connect Four": {
+            "IMAGE": "https://i.imgur.com/BqUhwZd.png",
+            "COOLDOWN": 43200,
+            "BUTTON_COOLDOWN": 1.5,
+            "base_image_path": "MinecadiaGames/Assets/Images/ConnectFourBoard.png",
+            "output_image_path": "MinecadiaGames/Assets/Images/ConnectFourOutput.png",
+            "red_piece_path": "MinecadiaGames/Assets/Images/RedPiece.png",
+            "yellow_piece_path": "MinecadiaGames/Assets/Images/YellowPiece.png"
+        },
+        "2048": {
+            "IMAGE": "https://i.imgur.com/hnmzi9M.png",
+            "COOLDOWN": 43200,
+            "BUTTON_COOLDOWN": 0.3
+        }
+    }
+}
