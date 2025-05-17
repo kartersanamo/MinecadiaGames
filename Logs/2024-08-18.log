@@ -1,0 +1,42 @@
+ERROR       2024-08-19 00:41:57.848038 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 00:42:33.377624 EST  executeINFO        2024-08-19 00:55:00.973394 EST  received_message : Shard ID None has sINFO        2024-08-19 02:38:12.028092 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-19 02:38:12.704053 EST  update_game     : Tictactoe waiting 21600 seconds...
+INFO        2024-08-19 02:38:54.988502 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-19 04:55:40.840553 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-19 04:57:48.788501 EST  play_wordle     : Wordle 'STEED' (1ndividualism#0)
+INFO        2024-08-19 04:58:26.681616 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-19 07:00:49.033453 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-19 07:00:49.846590 EST  update_game     : Memory waiting 43200 seconds...
+INFO        2024-08-19 07:02:05.649919 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-19 07:04:32.789234 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-19 08:05:49.028974 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-19 08:05:49.743907 EST  update_game     : Wordle waiting 43200 seconds...
+INFO        2024-08-19 08:06:13.880286 EST  play_wordle     : Wordle 'FOIST' (1ndividualism#0)
+INFO        2024-08-19 08:38:12.706278 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-19 08:38:13.356465 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-19 09:11:11.531869 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-19 09:11:21.543326 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-19 09:11:42.508717 EST  play_wordle     : Wordle 'TIMID' (harleeboy#0)
+ grace last?' | '2 Weeks' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-19 06:36:22.002624 EST  game            : Trivia 'What is the name of the top rank on kitmap?' | 'Kami+' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-19 07:10:22.064946 EST  game            : Flag Guesser 'Western Sahara' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-19 07:42:22.004452 EST  game            : Math Quiz '189÷9=' | '21' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-19 08:09:22.056890 EST  game            : Flag Guesser 'Cambodia' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-19 08:43:22.061989 EST  game            : Flag Guesser 'Vietnam' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-19 09:09:22.001812 EST  game            : Trivia 'What was the name of the first Factions Realm?' | 'Pirate' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-19 09:43:22.006879 EST  game            : Math Quiz '5x + 8 = 9' | '1/5' #𝖫𝗂𝖿𝖾𝗌𝗍𝖾𝖺𝗅-𝖢𝗁𝖺𝗍
+ute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:03:18.888039 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:03:26.652904 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:03:38.150834 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:04:43.190945 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:05:03.063598 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:05:29.933256 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:05:35.828746 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:05:43.INFO        2024-08-19 08:17:50.206059 EST  received_message : Shard ID None has successfully RESUMED session 708aee39cba32145bf3e58fa90b45abe.
+ERROR       2024-08-19 10:00:55.173646 EST  on_command_error : Ignoring exception in command None
+discord.ext.commands.errors.CommandNotFound: Command "/joinqueue" is not found
+'matches' in 'field list'")
+ERROR       2024-08-19 07:06:01.244049 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:06:05.173793 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")
+ERROR       2024-08-19 07:06:08.626143 EST  execute         : Execute error (1054, "Unknown column 'matches' in 'field list'")

@@ -1,0 +1,501 @@
+INFO        2025-05-16 00:28:54.530913 EST  check_chat_games : Waiting 1951 seconds.
+INFO        2025-05-16 00:29:51.098943 EST  INFO        202ERROR    ERROR       2025-05-16 03:52:12.948556 EST  check_level_up  : Check Level-up Error: 403 Forbidden (error code: 50007): Cannot send messages to this user
+game   INFO        2025-05-16 01:39:51.626703 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18c7a4d8ININFO        2025-05-16 02:16:00.352875 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18INFO    INFO        2025-05-16 04:37:43.203764 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18c7a4d8.
+ERROR       2025-05-16 05:39:44.684219 EST  on_command_error : Ignoring exception in command None
+discord.ext.commands.errors.CommandNotFound: Command "..." is not found
+INFO        2025-05-16 06:30:13.253595 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18c7a4d8.
+ERROR       2025-05-16 07:53:04.128283 EST  on_error        : Ignoring exception in view <_2048Buttons timeout=None children=21> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=False label=None emoji=<PartialEmoji animated=False name='➡️' id=None> row=4 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 206, in callback
+    await self.check_cooldown(interaction = interaction, direction = dir)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 172, in check_cooldown
+    await self.handle_click(interaction, direction)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 180, in handle_click
+    await self.end_game(interaction, lost=True)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 149, in end_game
+    if xp:
+UnboundLocalError: local variable 'xp' referenced before assignment
+ERROR       2025-05-16 08:09:43.084589 EST  on_error        : Ignoring exception in view <_2048Buttons timeout=None children=21> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=False labelINFO        2025-05-16 08:38:53.952037 EST  game            : Flag Guesser 'Maldives' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 09:21:54.990235 EST  game            : Unscramble 'teleportation' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 09:55:34.420605 EST  game            : Unscramble 'shackle' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 10:28:47.123000 EST  game            : Flag Guesser 'Mozambique' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 11:04:36.203950 EST  game            : Flag Guesser 'Albania' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 11:41:46.054942 EST  game            : Flag Guesser 'Luxembourg' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 12:25:41.918343 EST  game            : Flag Guesser 'Venezuela' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 13:02:52.193765 EST  game            : Flag Guesser 'Liberia' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 13:46:45.499553 EST  game            : Flag Guesser 'Croatia' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 14:28:46.666900 EST  game            : Unscramble 'pet eggs' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 14:55:38.559857 EST  check_chat_games : Waiting 245 seconds.
+INFO        2025-05-16 14:59:43.575932 EST  game            : Trivia 'Which season were markets released?' | 'Season 7' #𝖫𝗂𝖿𝖾𝗌𝗍𝖾𝖺𝗅-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 15:40:40.879315 EST  game            : Unscramble 'depth strider' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 16:06:59.944311 EST  check_chat_games : Waiting 91 seconds.
+INFO        2025-05-16 16:08:30.955632 EST  game            : Math Quiz '5x + 9 = 10' | '1/5' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍 | True
+INFO        2025-05-16 16:46:21.420333 EST  game            : Trivia 'What was the first Armorset released on factions?' | 'Rover' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 17:22:21.787003 EST  game            : Math Quiz 'Third angle of triangle with angles 18 and 63 =' | '99' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍 | True
+INFO        2025-05-16 18:07:19.188053 EST  game            : Trivia 'What is the name of the first ever skin that was released on Skyblock?' | 'Toad Skin' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 18:47:57.635905 EST  game            : Trivia 'What happened February 12th 2022?' | 'Mojang Blacklist' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 19:26:41.986981 EST  game            : Math Quiz '√(9)=' | '3' #𝖫𝗂𝖿𝖾𝗌𝗍𝖾𝖺𝗅-𝖢𝗁𝖺𝗍 | True
+INFO        2025-05-16 20:06:41.571157 EST  game            : Unscramble 'backbone' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 20:41:13.496502 EST  game            : Unscramble 'claw machine' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 21:10:37.699051 EST  game            : Unscramble 'petrify' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2025-05-16 21:37:44.328182 EST  check_chat_games : Waiting 213 seconds.
+INFO        2025-05-16 21:41:17.341084 EST  game            : Math Quiz '4/5÷3/9=' | '12/5' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍 | False
+ub1554#0)
+INFO        2025-05-16 13:24:10.972794 EST  play_wordle     : Wordle 'UPPER' (sanamo#0)
+INFO        2025-05-16 13:26:21.206080 EST  play_wordle     : Wordle 'EXILE' (sweatybomb#0)
+INFO        2025-05-16 13:36:33.373698 EST  play_wordle     : Wordle 'GRAZE' (therandom122#0)
+INFO        2025-05-16 13:56:46.656344 EST  check_chat_games : Waiting 1920 seconds.
+INFO        2025-05-16 14:29:43.554394 EST  check_chat_games : Waiting 1555 seconds.
+INFO        2025-05-16 15:00:21.325159 EST  play_wordle     : Wordle 'COUPE' (lilrolls123#0)
+INFO        2025-05-16 15:08:25.582584 EST  play_wordle     : Wordle 'NERDY' (coolcreeper4058#0)
+INFO        2025-05-16 15:09:43.868022 EST  check_chat_games : Waiting 1857 seconds.
+INFO        2025-05-16 15:11:07.437902 EST  refresh         : Refreshing Connectfour...
+INFO        2025-05-16 15:11:08.079234 EST  check_dm_games  : Waiting 7200 seconds.
+INFO        2025-05-16 15:11:32.271959 EST  play_connect_four : Connect Four (sweatybomb#0)
+INFO        2025-05-16 15:41:05.938820 EST  check_chat_games : Waiting 1554 seconds.
+INFO        2025-05-16 16:09:46.349804 EST  play_connect_four : Connect Four (cub1554#0)
+INFO        2025-05-16 16:12:46.879203 EST  play_connect_four : Connect Four (harleeboy#0)
+INFO        2025-05-16 16:18:31.409007 EST  check_chat_games : Waiting 1670 seconds.
+INFO        2025-05-16 16:56:21.771584 EST  check_chat_games : Waiting 1560 seconds.
+INFO        2025-05-16 17:11:08.088236 EST  refresh         : Refreshing 2048...
+INFO        2025-05-16 17:11:08.732595 EST  check_dm_games  : Waiting 7200 seconds.
+INFO        2025-05-16 17:12:06.457777 EST  play_2048       : 2048 (therandom122#0)
+INFO        2025-05-16 17:23:12.703999 EST  play_2048       : 2048 (lilrolls123#0)
+INFO        2025-05-16 17:32:22.174486 EST  check_chat_games : Waiting 2097 seconds.
+INFO        2025-05-16 17:44:35.398937 EST  play_2048       : 2048 (noah.gt#0)
+INFO        2025-05-16 18:17:19.625067 EST  check_chat_games : Waiting 1838 seconds.
+INFO        2025-05-16 18:48:22.051969 EST  play_2048       : 2048 (harleeboy#0)
+INFO        2025-05-16 18:57:57.974201 EST  check_chat_games : Waiting 1724 seconds.
+INFO        2025-05-16 19:11:08.741526 EST  refresh         : Refreshing Tictactoe...
+INFO        2025-05-16 19:11:09.587324 EST  check_dm_games  : Waiting 7200 seconds.
+INFO        2025-05-16 19:20:54.012253 EST  play            : TicTacToe (sweatybomb#0)
+INFO        2025-05-16 19:36:42.554298 EST  check_chat_games : Waiting 1799 seconds.
+INFO        2025-05-16 19:38:17.575562 EST  play            : TicTacToe (lilrolls123#0)
+INFO        2025-05-16 19:46:13.351204 EST  play            : TicTacToe (cub1554#0)
+INFO        2025-05-16 20:07:57.485353 EST  check_chat_games : Waiting 1996 seconds.
+INFO        2025-05-16 20:43:48.685955 EST  check_chat_games : Waiting 1609 seconds.
+INFO        2025-05-16 20:54:07.429983 EST  play            : TicTacToe (cake2004#0)
+INFO        2025-05-16 21:10:57.321631 EST  check_chat_games : Waiting 1607 seconds.
+INFO        2025-05-16 21:11:09.594543 EST  refresh         : Refreshing Memory...
+INFO        2025-05-16 21:11:10.243680 EST  check_dm_games  : Waiting 7200 seconds.
+INFO        2025-05-16 21:19:15.787552 EST  play            : Memory (lilrolls123#0)
+INFO        2025-05-16 21:51:17.858447 EST  check_chat_games : Waiting 1840 seconds.
+onded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:32:15.697167 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:32:15.705884 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:32:16.450925 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.11 seconds.
+WARNING     2025-05-16 12:32:16.674150 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.65 seconds.
+WARNING     2025-05-16 12:32:17.453905 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.11 seconds.
+ERROR       2025-05-16 12:32:21.562106 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.success: 3> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Arkham_Batman' id=1037394345688572025> row=1 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 187, in pos_7
+    await self.check_cooldown(interaction, self.pos_7, 6)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:32:21.683527 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:32:21.703627 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:32:21.704986 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.61 seconds.
+WARNING     2025-05-16 12:32:21.825701 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.75 seconds.
+WARNING     2025-05-16 12:32:22.444596 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.12 seconds.
+WARNING     2025-05-16 12:32:23.511872 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.05 seconds.
+ERROR       2025-05-16 12:32:27.561401 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.success: 3> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Pirate_Thinking' id=1037392977317863444> row=2 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 207, in pos_12
+    await self.check_cooldown(interaction, self.pos_12, 11)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+ERROR       2025-05-16 12:32:27.564289 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.success: 3> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Arkham_Batman' id=1037394345688572025> row=1 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 187, in pos_7
+    await self.check_cooldown(interaction, self.pos_7, 6)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:32:27.669007 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.65 seconds.
+WARNING     2025-05-16 12:32:27.703377 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:32:27.711422 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:32:27.714744 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:32:28.426890 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.13 seconds.
+WARNING     2025-05-16 12:32:28.473964 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.83 seconds.
+WARNING     2025-05-16 12:32:29.429073 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.13 seconds.
+WARNING     2025-05-16 12:32:33.683808 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:32:33.743370 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.82 seconds.
+WARNING     2025-05-16 12:32:33.823472 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.74 seconds.
+WARNING     2025-05-16 12:32:34.035963 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.30 seconds.
+WARNING     2025-05-16 12:32:34.436513 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.12 seconds.
+WARNING     2025-05-16 12:32:35.627011 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 3.94 seconds.
+ERROR       2025-05-16 12:32:39.563488 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.danger: 4> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Arkham_Wink' id=1037394478878691368> row=1 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 195, in pos_9
+    await self.check_cooldown(interaction, self.pos_9, 8)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+ERROR       2025-05-16 12:32:39.566122 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.success: 3> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Pirate_Thinking' id=1037392977317863444> row=2 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 207, in pos_12
+    await self.check_cooldown(interaction, self.pos_12, 11)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 121, in handle_click
+    await interaction.message.edit(embed = embed, view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:32:39.668964 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.65 seconds.
+WARNING     2025-05-16 12:32:39.682941 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:32:39.683708 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:32:39.782853 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.79 seconds.
+WARNING     2025-05-16 12:32:40.484115 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.08 seconds.
+WARNING     2025-05-16 12:32:40.947037 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.36 seconds.
+WARNING     2025-05-16 12:32:41.482553 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.08 seconds.
+WARNING     2025-05-16 12:32:45.718596 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.59 seconds.
+WARNING     2025-05-16 12:32:45.746543 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.81 seconds.
+WARNING     2025-05-16 12:32:45.750162 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.83 seconds.
+WARNING     2025-05-16 12:32:45.797909 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.79 seconds.
+WARNING     2025-05-16 12:32:46.450365 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.11 seconds.
+WARNING     2025-05-16 12:32:46.745098 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.56 seconds.
+WARNING     2025-05-16 12:32:47.445200 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.11 seconds.
+WARNING     2025-05-16 12:32:51.690177 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:32:51.699341 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.61 seconds.
+WARNING     2025-05-16 12:32:51.730362 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:32:51.750136 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.81 seconds.
+ERROR       2025-05-16 12:32:52.310664 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.success: 3> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Arkham_Batman' id=1037394345688572025> row=1 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 187, in pos_7
+    await self.check_cooldown(interaction, self.pos_7, 6)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 127, in handle_click
+    await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 0): You are being rate limited.
+WARNING     2025-05-16 12:32:53.509593 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.05 seconds.
+WARNING     2025-05-16 12:32:53.568212 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.00 seconds.
+ERROR       2025-05-16 12:32:57.564854 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=False label=None emoji=<PartialEmoji animated=False name='TicTacToe' id=1190287916358967327> row=3 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 239, in pos_20
+    await self.check_cooldown(interaction, self.pos_20, 19)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:32:57.659168 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.65 seconds.
+WARNING     2025-05-16 12:32:57.691277 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:32:57.695491 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.86 seconds.
+WARNING     2025-05-16 12:32:57.696695 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.86 seconds.
+ERROR       2025-05-16 12:32:58.313303 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Galaxy_Alien' id=1037394289749139496> row=0 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 171, in pos_3
+    await self.check_cooldown(interaction, self.pos_3, 2)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 0): You are being rate limited.
+WARNING     2025-05-16 12:33:01.513379 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 2.05 seconds.
+WARNING     2025-05-16 12:33:01.514541 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 2.04 seconds.
+ERROR       2025-05-16 12:33:03.559039 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Pirate_Smirk' id=1037392719288467539> row=0 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 175, in pos_4
+    await self.check_cooldown(interaction, self.pos_4, 3)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:33:03.706333 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.86 seconds.
+WARNING     2025-05-16 12:33:03.708222 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.61 seconds.
+WARNING     2025-05-16 12:33:03.719947 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:33:04.159853 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.40 seconds.
+WARNING     2025-05-16 12:33:04.511912 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.05 seconds.
+WARNING     2025-05-16 12:33:06.524279 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 3.04 seconds.
+WARNING     2025-05-16 12:33:09.686321 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.62 seconds.
+WARNING     2025-05-16 12:33:09.688698 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:33:09.697105 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.86 seconds.
+WARNING     2025-05-16 12:33:09.707630 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.86 seconds.
+WARNING     2025-05-16 12:33:10.461977 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.10 seconds.
+WARNING     2025-05-16 12:33:10.714565 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.59 seconds.
+WARNING     2025-05-16 12:33:11.426157 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.13 seconds.
+WARNING     2025-05-16 12:33:15.671664 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.65 seconds.
+WARNING     2025-05-16 12:33:15.794797 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.76 seconds.
+WARNING     2025-05-16 12:33:15.801944 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.76 seconds.
+WARNING     2025-05-16 12:33:15.833454 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.75 seconds.
+WARNING     2025-05-16 12:33:16.453888 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.11 seconds.
+WARNING     2025-05-16 12:33:17.622269 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 3.94 seconds.
+ERROR       2025-05-16 12:33:21.561597 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Pirate_Thinking' id=1037392977317863444> row=0 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 167, in pos_2
+    await self.check_cooldown(interaction, self.pos_2, 1)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+ERROR       2025-05-16 12:33:21.580349 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Pirate_Thinking' id=1037392977317863444> row=0 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 167, in pos_2
+    await self.check_cooldown(interaction, self.pos_2, 1)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 127, in handle_click
+    await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:33:21.668317 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.64 seconds.
+WARNING     2025-05-16 12:33:21.675650 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:33:21.684073 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:33:21.687709 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:33:22.430803 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.13 seconds.
+WARNING     2025-05-16 12:33:24.561679 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 3.00 seconds.
+ERROR       2025-05-16 12:33:27.557460 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=False label=None emoji=<PartialEmoji animated=False name='TicTacToe' id=1190287916358967327> row=1 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 183, in pos_6
+    await self.check_cooldown(interaction, self.pos_6, 5)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+ERROR       2025-05-16 12:33:27.560249 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=False label=None emoji=<PartialEmoji animated=False name='TicTacToe' id=1190287916358967327> row=0 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 179, in pos_5
+    await self.check_cooldown(interaction, self.pos_5, 4)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:33:27.676525 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.64 seconds.
+WARNING     2025-05-16 12:33:27.715918 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:33:27.786652 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.78 seconds.
+WARNING     2025-05-16 12:33:28.447004 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.11 seconds.
+WARNING     2025-05-16 12:33:29.014197 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.55 seconds.
+WARNING     2025-05-16 12:33:30.603696 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 2.97 seconds.
+WARNING     2025-05-16 12:33:33.653972 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.66 seconds.
+WARNING     2025-05-16 12:33:33.678370 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:33:33.679553 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:33:33.721603 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.84 seconds.
+WARNING     2025-05-16 12:33:34.423116 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.14 seconds.
+WARNING     2025-05-16 12:33:35.557435 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.01 seconds.
+ERROR       2025-05-16 12:33:39.559909 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Arkham_Batman' id=1037394345688572025> row=3 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 231, in pos_18
+    await self.check_cooldown(interaction, self.pos_18, 17)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 135, in handle_click
+    await interaction.message.edit(view = self, embed = embed)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:33:39.668517 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.65 seconds.
+WARNING     2025-05-16 12:33:39.688347 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:33:39.708459 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:33:39.811298 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.77 seconds.
+WARNING     2025-05-16 12:33:40.465810 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.11 seconds.
+WARNING     2025-05-16 12:33:41.517878 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.04 seconds.
+ERROR       2025-05-16 12:33:45.558756 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=False label=None emoji=<PartialEmoji animated=False name='TicTacToe' id=1190287916358967327> row=2 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 211, in pos_13
+    await self.check_cooldown(interaction, self.pos_13, 12)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:33:45.673853 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.64 seconds.
+WARNING     2025-05-16 12:33:45.696938 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.86 seconds.
+WARNING     2025-05-16 12:33:45.705933 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:33:45.749128 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.81 seconds.
+WARNING     2025-05-16 12:33:46.510576 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.07 seconds.
+WARNING     2025-05-16 12:33:47.555750 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.00 seconds.
+ERROR       2025-05-16 12:33:51.581720 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='TicTacToe' id=1190287916358967327> row=3 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 235, in pos_19
+    await self.check_cooldown(interaction, self.pos_19, 18)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 127, in handle_click
+    await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:33:51.675576 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+WARNING     2025-05-16 12:33:51.694901 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:33:51.723119 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.59 seconds.
+WARNING     2025-05-16 12:33:51.723962 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.84 seconds.
+WARNING     2025-05-16 12:33:52.474849 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.10 seconds.
+ERROR       2025-05-16 12:33:57.562196 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.secondary: 2> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='TicTacToe' id=1190287916358967327> row=2 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 203, in pos_11
+    await self.check_cooldown(interaction, self.pos_11, 10)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 107, in handle_click
+    new_msg: discord.PartialMessage = await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+WARNING     2025-05-16 12:33:57.703459 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:33:57.799953 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.76 seconds.
+WARNING     2025-05-16 12:33:59.062090 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.50 seconds.
+WARNING     2025-05-16 12:34:03.704443 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.86 seconds.
+WARNING     2025-05-16 12:34:03.716035 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
+WARNING     2025-05-16 12:34:04.932350 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 4.63 seconds.
+WARNING     2025-05-16 12:34:09.689280 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.87 seconds.
+WARNING     2025-05-16 12:34:09.740381 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.83 seconds.
+ERROR       2025-05-16 12:34:15.573777 EST  on_error        : Ignoring exception in view <MemoryButtons timeout=None children=20> for item <Button style=<ButtonStyle.danger: 4> url=None disabled=True label=None emoji=<PartialEmoji animated=False name='Minecadia_Pirate_Dead' id=1037392830273966110> row=3 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 227, in pos_17
+    await self.check_cooldown(interaction, self.pos_17, 16)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 97, in check_cooldown
+    await self.handle_click(interaction, button_method, position)
+  File "/root/MinecadiaGames/Cogs/memory.py", line 141, in handle_click
+    await interaction.message.edit(view = self)
+  File "/usr/local/lib/python3.9/dist-packages/discord/message.py", line 2988, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+  File "/usr/local/lib/python3.9/dist-packages/discord/http.py", line 777, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 429 Too Many Requests (error code: 30046): Maximum number of edits to messages older than 1 hour reached.
+ERROR       2025-05-16 12:57:58.801111 EST  on_command_error : Ignoring exception in command None
+discord.ext.commands.errors.CommandNotFound: Command "..." is not found
+INFO        2025-05-16 13:08:19.312929 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18c7a4d8.
+INFO        2025-05-16 15:32:13.104205 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18c7a4d8.
+ERROR       2025-05-16 17:55:50.613972 EST  on_command_error : Ignoring exception in command None
+discord.ext.commands.errors.CommandNotFound: Command ".." is not found
+ERROR       2025-05-16 18:04:29.632468 EST  on_error        : Ignoring exception in view <_2048Buttons timeout=None children=21> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=False label=None emoji=<PartialEmoji animated=False name='⬆️' id=None> row=4 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 206, in callback
+    await self.check_cooldown(interaction = interaction, direction = dir)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 172, in check_cooldown
+    await self.handle_click(interaction, direction)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 180, in handle_click
+    await self.end_game(interaction, lost=True)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 149, in end_game
+    if xp:
+UnboundLocalError: local variable 'xp' referenced before assignment
+INFO        2025-05-16 18:35:57.457611 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18c7a4d8.
+ERROR       2025-05-16 18:58:59.295436 EST  on_error        : Ignoring exception in view <_2048Buttons timeout=None children=21> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=False label=None emoji=<PartialEmoji animated=False name='⬆️' id=None> row=4 sku_id=None>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ui/view.py", line 435, in _scheduled_task
+    await item.callback(interaction)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 206, in callback
+    await self.check_cooldown(interaction = interaction, direction = dir)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 172, in check_cooldown
+    await self.handle_click(interaction, direction)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 180, in handle_click
+    await self.end_game(interaction, lost=True)
+  File "/root/MinecadiaGames/Cogs/_2048.py", line 149, in end_game
+    if xp:
+UnboundLocalError: local variable 'xp' referenced before assignment
+INFO        2025-05-16 19:44:03.659615 EST  received_message : Shard ID None has successfully RESUMED session 56f6fe34e90d15215622e8cf18c7a4d8.

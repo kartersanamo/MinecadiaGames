@@ -1,0 +1,163 @@
+{
+    "XP_ADD": 10,
+    "XP_LOWER": {
+        "1": 50,
+        "2": 40,
+        "3": 30,
+        "4": 20,
+        "5": 10,
+        "6": 0
+    },
+    "WINNERS": 3,
+    "CHANNELS":[
+        918903892144717915,
+        918903892144717915,
+        918903892144717915,
+        918903892144717915,
+        918903892144717915,
+        1066045406028505178,
+        1066045406028505178,
+        1066045406028505178,
+        1066045406028505178,
+        1222028922795982923,
+        1222028922795982923,
+        1012348851920834560
+     ],
+     "QUESTIONS":[
+        {
+            "ID": 0,
+            "Problem Type": "Addition",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 1,
+            "Problem Type": "Subtraction",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 2,
+            "Problem Type": "Multiplication",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 3,
+            "Problem Type": "Division",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 6,
+            "Problem Type": "Square Root",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 7,
+            "Problem Type": "Power Rule Differentiation",
+            "Accepted Format": "Integer**x**^Integer + ..."
+        },
+        {
+            "ID": 8,
+            "Problem Type": "Square",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 10,
+            "Problem Type": "Greatest Common Denominator",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 11,
+            "Problem Type": "Algebra (Solve For X)",
+            "Accepted Format": "Integer OR Fraction"
+        },
+        {
+            "ID": 12,
+            "Problem Type": "Logarithm",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 13,
+            "Problem Type": "Fraction To Decimal",
+            "Accepted Format": "Decimal (Round to Nearest Hundredths & Truncate One Zero If Present)"
+        },
+        {
+            "ID": 16,
+            "Problem Type": "Fraction Division",
+            "Accepted Format": "Integer OR Fraction"
+        },
+        {
+            "ID": 21,
+            "Problem Type": "Factoring Quadratic",
+            "Accepted Format": "(x +/- Integer)(x +/- Integer) -> Or Just (x)"
+        },
+        {
+            "ID": 22,
+            "Problem Type": "Third Angle of Triangle",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 25,
+            "Problem Type": "Pythagorean Theorem",
+            "Accepted Format": "Decimal (Round to Nearest Hundredths & Truncate One Zero If Present)"
+        },
+        {
+            "ID": 28,
+            "Problem Type": "Fraction Multiplication",
+            "Accepted Format": "Fraction"
+        },
+        {
+            "ID": 31,
+            "Problem Type": "Factorial",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 32,
+            "Problem Type": "Surface Area of Cube",
+            "Accepted Format": "Integer m^2"
+        },
+        {
+            "ID": 35,
+            "Problem Type": "Volume of Cube",
+            "Accepted Format": "Integer m^3"
+        },
+        {
+            "ID": 40,
+            "Problem Type": "Common Factors",
+            "Accepted Format": "Integer, Integer..."
+        },
+        {
+            "ID": 44,
+            "Problem Type": "Compare Fractions",
+            "Accepted Format": ">, <, OR ="
+        },
+        {
+            "ID": 49,
+            "Problem Type": "Fourth Angle of Quadrilateral",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 53,
+            "Problem Type": "Exponentiation",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 90,
+            "Problem Type": "Is Prime",
+            "Accepted Format": "Yes OR No"
+        },
+        {
+            "ID": 96,
+            "Problem Type": "Perimeter of Polygons",
+            "Accepted Format": "Integer"
+        },
+        {
+            "ID": 116,
+            "Problem Type": "Factors of a Number",
+            "Accepted Format": "Integer, Integer..."
+        },
+        {
+            "ID": 124,
+            "Problem Type": "Is Composite",
+            "Accepted Format": "Yes OR No"
+        }
+     ]
+}

@@ -1,0 +1,71 @@
+{
+    "TOKEN":"MTE3NzMyNTgzNzM4MTU0NjA2NQ.GQhL90.FSRzC6p0cBslxEAlSKTg7ldQzhdT8Foqps6me8",
+    "DATABASE_CONFIG":{
+       "host":"127.0.0.1",
+       "user":"discord_bot",
+       "database":"discord_bot",
+       "password":"Z8587U3NRbvG",
+       "port":3306,
+       "autocommit":"True"
+    },
+    "ADMIN_ROLES":[
+       "*",
+       "Owner",
+       "Factions Management",
+       "Manager",
+       "Developer",
+       "Jr. Developer",
+       "Sr. Administrator",
+       "Administrator"
+    ],
+    "STAFF_ROLES":[
+       "*",
+       "Owner",
+       "Factions Management",
+       "Manager",
+       "Developer",
+       "Jr. Developer",
+       "Sr. Administrator",
+       "Administrator",
+       "Staff of the Month",
+       "Jr. Administrator",
+       "Sr. Moderator",
+       "Moderator",
+       "Helper",
+       "Staff Team"
+    ],
+    "COGS_LIST":[
+       "trivia",
+       "unscramble",
+       "flag_guesser",
+       "math_quiz",
+       "level",
+       "wordle",
+       "wipe_levels",
+       "tictactoe",
+       "memory",
+       "sendmessage",
+       "add_xp",
+       "connect_four"
+    ],
+    "EMBED_COLOR":"0xF1C40F",
+    "FOOTER":"Minecadia Games Bot",
+    "PRESENCE":"play.minecadia.com",
+    "LOGO":"https://i.imgur.com/fjIYhig.png",
+    "GAMES_ROLE": 1190635899025891398,
+    "VERIFIED_ROLE": 1016520282682445914,
+    "GUILD_ID": 680569558754656280,
+    "ADMIN_LOGS": 1190693196716576878,
+    "LOGS_CHANNEL": 918928087582916699,
+    "ANNOUNCE_CHANNELS": [
+        918903892144717915, 
+        1066045406028505178, 
+        1012348851920834560,
+        1032633836208672818
+    ],
+    "CHAT_GAMES_RANGE": {
+        "LOWER": 25,
+        "UPPER": 35
+    },
+    "DISCORD_TICKETS": 1185698620251574383
+ }
