@@ -42,9 +42,8 @@ INFO        2025-05-16 20:41:13.496502 EST  game            : Unscramble 'claw m
 INFO        2025-05-16 21:10:37.699051 EST  game            : Unscramble 'petrify' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
 INFO        2025-05-16 21:37:44.328182 EST  check_chat_games : Waiting 213 seconds.
 INFO        2025-05-16 21:41:17.341084 EST  game            : Math Quiz '4/5÷3/9=' | '12/5' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍 | False
-ub1554#0)
-INFO        2025-05-16 13:24:10.972794 EST  play_wordle     : Wordle 'UPPER' (sanamo#0)
-INFO        2025-05-16 13:26:21.206080 EST  play_wordle     : Wordle 'EXILE' (sweatybomb#0)
+INFO        2025-05-16 22:21:57.872630 EST  game            : Trivia 'What is the top rank named on factions?' | 'Kraken+' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+ (sweatybomb#0)
 INFO        2025-05-16 13:36:33.373698 EST  play_wordle     : Wordle 'GRAZE' (therandom122#0)
 INFO        2025-05-16 13:56:46.656344 EST  check_chat_games : Waiting 1920 seconds.
 INFO        2025-05-16 14:29:43.554394 EST  check_chat_games : Waiting 1555 seconds.
@@ -82,8 +81,9 @@ INFO        2025-05-16 21:11:09.594543 EST  refresh         : Refreshing Memory.
 INFO        2025-05-16 21:11:10.243680 EST  check_dm_games  : Waiting 7200 seconds.
 INFO        2025-05-16 21:19:15.787552 EST  play            : Memory (lilrolls123#0)
 INFO        2025-05-16 21:51:17.858447 EST  check_chat_games : Waiting 1840 seconds.
-onded with 429. Retrying in 5.88 seconds.
-WARNING     2025-05-16 12:32:15.697167 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
+INFO        2025-05-16 22:24:00.252337 EST  play            : Memory (cub1554#0)
+INFO        2025-05-16 22:31:58.239027 EST  check_chat_games : Waiting 1898 seconds.
+hannels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.88 seconds.
 WARNING     2025-05-16 12:32:15.705884 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.85 seconds.
 WARNING     2025-05-16 12:32:16.450925 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 5.11 seconds.
 WARNING     2025-05-16 12:32:16.674150 EST  request         : We are being rate limited. PATCH https://discord.com/api/v10/channels/1190534739195592734/messages/1372957864334852187 responded with 429. Retrying in 0.65 seconds.
