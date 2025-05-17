@@ -1,0 +1,363 @@
+INFO        2024-08-13 02:38:12.692974 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-13 02:38:13.625502 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-13 02:39:45.237184 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-13 05:13:49.273154 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-13 05:21:45.784845 EST  play            : TicTacToe (1ndiviINFO        2024-08-17 19:04:40.549257 EST  wrapper         : Games Reload Command completed in 0.2s
+INFO        2024-08-17 19:05:11.358893 EST  wrapper         : Games Reload Command completed in 0.14s
+INFO        2024-08-17 19:05:49.828343 EST  wrapper         : Games Reload Command completed in 0.15s
+INFO        2024-08-17 19:06:18.841857 EST  wrapper         : Games Reload Command completed in 0.13s
+INFO        2024-08-17 19:06:41.499282 EST  wrapper         : Games Reload Command completed in 0.31s
+: Memory waiting 43199 seconds...
+INFO        2024-08-13 07:00:56.148912 EST  play            : Memory (notfriz#0)
+INFO        2024-08-13 07:03:37.356061 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-13 07:17:58.216730 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-13 08:05:49.790507 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-13 08:05:50.496776 EST  update_game     : Wordle waiting 43199 seconds...
+INFO        2024-08-13 08:06:19.677108 EST  play_wordle     : Wordle 'HOUND' (notfriz#0)
+INFO        2024-08-13 08:07:13.710052 EST  play_wordle     : Wordle 'HALVE' (ebkmabu#0)
+INFO        2024-08-13 08:12:37.245779 EST  play_wordle     : Wordle 'WHINE' (harleeboy#0)
+INFO        2024-08-13 08:32:02.068398 EST  play_wordle     : Wordle 'NYMPH' (1ndividualism#0)
+INFO        2024-08-13 08:38:12.627153 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-13 08:38:13.315757 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-13 08:38:23.852024 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-13 08:39:05.226209 EST  play            : TicTacToe (notfriz#0)
+INFO        2024-08-13 08:42:30.311512 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-13 09:00:37.021811 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-13 09:10:58.592973 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-13 14:38:12.318989 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-13 14:38:12.992623 EST  update_game     : Tictactoe waiting 21600 seconds...
+INFO        2024-08-13 15:11:46.442421 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-13 15:28:14.610823 EST  play            : TicTacToe (notfriz#0)
+INFO        2024-08-13 18:16:35.948410 EST  play_wordle     : Wordle 'OPIUM' (xd.1029#0)
+INFO        2024-08-13 18:17:22.061603 EST  play_wordle     : Wordle 'FATTY' (invis00#0)
+INFO        2024-08-13 18:17:53.115503 EST  play            : TicTacToe (xd.1029#0)
+INFO        2024-08-13 18:18:01.096194 EST  play            : TicTacToe (invis00#0)
+INFO        2024-08-13 18:18:17.544628 EST  play            : Memory (xd.1029#0)
+INFO        2024-08-13 18:18:22.743878 EST  play            : Memory (invis00#0)
+INFO        2024-08-13 18:22:47.917452 EST  play            : TicTacToe (desktopmist2089#0)
+INFO        2024-08-13 18:51:55.970798 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-13 18:58:27.063743 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-13 19:00:49.401535 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-13 19:00:50.224595 EST  update_game     : Memory waiting 43199 seconds...
+INFO        2024-08-13 19:14:42.670913 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-13 19:20:03.154157 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-13 20:05:49.498826 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-13 20:05:50.101187 EST  update_game     : Wordle waiting 43199 seconds...
+INFO        2024-08-13 20:06:31.301177 EST  play_wordle     : Wordle 'OWING' (harleeboy#0)
+INFO        2024-08-13 20:06:55.103613 EST  play_wordle     : Wordle 'SWEAT' (ebkmabu#0)
+INFO        2024-08-13 20:38:12.994294 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-13 20:38:13.680820 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-13 20:38:36.832186 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-13 20:49:32.029454 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-14 02:38:12.682856 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-14 02:38:13.202636 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-14 02:38:24.970356 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-14 06:04:50.902044 EST  play_wordle     : Wordle 'JUNTA' (1ndividualism#0)
+INFO        2024-08-14 06:05:21.224376 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-14 06:05:34.358820 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-14 06:17:17.400308 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-14 07:00:49.226329 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-14 07:00:51.268116 EST  update_game     : Memory waiting 43198 seconds...
+INFO        2024-08-14 07:02:10.944211 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-14 07:03:03.542612 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-14 07:03:22.964110 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-14 08:05:49.103602 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-14 08:05:49.864369 EST  update_game     : Wordle waiting 43200 seconds...
+INFO        2024-08-14 08:07:00.388055 EST  play_wordle     : Wordle 'SPERM' (1ndividualism#0)
+INFO        2024-08-14 08:18:20.101074 EST  play_wordle     : Wordle 'CLOSE' (sanamo#0)
+INFO        2024-08-14 08:21:14.903740 EST  play_wordle     : Wordle 'ANGER' (harleeboy#0)
+INFO        2024-08-14 08:24:40.677710 EST  play_wordle     : Wordle 'STAID' (ebkmabu#0)
+INFO        2024-08-14 08:38:12.205177 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-14 08:38:12.864703 EST  update_game     : Tictactoe waiting 21600 seconds...
+INFO        2024-08-14 08:38:23.772026 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-14 08:58:09.379363 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-14 11:50:45.379777 EST  play            : TicTacToe (manlikeaz#0)
+INFO        2024-08-14 11:51:12.603391 EST  play_wordle     : Wordle 'IDEAL' (manlikeaz#0)
+INFO        2024-08-14 11:57:40.015343 EST  play            : Memory (manlikeaz#0)
+INFO        2024-08-14 13:03:26.958666 EST  play            : TicTacToe (desktopmist2089#0)
+INFO        2024-08-14 14:38:12.866924 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-14 14:38:13.528475 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-14 14:41:10.408305 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-14 14:42:45.132266 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-14 18:03:18.204791 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-14 19:00:49.269631 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-14 19:00:50.070878 EST  update_game     : Memory waiting 43199 seconds...
+INFO        2024-08-14 19:02:12.184819 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-14 19:21:23.837682 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-14 20:05:49.865768 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-14 20:05:50.734648 EST  update_game     : Wordle waiting 43199 seconds...
+INFO        2024-08-14 20:17:29.945858 EST  play_wordle     : Wordle 'LIVER' (ebkmabu#0)
+INFO        2024-08-14 20:38:12.532324 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-14 20:38:13.274738 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-14 20:40:48.086718 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-14 20:52:23.504554 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-14 21:46:37.225044 EST  play_wordle     : Wordle 'TODAY' (harleeboy#0)
+INFO        2024-08-15 02:38:12.276189 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-15 02:38:12.865902 EST  update_game     : Tictactoe waiting 21600 seconds...
+INFO        2024-08-15 02:43:48.226885 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-15 02:47:02.299730 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-15 05:39:58.173792 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-15 05:40:23.997307 EST  play_wordle     : Wordle 'SLYLY' (1ndividualism#0)
+INFO        2024-08-15 06:15:41.402347 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-15 07:00:49.072792 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-15 07:00:49.755995 EST  update_game     : Memory waiting 43200 seconds...
+INFO        2024-08-15 07:04:20.363209 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-15 07:33:14.406622 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-15 08:01:48.590338 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-15 08:05:49.736821 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-15 08:05:50.317816 EST  update_game     : Wordle waiting 43199 seconds...
+INFO        2024-08-15 08:05:59.643030 EST  play_wordle     : Wordle 'FIERY' (ebkmabu#0)
+INFO        2024-08-15 08:06:22.566690 EST  play_wordle     : Wordle 'WHACK' (harleeboy#0)
+INFO        2024-08-15 08:06:49.685789 EST  play_wordle     : Wordle 'EAGER' (1ndividualism#0)
+INFO        2024-08-15 08:38:12.868153 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-15 08:38:13.435572 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-15 08:40:03.405826 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-15 08:42:34.020796 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-15 14:38:12.437555 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-15 14:38:13.074117 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-15 14:38:27.008580 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-15 14:38:56.402496 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-15 17:50:03.361135 EST  play_wordle     : Wordle 'PUFFY' (invis00#0)
+INFO        2024-08-15 17:50:42.830744 EST  play            : TicTacToe (invis00#0)
+INFO        2024-08-15 17:50:55.330292 EST  play            : Memory (invis00#0)
+INFO        2024-08-15 17:52:43.967629 EST  play_wordle     : Wordle 'PLAIT' (xd.1029#0)
+INFO        2024-08-15 17:53:06.096899 EST  play            : TicTacToe (xd.1029#0)
+INFO        2024-08-15 17:53:19.472725 EST  play            : Memory (xd.1029#0)
+INFO        2024-08-15 18:44:11.508866 EST  play            : TicTacToe (desktopmist2089#0)
+INFO        2024-08-15 18:59:39.687491 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-15 19:00:49.757684 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-15 19:00:50.459451 EST  update_game     : Memory waiting 43199 seconds...
+INFO        2024-08-15 19:01:11.774294 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-15 19:04:24.922904 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-15 20:05:49.319083 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-15 20:05:49.927272 EST  update_game     : Wordle waiting 43200 seconds...
+INFO        2024-08-15 20:05:59.393576 EST  play_wordle     : Wordle 'FRUIT' (ebkmabu#0)
+INFO        2024-08-15 20:38:12.076930 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-15 20:38:12.694711 EST  update_game     : Tictactoe waiting 21600 seconds...
+INFO        2024-08-15 20:38:35.908666 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-15 20:57:12.799512 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-15 21:59:00.136513 EST  play_wordle     : Wordle 'SNIDE' (harleeboy#0)
+INFO        2024-08-16 02:38:12.696482 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-16 02:38:13.482491 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-16 02:39:07.686552 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-16 05:14:04.596133 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-16 05:14:29.854583 EST  play_wordle     : Wordle 'CAMEL' (1ndividualism#0)
+INFO        2024-08-16 06:01:36.802933 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-16 07:00:49.462222 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-16 07:00:50.104129 EST  update_game     : Memory waiting 43199 seconds...
+INFO        2024-08-16 07:01:14.124321 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-16 07:02:26.405552 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-16 07:38:37.463861 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-16 08:05:49.930892 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-16 08:05:50.585531 EST  update_game     : Wordle waiting 43199 seconds...
+INFO        2024-08-16 08:06:09.896690 EST  play_wordle     : Wordle 'GRANT' (1ndividualism#0)
+INFO        2024-08-16 08:09:51.475518 EST  play            : TicTacToe (desktopmist2089#0)
+INFO        2024-08-16 08:38:12.484328 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-16 08:38:13.343668 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-16 08:38:20.366696 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-16 09:04:48.734660 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-16 09:07:56.792124 EST  play_wordle     : Wordle 'MOUND' (harleeboy#0)
+INFO        2024-08-16 09:48:37.942892 EST  play_wordle     : Wordle 'DRIER' (demarkess#0)
+INFO        2024-08-16 09:49:25.417808 EST  play            : Memory (demarkess#0)
+INFO        2024-08-16 09:49:26.766323 EST  play            : TicTacToe (demarkess#0)
+INFO        2024-08-16 10:19:50.531312 EST  play            : TicTacToe (nearmapxd#0)
+INFO        2024-08-16 14:38:12.346059 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-16 14:38:13.156934 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-16 14:38:21.111680 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-16 14:38:27.660143 EST  play            : TicTacToe (demarkess#0)
+INFO        2024-08-16 14:38:30.207603 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-16 14:39:30.891480 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-16 17:41:35.871221 EST  play_wordle     : Wordle 'YEARN' (ebkmabu#0)
+INFO        2024-08-16 17:42:44.659667 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-16 17:47:31.065040 EST  play_wordle     : Wordle 'GLIDE' (xdeliot#0)
+INFO        2024-08-16 17:48:07.879108 EST  play            : TicTacToe (xdeliot#0)
+INFO        2024-08-16 17:49:11.532540 EST  play_wordle     : Wordle 'PATIO' (invis00#0)
+INFO        2024-08-16 17:49:38.327994 EST  play            : TicTacToe (invis00#0)
+INFO        2024-08-16 17:49:53.695410 EST  play            : Memory (invis00#0)
+INFO        2024-08-16 18:01:17.687528 EST  play_wordle     : Wordle 'CAMEO' (xd.1029#0)
+INFO        2024-08-16 18:02:20.785951 EST  play            : TicTacToe (xd.1029#0)
+INFO        2024-08-16 18:02:34.183909 EST  play            : Memory (xd.1029#0)
+INFO        2024-08-16 19:00:49.105909 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-16 19:00:49.878710 EST  update_game     : Memory waiting 43200 seconds...
+INFO        2024-08-16 19:16:13.395876 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-16 20:05:49.587961 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-16 20:05:51.269563 EST  update_game     : Wordle waiting 43198 seconds...
+INFO        2024-08-16 20:06:28.850755 EST  play_wordle     : Wordle 'MERIT' (ebkmabu#0)
+INFO        2024-08-16 20:22:42.648346 EST  play_wordle     : Wordle 'SKIMP' (harleeboy#0)
+INFO        2024-08-16 20:23:43.543293 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-16 20:38:12.160412 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-16 20:38:12.757642 EST  update_game     : Tictactoe waiting 21600 seconds...
+INFO        2024-08-16 20:38:29.919200 EST  play_wordle     : Wordle 'DRUID' (demarkess#0)
+INFO        2024-08-16 20:38:43.825652 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-16 20:39:07.938494 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-16 20:39:44.104097 EST  play            : TicTacToe (demarkess#0)
+INFO        2024-08-16 20:40:01.949022 EST  play            : Memory (demarkess#0)
+INFO        2024-08-17 02:38:12.760275 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-17 02:38:13.320812 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-17 02:38:24.923759 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-17 03:35:09.487389 EST  play            : TicTacToe (demarkess#0)
+INFO        2024-08-17 05:35:30.075066 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-17 05:35:45.424891 EST  play_wordle     : Wordle 'OAKEN' (1ndividualism#0)
+INFO        2024-08-17 05:36:14.564070 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-17 07:00:49.882341 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-17 07:00:50.730451 EST  update_game     : Memory waiting 43199 seconds...
+INFO        2024-08-17 07:02:33.030663 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-17 07:05:05.356869 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-17 07:32:42.267275 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-17 08:05:49.273852 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-17 08:05:49.917321 EST  update_game     : Wordle waiting 43200 seconds...
+INFO        2024-08-17 08:05:56.577519 EST  play_wordle     : Wordle 'CIRCA' (1ndividualism#0)
+INFO        2024-08-17 08:08:28.153577 EST  play_wordle     : Wordle 'FOLLY' (harleeboy#0)
+INFO        2024-08-17 08:09:54.979160 EST  play            : Memory (harleeboy#0)
+INFO        2024-08-17 08:12:06.099898 EST  play            : TicTacToe (notfriz#0)
+INFO        2024-08-17 08:12:08.471827 EST  play            : Memory (notfriz#0)
+INFO        2024-08-17 08:38:12.324241 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-17 08:38:12.995834 EST  update_game     : Tictactoe waiting 21600 seconds...
+INFO        2024-08-17 08:38:22.571406 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-17 08:40:15.816466 EST  play_wordle     : Wordle 'RALLY' (ebkmabu#0)
+INFO        2024-08-17 08:41:45.687759 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-17 08:42:15.357404 EST  play            : TicTacToe (ebkmabu#0)
+INFO        2024-08-17 09:25:54.197285 EST  play            : TicTacToe (demarkess#0)
+INFO        2024-08-17 12:37:00.627059 EST  play            : Memory (demarkess#0)
+INFO        2024-08-17 14:38:12.998130 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-17 14:38:13.738151 EST  update_game     : Tictactoe waiting 21599 seconds...
+INFO        2024-08-17 14:38:30.911247 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-17 14:39:17.018209 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-17 16:44:10.190364 EST  play_wordle     : Wordle 'RECUT' (rb4#0)
+INFO        2024-08-17 19:00:49.733024 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-17 19:00:50.397793 EST  update_game     : Memory waiting 43199 seconds...
+INFO        2024-08-17 19:01:56.625329 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-17 19:05:15.350197 EST  play            : Memory (harleeboy#0)
+aceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-16 17:17:42.252803 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+ERROR       2024-08-16 18:09:13.133797 EST  connect         : Attempting a reconnect in 1.27s
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-16 18:09:14.563909 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-16 18:54:00.889693 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+ERROR       2024-08-16 19:51:20.276330 EST  connect         : Attempting a reconnect in 1.42s
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-16 19:51:21.846193 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+ERROR       2024-08-16 21:18:57.376842 EST  connect         : Attempting a reconnect in 0.25s
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-16 21:18:57.774244 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+ERROR       2024-08-16 21:38:06.756508 EST  connect         : Attempting a reconnect in 2.29s
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-16 21:38:09.192750 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+ERROR       2024-08-16 22:06:23.795430 EST  connect         : Attempting a reconnect in 7.96s
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-16 22:06:31.914190 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-17 01:24:13.848271 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-17 03:33:37.325050 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-17 04:21:41.539033 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+ERROR       2024-08-17 05:43:53.154230 EST  connect         : Attempting a reconnect in 1.23s
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-17 05:43:54.537472 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-17 09:07:47.445438 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-17 12:15:15.213577 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-17 14:51:19.697423 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+INFO        2024-08-17 16:35:06.388840 EST  received_message : Shard ID None has successfully RESUMED session 5094d154418e10a5c15ca9ab712fc364.
+ERROR       2024-08-17 17:35:51.349090 EST  on_command_error : Ignoring exception in command None
+discord.ext.commands.errors.CommandNotFound: Command "/f" is not found
+:21.899111 EST  game            : Math Quiz '5x^7 + 5x^10' | '35x^6 + 50x^9' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 16:27:21.895270 EST  game            : Unscramble 'golden knife' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 16:52:21.973460 EST  game            : Flag Guesser 'Mayotte' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 17:22:21.910570 EST  game            : Math Quiz 'Third angle of triangle with angles 82 and 52 =' | '46' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 17:53:21.898296 EST  game            : Math Quiz '4/7÷4/7=' | '1/1' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 18:20:21.899230 EST  game            : Math Quiz '√(64)=' | '8' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 18:46:21.956889 EST  game            : Flag Guesser 'Uganda' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 19:17:21.965901 EST  game            : Flag Guesser 'DR Congo' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 19:44:21.894680 EST  game            : Unscramble 'void' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 20:11:21.898978 EST  game            : Unscramble 'vkits' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 20:36:21.901249 EST  game            : Math Quiz '64-52=' | '12' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 21:03:21.895618 EST  game            : Trivia 'How much gold does Dracula rank cost? (No sale)' | '40,000' #𝖫𝗂𝖿𝖾𝗌𝗍𝖾𝖺𝗅-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 21:29:21.953631 EST  game            : Flag Guesser 'Saint Lucia' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 22:02:21.894206 EST  game            : Unscramble 'dtc event' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 22:30:21.894730 EST  game            : Trivia 'What is the newest minigame called?' | 'UHC Battle Royale' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 23:01:21.895586 EST  game            : Unscramble 'squid spawner' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-16 23:34:21.895392 EST  game            : Unscramble 'ninja' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 00:05:21.970618 EST  game            : Flag Guesser 'Slovakia' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 00:38:21.963596 EST  game            : Flag Guesser 'Vanuatu' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 01:12:21.902273 EST  game            : Math Quiz '5x + 4 = 8' | '4/5' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 01:38:21.946687 EST  game            : Flag Guesser 'Lebanon' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 02:07:21.895288 EST  game            : Trivia 'What is the KOTH called that is always there every season?' | 'Sky' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 02:39:21.894588 EST  game            : Unscramble 'insomnia' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 03:13:21.951110 EST  game            : Flag Guesser 'Angola' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 03:42:21.899599 EST  game            : Math Quiz '3/10 x 7/8=' | '21/80' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 04:07:21.895920 EST  game            : Trivia 'Which one of the Clans gives Permanent Speed II?' | 'Uchiha' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 04:32:21.894028 EST  game            : Trivia 'What Crypto is mineable at warp crypto?' | 'ETH' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 05:00:21.897440 EST  game            : Trivia 'Which one of the Clans gives Permanent Speed II?' | 'Uchiha' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 05:34:21.894773 EST  game            : Trivia 'Which one of the Clans gives Permanent Speed II?' | 'Uchiha' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 06:01:21.893847 EST  game            : Unscramble 'dinosaurs' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 06:36:21.901533 EST  game            : Math Quiz 'x^2+10x+16' | '(x+2)(x+8)' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 07:06:21.893745 EST  game            : Trivia 'What is the 3rd Day playtime reward?' | 'Pet Collar' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 07:31:21.894940 EST  game            : Unscramble 'hoarder' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 07:58:21.899939 EST  game            : Math Quiz 'GCD of 12 and 3 =' | '3' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 08:23:21.893518 EST  game            : Trivia 'Which one of the Clans gives Permanent Fire Resistance I?' | 'Sarutobi' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 08:48:21.899056 EST  game            : Math Quiz 'The perimeter of a 7 sided polygon with lengths of 118, 45, 27, 70, 89, 95, 114cm is: ' | '558' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 09:22:21.894279 EST  game            : Unscramble 'warzone ctf' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 09:49:21.895079 EST  game            : Trivia 'Who is the NPC you talk to at spawn for quests?' | 'Grandpa Frank' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 10:19:21.952274 EST  game            : Flag Guesser 'Northern Mariana Islands' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 10:54:21.894068 EST  game            : Unscramble 'beach ball pet' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 11:21:21.901079 EST  game            : Math Quiz 'Which symbol represents the comparison between 1/10 and 7/9?' | '<' #𝖫𝗂𝖿𝖾𝗌𝗍𝖾𝖺𝗅-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 11:47:21.978800 EST  game            : Flag Guesser 'Bosnia and Herzegovina' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 12:17:22.278237 EST  game            : Math Quiz '96÷5=' | '19.2' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 12:51:21.894223 EST  game            : Unscramble 'reputation' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 13:24:21.895176 EST  game            : Trivia 'What is the name of the first ever skin that was released on Skyblock?' | 'Toad Skin' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 13:55:21.896290 EST  game            : Unscramble 'oddball' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 14:21:21.907040 EST  game            : Math Quiz '0! =' | '1' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 14:52:21.953344 EST  game            : Flag Guesser 'Botswana' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 15:20:21.895776 EST  game            : Unscramble 'arcade' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 15:47:21.896656 EST  game            : Trivia 'When did Skyblock's first map release on Minecadia?' | 'March 30th 2024' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 16:14:21.895263 EST  game            : Trivia 'Which one of the Clans gives Permanent Haste II?' | 'Senju' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 16:43:21.901851 EST  game            : Math Quiz '24÷38=' | '0.63' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 17:15:21.894889 EST  game            : Trivia 'Which warp has fly disabled?' | 'Namek' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 17:44:21.893398 EST  game            : Unscramble 'mario' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 18:16:21.895090 EST  game            : Unscramble 'phantom gkit' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 18:48:21.894778 EST  game            : Unscramble 'holy white scroll' #𝖪𝗂𝗍𝗆𝖺𝗉-𝖢𝗁𝖺𝗍
+INFO        2024-08-17 19:04:46.049775 EST  game            : Unscramble 'second mate' #test-bot
+INFO        2024-08-17 19:05:13.157324 EST  game            : Unscramble 'mirage' #test-bot
+INFO        2024-08-17 19:05:26.240342 EST  game            : Unscramble 'gkit fragment' #test-bot
+INFO        2024-08-17 19:05:51.064368 EST  game            : Unscramble 'ghast spawner' #test-bot
+INFO        2024-08-17 19:06:10.577234 EST  game            : Unscramble 'third mate' #test-bot
+INFO        2024-08-17 19:06:21.596276 EST  game            : Unscramble 'thanksgiving' #test-bot
+INFO        2024-08-17 19:06:42.841436 EST  game            : Unscramble 'soulshot' #test-bot
+INFO        2024-08-17 19:06:53.740395 EST  game            : Unscramble 'wild pvp planet' #test-bot
+INFO        2024-08-17 19:07:10.588233 EST  game            : Unscramble 'petrify' #test-bot
+INFO        2024-08-17 19:07:16.725606 EST  game            : Unscramble 'sticky piston' #test-bot
+INFO        2024-08-17 19:07:28.795381 EST  game            : Unscramble 'entangle' #test-bot
+INFO        2024-08-17 19:07:38.647816 EST  game            : Unscramble 'broken harbor' #test-bot

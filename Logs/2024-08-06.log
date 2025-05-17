@@ -1,0 +1,30 @@
+ERROR       2024-08-07 01:56:01.409182 EST  wrapper         : Logging in failed after INFO        2024-08-07 04:24:16.226137 EST  play            : TicTacToe (harleeboy#0)
+INFO        2024-08-07 04:37:34.814576 EST  play_wordle     : Wordle 'ALTAR' (notfriz#0)
+INFO        2024-08-07 04:38:56.767721 EST  play            : TicTacToe (notfriz#0)
+INFO        2024-08-07 04:38:59.597809 EST  play            : Memory (notfriz#0)
+INFO        2024-08-07 05:07:34.203708 EST  play            : TicTacToe (1ndividualism#0)
+INFO        2024-08-07 05:07:58.099895 EST  play_wordle     : Wordle 'HOIST' (1ndividualism#0)
+INFO        2024-08-07 07:00:49.253548 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-07 07:00:49.876169 EST  update_game     : Memory waiting 43200 seconds...
+INFO        2024-08-07 07:01:16.417242 EST  play            : Memory (1ndividualism#0)
+INFO        2024-08-07 07:03:36.213850 EST  play            : Memory (desktopmist2089#0)
+INFO        2024-08-07 07:04:49.327427 EST  play            : Memory (ebkmabu#0)
+INFO        2024-08-07 07:06:15.445032 EST  play            : TicTacToe (desktopmist2089#0)
+INFO        2024-08-07 07:06:33.743896 EST  play_wordle     : Wordle 'SOGGY' (desktopmist2089#0)
+INFO        2024-08-07 07:12:08.462905 EST  play            : Memory (notfriz#0)
+INFO        2024-08-07 08:02:29.023286 EST  play            : Memory (sanamo#0)
+INFO        2024-08-07 08:05:49.252330 EST  refresh_dm_game : Refreshing Wordle...
+INFO        2024-08-07 08:05:50.175919 EST  update_game     : Wordle waiting 43199 seconds...
+INFO        2024-08-07 08:05:59.566785 EST  play_wordle     : Wordle 'ENEMY' (ebkmabu#0)
+INFO        2024-08-07 08:10:44.456228 EST  play_wordle     : Wordle 'PESTO' (notfriz#0)
+INFO        2024-08-07 08:17:51.000674 EST  play_wordle     : Wordle 'COBRA' (1ndividualism#0)
+py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shINFO        2024-08-07 06:44:45.300392 EST  game            : Flag Guesser 'Slovakia' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+INFO        2024-08-07 07:11:45.247289 EST  game            : Trivia 'Who created the Minecadia 1 year anniverERROR       2024-08-07 07:28:28.072531 EST  connect         : Attempting INFO        2024-08-07 07:39:45.300159 EST  game            : Flag Guesser 'Ghana' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
+INFO        2024-08-07 08:13:45.245643 EST  game            : Trivia 'Which game is displayed on the Arcade Crate?' | 'PacMan' #𝖲𝗄𝗒𝖻𝗅𝗈𝖼𝗄-𝖢𝗁𝖺𝗍
+_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO        2024-08-07 07:28:29.746662 EST  received_message : Shard ID None has successfully RESUMED session 77c129e9f22268081608d1037a91e8fb.
+INFO        2024-08-07 08:02:09.794887 EST  received_message : Shard ID None has successfully RESUMED session 77c129e9f22268081608d1037a91e8fb.

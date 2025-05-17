@@ -1,0 +1,33 @@
+INFO        2024-08-12 02:38:12.490144 EST  refresh_dm_game : Refreshing Tictactoe...
+INFO        2024-08-12 02:38:13.070394 EST  update_game   INFO        2024-08-12 03:52:48.583187 EST  received_message : Shard ID None has successfully RESUMED session b3735711ff3ed6603eb927f4359b1ec3.
+ERROR       2024-08-12 06:34:09.490062 EST  connect         : Attempting a reconnect in 1.91s
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/client.py", line 667, in connect
+    await self.ws.poll_event()
+  File "/usr/local/lib/python3.9/dist-packages/discord/gateway.py", line 648, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO  INFO        2024-08-12 07:00:49.209774 EST  refresh_dm_game : Refreshing Memory...
+INFO        2024-08-12 07:00:49.844392 EST  update_gameINFO        2024-08-12 08:14:59.460946 EST  received_message : Shard ID None has successfully RESUMED session b3735711ff3ed6603eb927f4359b1ec3.
+INFO        2024-08-12 08:37:42.264133 EST  received_message : Shard ID None has successfully RESUMED session b3735711ff3ed6603eb927f4359b1ec3.
+ERROR       2024-08-12 08:40:55.847143 EST  _error          : Unhandled exception in internal background task 'send_games'.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/discord/ext/tasks/__init__.py", line 241, in _loop
+    await self.coro(*args, **kwargs)
+  File "/root/MinecadiaGames/main.py", line 36, in send_games
+    game = choice(self)
+  File "/root/MinecadiaGames/Cogs/unscramble.py", line 17, in __init__
+    self.unscramble_data = json.load(file)
+  File "/usr/lib/python3.9/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "/usr/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 560 column 9 (char 14086)
+ 08:38:49.628816 EST  play            : TicTacToe (notfriz#0)
+INFO        2024-08-12 08:53:58.783977 EST  play            : TicTacToe (harleeboy#0)
+���𝗍
+INFO        2024-08-12 08:13:55.901888 EST  game            : Flag Guesser 'Vanuatu' #𝖥𝖺𝖼𝗍𝗂𝗈𝗇𝗌-𝖢𝗁𝖺𝗍
