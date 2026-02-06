@@ -1,0 +1,48 @@
+{
+    "_comment": "General chat game settings",
+    "enabled": true,
+    "delay": {
+        "min_seconds": 1500,
+        "max_seconds": 2100,
+        "_comment": "Random delay between games in seconds"
+    },
+    "game_duration": 600,
+    "_comment_duration": "How long each game lasts in seconds (10 minutes)",
+    "max_winners": 3,
+    "xp": {
+        "base": 10,
+        "positions": {
+            "1": 50,
+            "2": 40,
+            "3": 30,
+            "4": 20,
+            "5": 10,
+            "6": 0
+        },
+        "_comment": "XP = base + position_bonus. Position 1 gets 50+10=60xp"
+    },
+    "channels": {
+        "Factions": {
+            "id": 918903892144717915,
+            "weight": 0.0,
+            "_comment": "Weight determines probability (0.0 = disabled, 1.0 = 100%)"
+        },
+        "Kitmap": {
+            "id": 1066045406028505178,
+            "weight": 0.0
+        },
+        "Lifesteal": {
+            "id": 1222028922795982923,
+            "weight": 0.0
+        },
+        "Skyblock": {
+            "id": 1012348851920834560,
+            "weight": 0.0
+        },
+        "Games": {
+            "id": 1456658225964388504,
+            "weight": 1.0
+        }
+    }
+}
+

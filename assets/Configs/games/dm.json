@@ -1,0 +1,83 @@
+{
+    "_comment": "General DM game settings",
+    "enabled": true,
+    "rotation_delay": 7200,
+    "_comment_delay": "How long each DM game is active in seconds (2 hours)",
+    "button_cooldown": 0.8,
+    "_comment_cooldown": "Seconds between button clicks to prevent spam",
+    "games": {
+        "TicTacToe": {
+            "enabled": true,
+            "refresh_cooldown": 21600,
+            "button_cooldown": 1.5,
+            "image_url": "https://i.imgur.com/ujqg8h1.png",
+            "xp": {
+                "win_min": 40,
+                "win_max": 60
+            }
+        },
+        "Wordle": {
+            "enabled": true,
+            "refresh_cooldown": 43200,
+            "image_url": "https://i.imgur.com/cFJkVEl.png",
+            "words_file": "assets/Configs/data/words.txt"
+        },
+        "Connect Four": {
+            "enabled": true,
+            "refresh_cooldown": 43200,
+            "button_cooldown": 1.5,
+            "image_url": "https://i.imgur.com/BqUhwZd.png",
+            "assets": {
+                "board": "assets/Images/ConnectFourBoard.png",
+                "output": "assets/Images/ConnectFourOutput.png",
+                "red_piece": "assets/Images/RedPiece.png",
+                "yellow_piece": "assets/Images/YellowPiece.png"
+            }
+        },
+        "Memory": {
+            "enabled": true,
+            "refresh_cooldown": 43200,
+            "button_cooldown": 1.5,
+            "image_url": "https://i.imgur.com/a7qo0qJ.png",
+            "max_tries": 7,
+            "xp": {
+                "match_min": 10,
+                "match_max": 20,
+                "win_min": 60,
+                "win_max": 70
+            },
+            "emojis": [
+                "<:MeeZoid:934656446942036038>",
+                "<:Minecadia_Pirate_Smirk:1037392719288467539>",
+                "<:Minecadia_Arkham_Angry:1037394395374301194>",
+                "<:Minecadia_Arkham_Batman:1037394345688572025>",
+                "<:Minecadia_Arkham_ROFL:1037394505466392638>",
+                "<:Minecadia_Arkham_Wink:1037394478878691368>",
+                "<:Minecadia_Pirate_Thinking:1037392977317863444>",
+                "<:Minecadia_Pirate_Dead:1037392830273966110>",
+                "<:Minecadia_Dracula_Thinking:1037393201406939217>",
+                "<:Minecadia_Galaxy_Alien:1037394289749139496>"
+            ]
+        },
+        "2048": {
+            "enabled": true,
+            "refresh_cooldown": 43200,
+            "button_cooldown": 0.5,
+            "image_url": "https://i.imgur.com/example.png"
+        },
+        "Minesweeper": {
+            "enabled": true,
+            "refresh_cooldown": 43200,
+            "button_cooldown": 0.5,
+            "image_url": "https://i.imgur.com/example.png"
+        },
+        "Hangman": {
+            "enabled": true,
+            "refresh_cooldown": 43200,
+            "max_wrong_guesses": 6,
+            "words_file": "assets/Configs/data/words.txt",
+            "image_url": "https://i.imgur.com/example.png"
+        }
+    }
+}
+

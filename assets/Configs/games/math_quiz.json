@@ -1,0 +1,141 @@
+{
+    "_comment": "Math Quiz game - problem types and IDs from mathgenerator library",
+    "problem_types": [
+        {
+            "id": 0,
+            "name": "Addition",
+            "format": "Integer"
+        },
+        {
+            "id": 1,
+            "name": "Subtraction",
+            "format": "Integer"
+        },
+        {
+            "id": 2,
+            "name": "Multiplication",
+            "format": "Integer"
+        },
+        {
+            "id": 3,
+            "name": "Division",
+            "format": "Integer"
+        },
+        {
+            "id": 6,
+            "name": "Square Root",
+            "format": "Integer"
+        },
+        {
+            "id": 7,
+            "name": "Power Rule Differentiation",
+            "format": "Integer**x**^Integer + ..."
+        },
+        {
+            "id": 8,
+            "name": "Square",
+            "format": "Integer"
+        },
+        {
+            "id": 10,
+            "name": "Greatest Common Denominator",
+            "format": "Integer"
+        },
+        {
+            "id": 11,
+            "name": "Algebra (Solve For X)",
+            "format": "Integer OR Fraction"
+        },
+        {
+            "id": 12,
+            "name": "Logarithm",
+            "format": "Integer"
+        },
+        {
+            "id": 13,
+            "name": "Fraction To Decimal",
+            "format": "Decimal (Round to Nearest Hundredths & Truncate One Zero If Present)"
+        },
+        {
+            "id": 16,
+            "name": "Fraction Division",
+            "format": "Integer OR Fraction"
+        },
+        {
+            "id": 21,
+            "name": "Factoring Quadratic",
+            "format": "(x +/- Integer)(x +/- Integer) -> Or Just (x)"
+        },
+        {
+            "id": 22,
+            "name": "Third Angle of Triangle",
+            "format": "Integer"
+        },
+        {
+            "id": 25,
+            "name": "Pythagorean Theorem",
+            "format": "Decimal (Round to Nearest Hundredths & Truncate One Zero If Present)"
+        },
+        {
+            "id": 28,
+            "name": "Fraction Multiplication",
+            "format": "Fraction"
+        },
+        {
+            "id": 31,
+            "name": "Factorial",
+            "format": "Integer"
+        },
+        {
+            "id": 32,
+            "name": "Surface Area of Cube",
+            "format": "Integer m^2"
+        },
+        {
+            "id": 35,
+            "name": "Volume of Cube",
+            "format": "Integer m^3"
+        },
+        {
+            "id": 40,
+            "name": "Common Factors",
+            "format": "Integer, Integer..."
+        },
+        {
+            "id": 44,
+            "name": "Compare Fractions",
+            "format": ">, <, OR ="
+        },
+        {
+            "id": 49,
+            "name": "Fourth Angle of Quadrilateral",
+            "format": "Integer"
+        },
+        {
+            "id": 53,
+            "name": "Exponentiation",
+            "format": "Integer"
+        },
+        {
+            "id": 90,
+            "name": "Is Prime",
+            "format": "Yes OR No"
+        },
+        {
+            "id": 96,
+            "name": "Perimeter of Polygons",
+            "format": "Integer"
+        },
+        {
+            "id": 116,
+            "name": "Factors of a Number",
+            "format": "Integer, Integer..."
+        },
+        {
+            "id": 124,
+            "name": "Is Composite",
+            "format": "Yes OR No"
+        }
+    ]
+}
+
