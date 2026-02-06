@@ -1,1 +1,1 @@
-python3 MinecadiaGames/main.py
+python3 bot.py

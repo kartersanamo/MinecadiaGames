@@ -1,0 +1,50 @@
+{
+    "_comment": "Discord server configuration - IDs for guild, channels, and roles",
+    "guild_id": 680569558754656280,
+    "channels": {
+        "leveling": 1186036927514812426,
+        "admin_logs": 1190693196716576878,
+        "logs": 918928087582916699,
+        "tickets_category": 1185698620251574383,
+        "announce": [
+            918903892144717915,
+            1066045406028505178,
+            1012348851920834560,
+            1032633836208672818
+        ]
+    },
+    "roles": {
+        "games_notification": 1190635899025891398,
+        "verified": 1016520282682445914,
+        "winner": 1191076547113799771
+    },
+    "permissions": {
+        "admin_roles": [
+            "*",
+            "Owner",
+            "Factions Management",
+            "Manager",
+            "Developer",
+            "Jr. Developer",
+            "Sr. Administrator",
+            "Administrator"
+        ],
+        "staff_roles": [
+            "*",
+            "Owner",
+            "Factions Management",
+            "Manager",
+            "Developer",
+            "Jr. Developer",
+            "Sr. Administrator",
+            "Administrator",
+            "Staff of the Month",
+            "Jr. Administrator",
+            "Sr. Moderator",
+            "Moderator",
+            "Helper",
+            "Staff Team"
+        ]
+    }
+}
+

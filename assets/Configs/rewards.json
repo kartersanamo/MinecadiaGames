@@ -1,0 +1,35 @@
+{
+    "_comment": "Reward templates for monthly leaderboard winners",
+    "message_format": {
+        "title": "`{month}`\n",
+        "positions": {
+            "1": "<:minecadia_one:1111028062981718026> <@{user_id}> » Level {level}\n",
+            "2": "<:minecadia_two:1111028088546021466> <@{user_id}> » Level {level}\n",
+            "3": "<:minecadia_three:1111028142430228520> <@{user_id}> » Level {level}\n",
+            "4": "<:minecadia_four:1186027785735643216> <@{user_id}> » Level {level}\n",
+            "5": "<:minecadia_five:1186027816156930058> <@{user_id}> » Level {level}\n",
+            "6": "<:minecadia_six:1186027855210106880> <@{user_id}> » Level {level}\n",
+            "7": "<:minecadia_seven:1186027891989938226> <@{user_id}> » Level {level}\n",
+            "8": "<:minecadia_eight:1186027893285986314> <@{user_id}> » Level {level}\n",
+            "9": "<:minecadia_nine:1186027895508963439> <@{user_id}> » Level {level}\n",
+            "10": "<:minecadia_ten:1186027950689239190> <@{user_id}> » Level {level}\n"
+        }
+    },
+    "rewards": {
+        "title": "**{month} Winners**",
+        "positions": {
+            "1": "<:minecadia_one:1111028062981718026> <@{user_id}> » 8 Hype Boxes, Rare Discord Tag, & Custom /tags in-game.",
+            "2": "<:minecadia_two:1111028088546021466> <@{user_id}> » 7 Hype Boxes, Rare Discord Tag, & Custom /tags in-game.",
+            "3": "<:minecadia_three:1111028142430228520> <@{user_id}> » 6 Hype Boxes, Rare Discord Tag, & Custom /tags in-game.",
+            "4": "<:minecadia_four:1186027785735643216> <@{user_id}> » 5 Hype Boxes + 1 Available /tags in-game (non custom).",
+            "5": "<:minecadia_five:1186027816156930058> <@{user_id}> » 3 Hype Boxes + 3,000 Credits/or Gold.",
+            "6": "<:minecadia_six:1186027855210106880> <@{user_id}> » 3,500 Credits/or Gold.",
+            "7": "<:minecadia_seven:1186027891989938226> <@{user_id}> » 3,000 Credits/or Gold.",
+            "8": "<:minecadia_eight:1186027893285986314> <@{user_id}> » 2,500 Credits/or Gold.",
+            "9": "<:minecadia_nine:1186027895508963439> <@{user_id}> » 2,000 Credits/or Gold.",
+            "10": "<:minecadia_ten:1186027950689239190> <@{user_id}> » 1,500 Credits/or Gold."
+        },
+        "footer": "`The leaderboard has been wiped and is ready for next month. Good luck!`"
+    }
+}
+

@@ -1,0 +1,245 @@
+{
+    "_comment": "Milestones configuration - Define achievements that users can earn",
+    "TicTacToe": {
+        "wins": [
+            {
+                "id": "tictactoe_novice",
+                "name": "TicTacToe Novice",
+                "description": "Win 50 games of TicTacToe",
+                "threshold": 50,
+                "emoji": ":TicTacToeNovice:"
+            },
+            {
+                "id": "tictactoe_intermediate",
+                "name": "TicTacToe Intermediate",
+                "description": "Win 100 games of TicTacToe",
+                "threshold": 100,
+                "emoji": ":TicTacToeIntermediate:"
+            },
+            {
+                "id": "tictactoe_expert",
+                "name": "TicTacToe Expert",
+                "description": "Win 250 games of TicTacToe",
+                "threshold": 250,
+                "emoji": ":TicTacToeExpert:"
+            },
+            {
+                "id": "tictactoe_master",
+                "name": "TicTacToe Master",
+                "description": "Win 500 games of TicTacToe",
+                "threshold": 500,
+                "emoji": ":TicTacToeMaster:"
+            }
+        ]
+    },
+    "Wordle": {
+        "wins": [
+            {
+                "id": "wordle_novice",
+                "name": "Wordle Novice",
+                "description": "Win 25 games of Wordle",
+                "threshold": 25,
+                "emoji": ":WordleNovice:"
+            },
+            {
+                "id": "wordle_intermediate",
+                "name": "Wordle Intermediate",
+                "description": "Win 50 games of Wordle",
+                "threshold": 50,
+                "emoji": ":WordleIntermediate:"
+            },
+            {
+                "id": "wordle_expert",
+                "name": "Wordle Expert",
+                "description": "Win 100 games of Wordle",
+                "threshold": 100,
+                "emoji": ":WordleExpert:"
+            }
+        ]
+    },
+    "Connect Four": {
+        "wins": [
+            {
+                "id": "connectfour_novice",
+                "name": "Connect Four Novice",
+                "description": "Win 30 games of Connect Four",
+                "threshold": 30,
+                "emoji": ":ConnectFourNovice:"
+            },
+            {
+                "id": "connectfour_intermediate",
+                "name": "Connect Four Intermediate",
+                "description": "Win 75 games of Connect Four",
+                "threshold": 75,
+                "emoji": ":ConnectFourIntermediate:"
+            },
+            {
+                "id": "connectfour_expert",
+                "name": "Connect Four Expert",
+                "description": "Win 150 games of Connect Four",
+                "threshold": 150,
+                "emoji": ":ConnectFourExpert:"
+            }
+        ]
+    },
+    "Memory": {
+        "wins": [
+            {
+                "id": "memory_novice",
+                "name": "Memory Novice",
+                "description": "Win 20 games of Memory",
+                "threshold": 20,
+                "emoji": ":MemoryNovice:"
+            },
+            {
+                "id": "memory_intermediate",
+                "name": "Memory Intermediate",
+                "description": "Win 50 games of Memory",
+                "threshold": 50,
+                "emoji": ":MemoryIntermediate:"
+            },
+            {
+                "id": "memory_expert",
+                "name": "Memory Expert",
+                "description": "Win 100 games of Memory",
+                "threshold": 100,
+                "emoji": ":MemoryExpert:"
+            }
+        ]
+    },
+    "2048": {
+        "wins": [
+            {
+                "id": "2048_novice",
+                "name": "2048 Novice",
+                "description": "Reach 2048 tile 10 times",
+                "threshold": 10,
+                "emoji": ":2048Novice:"
+            },
+            {
+                "id": "2048_intermediate",
+                "name": "2048 Intermediate",
+                "description": "Reach 2048 tile 25 times",
+                "threshold": 25,
+                "emoji": ":2048Intermediate:"
+            },
+            {
+                "id": "2048_expert",
+                "name": "2048 Expert",
+                "description": "Reach 2048 tile 50 times",
+                "threshold": 50,
+                "emoji": ":2048Expert:"
+            }
+        ],  
+        "best_score": [
+            {
+                "id": "2048_score_5000",
+                "name": "2048 High Scorer",
+                "description": "Achieve a score of 5,000 in 2048",
+                "threshold": 5000,
+                "emoji": ":2048HighScorer:"
+            },
+            {
+                "id": "2048_score_10000",
+                "name": "2048 Master Scorer",
+                "description": "Achieve a score of 10,000 in 2048",
+                "threshold": 10000,
+                "emoji": ":2048MasterScorer:"
+            }
+        ]
+    },
+    "Trivia": {
+        "total_games": [
+            {
+                "id": "trivia_novice",
+                "name": "Trivia Novice",
+                "description": "Play 50 Trivia games",
+                "threshold": 50,
+                "emoji": ":TriviaNovice:"
+            },
+            {
+                "id": "trivia_intermediate",
+                "name": "Trivia Intermediate",
+                "description": "Play 100 Trivia games",
+                "threshold": 100,
+                "emoji": ":TriviaIntermediate:"
+            },
+            {
+                "id": "trivia_expert",
+                "name": "Trivia Expert",
+                "description": "Play 250 Trivia games",
+                "threshold": 250,
+                "emoji": ":TriviaExpert:"
+            }
+        ]
+    },
+    "Math Quiz": {
+        "total_games": [
+            {
+                "id": "math_novice",
+                "name": "Math Quiz Novice",
+                "description": "Play 50 Math Quiz games",
+                "threshold": 50,
+                "emoji": ":MathQuizNovice:"
+            },
+            {
+                "id": "math_intermediate",
+                "name": "Math Quiz Intermediate",
+                "description": "Play 100 Math Quiz games",
+                "threshold": 100,
+                "emoji": ":MathQuizIntermediate:"
+            }
+        ]
+    },
+    "Global": {
+        "level": [
+            {
+                "id": "level_10",
+                "name": "Level 10 Achiever",
+                "description": "Reach level 10",
+                "threshold": 10,
+                "emoji": ":Level10Achiever:"
+            },
+            {
+                "id": "level_25",
+                "name": "Level 25 Achiever",
+                "description": "Reach level 25",
+                "threshold": 25,
+                "emoji": ":Level25Achiever:"
+            },
+            {
+                "id": "level_50",
+                "name": "Level 50 Achiever",
+                "description": "Reach level 50",
+                "threshold": 50,
+                "emoji": ":Level50Achiever:"
+            }
+        ],
+        "total_xp_all": [
+            {
+                "id": "xp_10000",
+                "name": "XP Collector",
+                "description": "Earn 10,000 total XP",
+                "threshold": 10000,
+                "emoji": ":XPCollector:"
+            },
+            {
+                "id": "xp_50000",
+                "name": "XP Master",
+                "description": "Earn 50,000 total XP",
+                "threshold": 50000,
+                "emoji": ":XPMaster:"
+            }
+        ],
+        "leaderboard_first": [
+            {
+                "id": "monthly_leaderboard_champion",
+                "name": "Monthly Leaderboard Champion",
+                "description": "Finish in 1st place on the monthly leveling leaderboard",
+                "threshold": 1,
+                "emoji": "👑"
+            }
+        ]
+    }
+}
+

@@ -1,0 +1,534 @@
+{
+    "_comment": "Emoji Quiz questions organized by category",
+    "questions": [
+        {
+            "category": "Celebrities",
+            "emojis": "🤱🚦 🚣 🐝",
+            "answer": "Margot Robbie",
+            "wrong_answers": ["Beyoncé", "Oprah Winfrey", "Justin Bieber"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🐝🔛🌊",
+            "answer": "Beyoncé",
+            "wrong_answers": ["Margot Robbie", "Justin Bieber", "David Beckham"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🐻 👧👧",
+            "answer": "Bear Grylls",
+            "wrong_answers": ["Oprah Winfrey", "Simon Cowell", "The Rock"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🎭 🏆🍟",
+            "answer": "Oprah Winfrey",
+            "wrong_answers": ["Beyoncé", "Emma Stone", "Cardi B"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🥤🥫 🐝🥶",
+            "answer": "Justin Bieber",
+            "wrong_answers": ["David Beckham", "Tom Cruise", "Kristen Bell"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "📅📹 🥓",
+            "answer": "David Beckham",
+            "wrong_answers": ["Penelope Cruz", "Bear Grylls", "Simon Cowell"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "✒️👋🅿️ 🛳️",
+            "answer": "Penelope Cruz",
+            "wrong_answers": ["Isla Fisher", "Emma Stone", "Margot Robbie"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🏝️ 🎣",
+            "answer": "Isla Fisher",
+            "wrong_answers": ["Penelope Cruz", "Kristen Bell", "Emma Stone"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "😩👨 🐄",
+            "answer": "Simon Cowell",
+            "wrong_answers": ["Bear Grylls", "David Beckham", "The Rock"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🪨",
+            "answer": "The Rock",
+            "wrong_answers": ["Tom Cruise", "Bear Grylls", "David Beckham"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🍅 🚢",
+            "answer": "Tom Cruise",
+            "wrong_answers": ["Kristen Bell", "Emma Stone", "Cardi B"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "✝️🔟 🔔",
+            "answer": "Kristen Bell",
+            "wrong_answers": ["Emma Stone", "Isla Fisher", "Penelope Cruz"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "Ⓜ️🤱 🪨",
+            "answer": "Emma Stone",
+            "wrong_answers": ["Cardi B", "Kristen Bell", "Margot Robbie"]
+        },
+        {
+            "category": "Celebrities",
+            "emojis": "🃏 🐝",
+            "answer": "Cardi B",
+            "wrong_answers": ["Beyoncé", "Emma Stone", "Oprah Winfrey"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🗣️🎶🐾",
+            "answer": "Singapore",
+            "wrong_answers": ["Bangkok", "Tokyo", "Havana"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🔩🔛",
+            "answer": "Bolton",
+            "wrong_answers": ["Bangkok", "Canberra", "Helsinki"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "💥🍆",
+            "answer": "Bangkok",
+            "wrong_answers": ["Singapore", "Tokyo", "Havana"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🥫🐻",
+            "answer": "Canberra",
+            "wrong_answers": ["Helsinki", "Tokyo", "Blackpool"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "👹🚰",
+            "answer": "Helsinki",
+            "wrong_answers": ["Tokyo", "Canberra", "Bangkok"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🦶🔑0️⃣",
+            "answer": "Tokyo",
+            "wrong_answers": ["Singapore", "Bangkok", "Havana"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "⬛ 🏊",
+            "answer": "Blackpool",
+            "wrong_answers": ["Kabul", "Portsmouth", "Bern"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🚗🐂",
+            "answer": "Kabul",
+            "wrong_answers": ["Portsmouth", "Bern", "Medellín"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🚢 👄",
+            "answer": "Portsmouth",
+            "wrong_answers": ["Kabul", "Bern", "Havana"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🔥",
+            "answer": "Bern",
+            "wrong_answers": ["Medellín", "Havana", "San Francisco"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "🏅📥",
+            "answer": "Medellín",
+            "wrong_answers": ["Havana", "San Francisco", "Bucharest"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "😂🚐🅰️",
+            "answer": "Havana",
+            "wrong_answers": ["San Francisco", "Bucharest", "Nairobi"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "☀️ 😒👭🚘",
+            "answer": "San Francisco",
+            "wrong_answers": ["Bucharest", "Nairobi", "Havana"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "📖🅰️😴",
+            "answer": "Bucharest",
+            "wrong_answers": ["Nairobi", "San Francisco", "Medellín"]
+        },
+        {
+            "category": "Geography",
+            "emojis": "⛔️👘👁",
+            "answer": "Nairobi",
+            "wrong_answers": ["Bucharest", "San Francisco", "Havana"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🍴🙏❤️",
+            "answer": "Eat Pray Love",
+            "wrong_answers": ["500 Days of Summer", "The Devil Wears Prada", "Trainspotting"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "5️⃣0️⃣0️⃣☀️❤️",
+            "answer": "500 Days of Summer",
+            "wrong_answers": ["Eat Pray Love", "The Devil Wears Prada", "Fight Club"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "😈 👠",
+            "answer": "The Devil Wears Prada",
+            "wrong_answers": ["Trainspotting", "Edward Scissorhands", "Fight Club"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🚆👀",
+            "answer": "Trainspotting",
+            "wrong_answers": ["Edward Scissorhands", "Fight Club", "Frozen"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "👨✂️👐",
+            "answer": "Edward Scissorhands",
+            "wrong_answers": ["Fight Club", "Frozen", "Bridesmaids"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🥊 ♣️",
+            "answer": "Fight Club",
+            "wrong_answers": ["Frozen", "Bridesmaids", "Finding Nemo"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🏰👭❄️☃️",
+            "answer": "Frozen",
+            "wrong_answers": ["Bridesmaids", "Finding Nemo", "Harry Potter"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "👰👭💩",
+            "answer": "Bridesmaids",
+            "wrong_answers": ["Finding Nemo", "Harry Potter", "Castaway"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🔎🐟",
+            "answer": "Finding Nemo",
+            "wrong_answers": ["Harry Potter", "Castaway", "E.T."]
+        },
+        {
+            "category": "Movies",
+            "emojis": "👨⚡",
+            "answer": "Harry Potter",
+            "wrong_answers": ["Castaway", "E.T.", "The Lord of the Rings"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🏝️🏐",
+            "answer": "Castaway",
+            "wrong_answers": ["E.T.", "The Lord of the Rings", "The Wolf of Wall Street"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "👽📞🏠",
+            "answer": "E.T.",
+            "wrong_answers": ["The Lord of the Rings", "The Wolf of Wall Street", "Les Miserables"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🧙‍♂️🧝‍♀️💍🌋",
+            "answer": "The Lord of the Rings",
+            "wrong_answers": ["The Wolf of Wall Street", "Les Miserables", "Frozen"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🐺🏦",
+            "answer": "The Wolf of Wall Street",
+            "wrong_answers": ["Les Miserables", "The Lord of the Rings", "Fight Club"]
+        },
+        {
+            "category": "Movies",
+            "emojis": "🎵🇫🇷😔",
+            "answer": "Les Miserables",
+            "wrong_answers": ["The Wolf of Wall Street", "The Lord of the Rings", "Frozen"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "🇬🇧🍰",
+            "answer": "The Great British Bake Off",
+            "wrong_answers": ["Squid Game", "Money Heist", "Dead to Me"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "🦑🎮",
+            "answer": "Squid Game",
+            "wrong_answers": ["Money Heist", "Dead to Me", "The Haunting of Hill House"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "💰🇪🇸",
+            "answer": "Money Heist",
+            "wrong_answers": ["Dead to Me", "The Haunting of Hill House", "The Queen's Gambit"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "⚰️2️⃣🙋",
+            "answer": "Dead to Me",
+            "wrong_answers": ["The Haunting of Hill House", "The Queen's Gambit", "Derry Girls"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "👻⛰️🏠",
+            "answer": "The Haunting of Hill House",
+            "wrong_answers": ["The Queen's Gambit", "Derry Girls", "Sex Education"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "👑♟️👩‍🦰",
+            "answer": "The Queen's Gambit",
+            "wrong_answers": ["Derry Girls", "Sex Education", "Too Hot To Handle"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "🇮🇪🚸👯",
+            "answer": "Derry Girls",
+            "wrong_answers": ["Sex Education", "Too Hot To Handle", "Downton Abbey"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "🥵❤️🏝️💸",
+            "answer": "Too Hot To Handle",
+            "wrong_answers": ["Downton Abbey", "Game of Thrones", "Gossip Girl"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "👇🔛⛪",
+            "answer": "Downton Abbey",
+            "wrong_answers": ["Game of Thrones", "Gossip Girl", "The Fresh Prince of Bel-Air"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "🎲🏰🪑⚔️",
+            "answer": "Game of Thrones",
+            "wrong_answers": ["Gossip Girl", "The Fresh Prince of Bel-Air", "Call the Midwife"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "💬📱👧",
+            "answer": "Gossip Girl",
+            "wrong_answers": ["The Fresh Prince of Bel-Air", "Call the Midwife", "Emily in Paris"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "🛁👑🔔💨",
+            "answer": "The Fresh Prince of Bel-Air",
+            "wrong_answers": ["Call the Midwife", "Emily in Paris", "Gossip Girl"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "📞👶",
+            "answer": "Call the Midwife",
+            "wrong_answers": ["Emily in Paris", "The Fresh Prince of Bel-Air", "Downton Abbey"]
+        },
+        {
+            "category": "TV Shows",
+            "emojis": "👩🏻👗📱🇫🇷",
+            "answer": "Emily in Paris",
+            "wrong_answers": ["Call the Midwife", "The Fresh Prince of Bel-Air", "Derry Girls"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "⭐💰",
+            "answer": "Starbucks",
+            "wrong_answers": ["Firefox", "North Face", "Five Guys"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🔥🦊",
+            "answer": "Firefox",
+            "wrong_answers": ["North Face", "Five Guys", "Percy Pig"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "⬆️🧭😊",
+            "answer": "North Face",
+            "wrong_answers": ["Five Guys", "Percy Pig", "Taco Bell"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "👨👨👨👨👨",
+            "answer": "Five Guys",
+            "wrong_answers": ["Percy Pig", "Taco Bell", "Wetherspoons"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "👛🌊🐷",
+            "answer": "Percy Pig",
+            "wrong_answers": ["Taco Bell", "Wetherspoons", "Nokia"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🌮🔔",
+            "answer": "Taco Bell",
+            "wrong_answers": ["Wetherspoons", "Nokia", "Energizer"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "☁️☀️🌧🥄🥄",
+            "answer": "Wetherspoons",
+            "wrong_answers": ["Nokia", "Energizer", "iPhone"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🚫🔑",
+            "answer": "Nokia",
+            "wrong_answers": ["Energizer", "iPhone", "Crocs"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🔋🐰",
+            "answer": "Energizer",
+            "wrong_answers": ["iPhone", "Crocs", "Cornflakes"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "👀📱",
+            "answer": "iPhone",
+            "wrong_answers": ["Crocs", "Cornflakes", "KitKat"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🐊",
+            "answer": "Crocs",
+            "wrong_answers": ["Cornflakes", "KitKat", "Burberry"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🌽❄️❄️",
+            "answer": "Cornflakes",
+            "wrong_answers": ["KitKat", "Burberry", "IKEA"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🪁🐱",
+            "answer": "KitKat",
+            "wrong_answers": ["Burberry", "IKEA", "Crocs"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "🧸🫐",
+            "answer": "Burberry",
+            "wrong_answers": ["IKEA", "KitKat", "Starbucks"]
+        },
+        {
+            "category": "Brands",
+            "emojis": "👁️🔑",
+            "answer": "IKEA",
+            "wrong_answers": ["Burberry", "KitKat", "Starbucks"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🐒🪔🧞‍♂️",
+            "answer": "Aladdin",
+            "wrong_answers": ["Lion King", "The Princess and the Frog", "The Little Mermaid"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🦁👑",
+            "answer": "Lion King",
+            "wrong_answers": ["The Princess and the Frog", "The Little Mermaid", "Frozen"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "👑🐸",
+            "answer": "The Princess and the Frog",
+            "wrong_answers": ["The Little Mermaid", "Frozen", "Toy Story"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "👶🧜🏽‍♀️",
+            "answer": "The Little Mermaid",
+            "wrong_answers": ["Frozen", "Toy Story", "Mulan"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "❄️☃️👩‍🦳",
+            "answer": "Frozen",
+            "wrong_answers": ["Toy Story", "Mulan", "Sleeping Beauty"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🧸📖",
+            "answer": "Toy Story",
+            "wrong_answers": ["Mulan", "Sleeping Beauty", "Finding Nemo"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "👩🏻🐉🗡",
+            "answer": "Mulan",
+            "wrong_answers": ["Sleeping Beauty", "Finding Nemo", "Beauty and the Beast"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "😴👸🏼",
+            "answer": "Sleeping Beauty",
+            "wrong_answers": ["Finding Nemo", "Beauty and the Beast", "Ratatouille"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🔍🐟",
+            "answer": "Finding Nemo",
+            "wrong_answers": ["Beauty and the Beast", "Ratatouille", "Inside Out"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "👸🏻🌹👹",
+            "answer": "Beauty and the Beast",
+            "wrong_answers": ["Ratatouille", "Inside Out", "Tangled"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🐀👨‍🍳🍝",
+            "answer": "Ratatouille",
+            "wrong_answers": ["Inside Out", "Tangled", "Lilo and Stitch"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "😀😭😡😱🤢",
+            "answer": "Inside Out",
+            "wrong_answers": ["Tangled", "Lilo and Stitch", "Hercules"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🌻👑💇‍♀️",
+            "answer": "Tangled",
+            "wrong_answers": ["Lilo and Stitch", "Hercules", "Beauty and the Beast"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🌺💙👽",
+            "answer": "Lilo and Stitch",
+            "wrong_answers": ["Hercules", "Tangled", "Finding Nemo"]
+        },
+        {
+            "category": "Disney",
+            "emojis": "🏺⚡️💪",
+            "answer": "Hercules",
+            "wrong_answers": ["Lilo and Stitch", "Tangled", "Mulan"]
+        }
+    ]
+}
+
