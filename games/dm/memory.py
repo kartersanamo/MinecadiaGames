@@ -232,9 +232,8 @@ class MemoryButtons(discord.ui.View):
         
         try:
             # Reveal the card (use _card_value_to_emoji so custom emojis like :clown: render instead of staying blue)
-            button.emoji = self._card_value_to_emoji(self.card_values[index])
-            button.style = discord.ButtonStyle.blurple
             self.selected_cards.append(index)
+            self._sync_buttons_from_state()
             
             # Update the view
             await interaction.message.edit(view=self)
@@ -275,12 +274,6 @@ class MemoryButtons(discord.ui.View):
             self.matched_cards.add(index1)
             self.matched_cards.add(index2)
             
-            # Update buttons to show matched state
-            button1.style = discord.ButtonStyle.green
-            button2.style = discord.ButtonStyle.green
-            button1.disabled = True
-            button2.disabled = True
-            
             # Award XP for match
             match_xp = self.game_config.get('MATCH_XP', {}) or self.game_config.get('xp', {}).get('match', {})
             xp = random.randint(
@@ -310,7 +303,8 @@ class MemoryButtons(discord.ui.View):
             # Save state after match
             await self._save_state()
             
-            # Update message
+            # Sync button styles from state so matched tiles always show green (fixes visual glitch)
+            self._sync_buttons_from_state()
             await interaction.message.edit(embed=embed, view=self)
         else:
             # No match - flip cards back
@@ -326,9 +320,12 @@ class MemoryButtons(discord.ui.View):
             # Update embed
             embed.set_field_at(0, name="Tries Remaining", value=str(self.tries_remaining))
             
-            # Show cards briefly, then flip back
-            button1.style = discord.ButtonStyle.red
-            button2.style = discord.ButtonStyle.red
+            # Show cards briefly (red = no match), then flip back
+            self._sync_buttons_from_state()
+            for idx in (index1, index2):
+                b = self._get_button(idx)
+                if b:
+                    b.style = discord.ButtonStyle.red
             await interaction.message.edit(embed=embed, view=self)
             
             # Wait 1.5 seconds before flipping back
@@ -340,13 +337,8 @@ class MemoryButtons(discord.ui.View):
                 return
             
             # Flip cards back
-            button1.emoji = "❓"
-            button2.emoji = "❓"
-            button1.style = discord.ButtonStyle.grey
-            button2.style = discord.ButtonStyle.grey
-            
-            # Clear selected cards
             self.selected_cards.clear()
+            self._sync_buttons_from_state()
             
             # Save state after match
             await self._save_state()
@@ -369,7 +361,8 @@ class MemoryButtons(discord.ui.View):
         )
         self.total_xp += xp
         
-        # Disable all buttons
+        # Sync all button styles from state (matched = green), then disable all
+        self._sync_buttons_from_state()
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
@@ -426,7 +419,8 @@ class MemoryButtons(discord.ui.View):
         # Save final state
         await self._save_state()
         
-        # Disable all buttons
+        # Sync button styles (matched = green) then disable all
+        self._sync_buttons_from_state()
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
@@ -506,6 +500,27 @@ class MemoryButtons(discord.ui.View):
             if isinstance(child, discord.ui.Button) and child.custom_id == f"mem_{index}_{self.game_id}":
                 return child
         return None
+
+    def _sync_buttons_from_state(self):
+        """Sync all button styles/emoji/disabled from game state. Call before every message.edit(view=self)
+        so matched tiles always render green and we avoid visual glitches where they stay blue.
+        """
+        for i in range(20):
+            button = self._get_button(i)
+            if not button:
+                continue
+            if i in self.matched_cards:
+                button.style = discord.ButtonStyle.green
+                button.disabled = True
+                button.emoji = self._card_value_to_emoji(self.card_values[i])
+            elif i in self.selected_cards:
+                button.style = discord.ButtonStyle.blurple
+                button.emoji = self._card_value_to_emoji(self.card_values[i])
+                button.disabled = False
+            else:
+                button.style = discord.ButtonStyle.grey
+                button.emoji = "❓"
+                button.disabled = self.game_ended
     
     async def _check_valid_game(self, interaction: discord.Interaction) -> bool:
         """Check if the game is still valid."""

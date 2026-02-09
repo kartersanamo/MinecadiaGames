@@ -254,6 +254,7 @@ class CountryButtons(discord.ui.View):
             }
         self.xp_config = xp_config
         self.winner_count = 0
+        self.answered_user_ids: set = set()  # Users who have already answered (right or wrong) - one attempt per user
         
         for answer in answers:
             button = discord.ui.Button(
@@ -266,6 +267,23 @@ class CountryButtons(discord.ui.View):
     
     def create_callback(self, answer: str):
         async def callback(interaction: discord.Interaction):
+            # One answer per user: reject if they already answered (right or wrong)
+            if interaction.user.id in self.answered_user_ids:
+                from utils.chat_game_registry import registry
+                if self.message:
+                    registry.log_activity(
+                        self.message.id,
+                        interaction.user.id,
+                        'denied',
+                        'Already answered',
+                        False
+                    )
+                if not interaction.response.is_done():
+                    await interaction.response.send_message("You've already answered this game!", ephemeral=True)
+                else:
+                    await interaction.followup.send("You've already answered this game!", ephemeral=True)
+                return
+            
             # Log activity
             from utils.chat_game_registry import registry
             if self.message:
@@ -276,6 +294,9 @@ class CountryButtons(discord.ui.View):
                     f'Clicked: {answer[:50]}',
                     True
                 )
+            
+            # Mark user as having answered immediately to prevent multiple attempts
+            self.answered_user_ids.add(interaction.user.id)
             
             try:
                 if answer == self.correct_answer:
