@@ -59,14 +59,16 @@
         "Minesweeper": {
             "COOLDOWN": 43200,
             "BUTTON_COOLDOWN": 0.5,
-            "IMAGE": "https://i.imgur.com/example.png"
+            "IMAGE": "https://i.imgur.com/example.png",
+            "WIN_XP": {"LOWER": 120, "UPPER": 150}
         },
         "Hangman": {
             "COOLDOWN": 43200,
             "BUTTON_COOLDOWN": 0.5,
             "MAX_WRONG": 6,
             "WORDS_FILE": "assets/Configs/data/words.txt",
-            "IMAGE": "https://i.imgur.com/example.png"
+            "IMAGE": "https://i.imgur.com/example.png",
+            "WIN_XP": {"LOWER": 120, "UPPER": 180}
         }
     }
 }

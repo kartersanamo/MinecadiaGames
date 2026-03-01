@@ -1,6 +1,5 @@
 """Utility functions for checking and awarding achievements"""
 from managers.milestones import MilestonesManager
-from managers.leveling import LevelingManager
 from core.database.pool import DatabasePool
 import discord
 
@@ -42,63 +41,39 @@ def _calculate_milestone_xp(milestone: dict, all_milestones: list) -> int:
 
 
 async def check_game_achievements(user: discord.User, game_type: str, metric: str, value: int, channel: discord.TextChannel = None, bot = None):
-    """Check and award achievements for a game metric"""
+    """Check and award achievements for a game metric. XP is awarded by MilestonesManager when user/channel/bot are passed."""
     milestones_manager = MilestonesManager()
-    new_achievements = await milestones_manager.check_achievements(user.id, game_type, metric, value)
-    
+    # Resolve client for milestone XP awarding
+    client = bot
+    if not client and channel:
+        try:
+            if hasattr(channel, '_state'):
+                client = getattr(channel._state, '_client', None) or getattr(channel._state, 'client', None)
+        except Exception:
+            pass
+        if not client and hasattr(channel, 'guild') and channel.guild:
+            try:
+                if hasattr(channel.guild, '_state'):
+                    client = getattr(channel.guild._state, '_client', None) or getattr(channel.guild._state, 'client', None)
+            except Exception:
+                pass
+
+    new_achievements = await milestones_manager.check_achievements(
+        user.id, game_type, metric, value, user=user, channel=channel, client=client
+    )
+
     if new_achievements:
-        # Get all milestones for this metric to calculate XP tier
         milestones_config = milestones_manager.milestones_config
         game_milestones = milestones_config.get(game_type, {})
         metric_milestones = game_milestones.get(metric, [])
-        
-        # Get guild for emoji resolution
         guild = channel.guild if hasattr(channel, 'guild') else None if channel else None
-        
+
         for achievement in new_achievements:
-            # Calculate XP reward based on milestone tier
             milestone_xp = _calculate_milestone_xp(achievement, metric_milestones)
-            
-            # Award XP for the milestone
-            try:
-                # Try to get bot/client instance - prefer passed bot, then try from channel
-                client = bot
-                if not client and channel:
-                    # Try to get client from channel's state
-                    try:
-                        if hasattr(channel, '_state'):
-                            client = getattr(channel._state, '_client', None) or getattr(channel._state, 'client', None)
-                    except:
-                        pass
-                    # If that doesn't work, try from guild
-                    if not client and hasattr(channel, 'guild') and channel.guild:
-                        try:
-                            if hasattr(channel.guild, '_state'):
-                                client = getattr(channel.guild._state, '_client', None) or getattr(channel.guild._state, 'client', None)
-                        except:
-                            pass
-                
-                # Always use the new singleton API for consistency and reliability
-                from managers.leveling import _LevelingManagerCore
-                core_manager = _LevelingManagerCore()
-                await core_manager.award_xp(
-                    user=user,
-                    xp=milestone_xp,
-                    source="Milestone Reward",
-                    game_id=0,  # Use 0 for milestone rewards (not tied to a specific game)
-                    channel=channel,
-                    bot=client,  # Use the client we found, or None if not available
-                    test_mode=False
-                )
-            except Exception as e:
-                milestones_manager.logger.error(f"Error awarding milestone XP: {e}")
-                import traceback
-                milestones_manager.logger.error(traceback.format_exc())
-            
-            # Resolve emoji to full Discord format
+
             emoji_str = achievement.get('emoji', '🏅')
             resolved_emoji = milestones_manager._resolve_emoji(emoji_str, guild) if guild else emoji_str
-            
+
             if channel:
                 try:
                     await channel.send(

@@ -205,6 +205,24 @@ class WipeLevels(commands.Cog):
                         }
                     )
                     self.logger.info(f"Awarded monthly leaderboard champion milestone to user {first_place_user_id}")
+
+                    # Grant XP via LevelingManager (database) so milestone always grants XP
+                    member = interaction.guild.get_member(first_place_user_id)
+                    if member:
+                        try:
+                            from managers.leveling import LevelingManager
+                            lvl_mng = LevelingManager()
+                            await lvl_mng.award_xp(
+                                user=member,
+                                xp=550,
+                                source="Milestone: monthly_leaderboard_champion Monthly Leaderboard Champion",
+                                game_id=-1,
+                                channel=interaction.channel,
+                                bot=self.bot,
+                                test_mode=False,
+                            )
+                        except Exception as xp_err:
+                            self.logger.error(f"Error awarding milestone XP to first place winner: {xp_err}")
             except Exception as e:
                 self.logger.error(f"Error awarding milestone to 1st place winner: {e}")
         

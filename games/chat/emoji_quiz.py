@@ -1,7 +1,7 @@
 import asyncio
 import random
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Optional, List, Dict
 import discord
 from games.base.chat_game import ChatGame
 from managers.leveling import LevelingManager
@@ -168,7 +168,10 @@ class EmojiQuiz(ChatGame):
                     has_winners_field = any(field.name == "Winners" for field in embed.fields)
                     if not has_winners_field:
                         if view.winners:
-                            winners_text = "\n".join(f"`+{w['xp']}xp` {w['user']}" for w in view.winners)
+                            winners_text = "\n".join(
+                                f"`+{w['xp']}xp` {w['user']} ({w.get('guesses', 1)} guess{'es' if w.get('guesses', 1) != 1 else ''})"
+                                for w in view.winners
+                            )
                             embed.add_field(name="Winners", value=winners_text, inline=False)
                         else:
                             embed.add_field(name="Winners", value="No winners!", inline=False)
@@ -218,7 +221,8 @@ class EmojiQuizButtons(discord.ui.View):
         self.winners: List[dict] = []
         self.message: Optional[discord.Message] = None
         self.winner_count = 0
-        self.failed_users: set = set()  # Track users who have answered incorrectly
+        self.user_guesses: Dict[int, int] = {}  # Track guesses per user (for XP scaling)
+        self._user_locks: Dict[int, asyncio.Lock] = {}  # Per-user lock to prevent double-submit
         
         # Support both old and new XP structure
         xp_config = chat_config.get('XP', {})
@@ -246,71 +250,78 @@ class EmojiQuizButtons(discord.ui.View):
             await self.guess_button_callback(interaction)
         return callback
     
+    def _get_user_lock(self, user_id: int) -> asyncio.Lock:
+        if user_id not in self._user_locks:
+            self._user_locks[user_id] = asyncio.Lock()
+        return self._user_locks[user_id]
+
     async def guess_button_callback(self, interaction: discord.Interaction):
         # Create modal for guess submission
         modal = EmojiQuizModal(self)
         await interaction.response.send_modal(modal)
     
     async def handle_guess(self, interaction: discord.Interaction, guess: str):
-        """Handle a user's guess"""
+        """Handle a user's guess (infinite guesses; XP scales by guess count when correct)."""
         user_id = interaction.user.id
-        
-        # Check if user has already answered incorrectly
-        if user_id in self.failed_users:
-            from utils.chat_game_registry import registry
-            if self.message:
-                registry.log_activity(
-                    self.message.id,
-                    user_id,
-                    'denied',
-                    'Already failed - cannot retry',
-                    False
-                )
-            await interaction.response.send_message("You've already answered incorrectly and cannot try again!", ephemeral=True)
-            return
-        
+        async with self._get_user_lock(user_id):
+            await self._handle_guess_impl(interaction, guess, user_id)
+
+    async def _handle_guess_impl(self, interaction: discord.Interaction, guess: str, user_id: int):
+        """Implementation of guess handling; must be called with user lock held."""
         # Check if user already won
         if user_id in [w['user_id'] for w in self.winners]:
             await interaction.response.send_message("You've already won this game!", ephemeral=True)
             return
-        
+
+        if user_id not in self.user_guesses:
+            self.user_guesses[user_id] = 0
+        self.user_guesses[user_id] += 1
+        guesses = self.user_guesses[user_id]
         guess_lower = guess.strip().lower()
         
         # Check if guess matches the answer
         if guess_lower == self.answer_lower:
+            # Re-check already won (defense in depth)
+            if user_id in [w['user_id'] for w in self.winners]:
+                await interaction.response.send_message("You've already won this game!", ephemeral=True)
+                return
             # User won!
             self.winner_count += 1
             position = self.winner_count
             
-            # Calculate XP: Base on position
+            # Base XP by position (same as Guess the Number)
             if position == 1:
-                xp = random.randint(50, 60)
+                base_xp = random.randint(50, 60)
             elif position == 2:
-                xp = random.randint(40, 50)
+                base_xp = random.randint(40, 50)
             elif position == 3:
-                xp = random.randint(30, 40)
+                base_xp = random.randint(30, 40)
             elif position == 4:
-                xp = random.randint(20, 30)
+                base_xp = random.randint(20, 30)
             elif position == 5:
-                xp = random.randint(10, 20)
+                base_xp = random.randint(10, 20)
             else:  # 6th place and beyond
                 previous_final_xp = self.winners[-1]['xp'] if self.winners else 20 * self.xp_multiplier
                 max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
                 min_base_xp_required = max(1, int((10 / self.xp_multiplier) + 0.999))
                 min_base_xp = max(min_base_xp_required, max_base_xp - 9)
-                # Ensure min_base_xp < max_base_xp for randint
                 if min_base_xp >= max_base_xp:
                     min_base_xp = max(1, max_base_xp - 1)
-                xp = random.randint(min_base_xp, max_base_xp) if min_base_xp < max_base_xp else min_base_xp
+                base_xp = random.randint(min_base_xp, max_base_xp) if min_base_xp < max_base_xp else min_base_xp
             
-            # Apply XP multiplier
+            # Fewer guesses = more XP (same formula as Guess the Number)
+            guess_bonus = max(0, (6 - guesses) * 2)
+            guess_penalty = max(0, (guesses - 5) * 2)
+            xp = base_xp + guess_bonus - guess_penalty
+            xp = max(10, xp)
             xp = int(xp * self.xp_multiplier)
-            xp = max(10, xp)  # Ensure minimum 10 XP
+            xp = max(10, xp)
             
             self.winners.append({
                 'user': interaction.user.mention,
                 'user_id': user_id,
-                'xp': xp
+                'xp': xp,
+                'guesses': guesses
             })
             
             lvl_mng = LevelingManager(
@@ -331,7 +342,7 @@ class EmojiQuizButtons(discord.ui.View):
                     self.message.id,
                     user_id,
                     'correct_answer',
-                    f'Won {xp} XP (position {position})',
+                    f'Won {xp} XP (position {position}, {guesses} guesses)',
                     True
                 )
             
@@ -348,7 +359,7 @@ class EmojiQuizButtons(discord.ui.View):
             xp_display = f"would have been awarded `{xp}xp`" if self.test_mode else f"have been awarded `{xp}xp`"
             
             await interaction.response.send_message(
-                f"`✅` {test_prefix}Correct! The answer was **{self.correct_answer}**! You {xp_display}{xp_msg}!",
+                f"`✅` {test_prefix}Correct! The answer was **{self.correct_answer}**! You {xp_display}{xp_msg} in {guesses} guess{'es' if guesses != 1 else ''}!",
                 ephemeral=True
             )
             
@@ -356,7 +367,10 @@ class EmojiQuizButtons(discord.ui.View):
             if self.message:
                 try:
                     embed = self.message.embeds[0]
-                    winners_text = "\n".join(f"`+{w['xp']}xp` {w['user']}" for w in self.winners)
+                    winners_text = "\n".join(
+                        f"`+{w['xp']}xp` {w['user']} ({w['guesses']} guess{'es' if w['guesses'] != 1 else ''})"
+                        for w in self.winners
+                    )
                     
                     # Check if Winners field exists and update it, otherwise add it
                     found_winners_field = False
@@ -376,10 +390,7 @@ class EmojiQuizButtons(discord.ui.View):
                     import traceback
                     logger.error(traceback.format_exc())
         else:
-            # Mark user as failed - they cannot try again
-            self.failed_users.add(user_id)
-            
-            # Log activity
+            # Wrong answer - allow infinite retries (like Guess the Number)
             if self.message:
                 from utils.chat_game_registry import registry
                 registry.log_activity(
@@ -391,7 +402,7 @@ class EmojiQuizButtons(discord.ui.View):
                 )
             
             await interaction.response.send_message(
-                "`❌` That's not correct! You cannot try again.",
+                "`❌` That's not correct! Try again!",
                 ephemeral=True
             )
 

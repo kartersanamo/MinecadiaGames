@@ -1,6 +1,6 @@
 import random
 from datetime import datetime, timezone
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 import discord
 from discord.ext import commands
 from games.base.dm_game import DMGame
@@ -8,6 +8,9 @@ from managers.leveling import LevelingManager
 from utils.helpers import get_last_game_id
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+
+# In-memory state for test games so the flag command can find them (test games are not in DB)
+TEST_MINESWEEPER_GAMES: Dict[int, dict] = {}  # user_id -> {'state': {...}, 'message_id': int}
 
 
 class Minesweeper(DMGame):
@@ -34,9 +37,15 @@ class Minesweeper(DMGame):
             # Create a 5x5 board with 4-5 mines (adjustable)
             num_mines = self.game_config.get('NUM_MINES', 4)
             board, mine_positions = self._generate_board(5, 5, num_mines)
+            mine_set = set(mine_positions)
+            # One random non-mine tile is revealed at start (keep picking until not a bomb)
+            non_mine_positions = [(r, c) for r in range(5) for c in range(5) if (r, c) not in mine_set]
+            initial_revealed = random.choice(non_mine_positions)
             
             view = MinesweeperButtons(last_game_id, board, mine_positions, num_mines, self.bot, self.config, self.game_config, test_mode=test_mode)
             view.player_id = user.id  # Set player_id so _save_state works
+            view.revealed.add(initial_revealed)
+            view._refresh_button_states()
             # Register view for persistence across bot restarts
             self.bot.add_view(view)
             
@@ -47,7 +56,7 @@ class Minesweeper(DMGame):
             )
             embed.add_field(
                 name="Status",
-                value=f"Cells revealed: 0/25\nMines: {num_mines}\nFlags: 0",
+                value=f"Cells revealed: 1/25\nMines: {num_mines}\nFlags: 0",
                 inline=False
             )
             embed.add_field(
@@ -61,6 +70,9 @@ class Minesweeper(DMGame):
             
             message = await user.send(embed=embed, view=view)
             view.message = message  # Store message reference
+
+            if test_mode:
+                TEST_MINESWEEPER_GAMES[user.id] = {'state': view._get_state(), 'message_id': message.id}
             
             if not test_mode:
                 db = await self._get_db()
@@ -186,10 +198,16 @@ class MinesweeperButtons(discord.ui.View):
                 self.update_button(row, col)
     
     async def _save_state(self):
-        """Save current game state to database"""
-        if self.test_mode or self.game_id == -999999 or not hasattr(self, 'player_id'):
+        """Save current game state to database (or in-memory for test games)."""
+        if not hasattr(self, 'player_id'):
             return
-        
+        if self.test_mode or self.game_id == -999999:
+            # Keep test game state in memory so the flag command can find it
+            if self.player_id in TEST_MINESWEEPER_GAMES:
+                TEST_MINESWEEPER_GAMES[self.player_id]['state'] = self._get_state()
+                if self.message:
+                    TEST_MINESWEEPER_GAMES[self.player_id]['message_id'] = self.message.id
+            return
         try:
             from utils.game_state_manager import save_game_state
             state = self._get_state()
@@ -354,6 +372,8 @@ class MinesweeperButtons(discord.ui.View):
                 (len(self.revealed), current_unix, interaction.user.id, self.game_id)
             )
         
+        if self.test_mode:
+            TEST_MINESWEEPER_GAMES.pop(interaction.user.id, None)
         await interaction.followup.send(
             f"`❌` Sorry {interaction.user.mention}, you hit a mine! Better luck next time!",
             ephemeral=False
@@ -387,10 +407,10 @@ class MinesweeperButtons(discord.ui.View):
         
         await interaction.message.edit(embed=embed, view=self)
         
-        # Calculate XP (based on cells revealed and mines found)
+        # Calculate XP (from config; default 80-120 for higher reward)
         xp = random.randint(
-            self.game_config.get('WIN_XP', {}).get('LOWER', 40),
-            self.game_config.get('WIN_XP', {}).get('UPPER', 60)
+            self.game_config.get('WIN_XP', {}).get('LOWER', 80),
+            self.game_config.get('WIN_XP', {}).get('UPPER', 120)
         )
         
         await interaction.followup.send(
@@ -421,6 +441,8 @@ class MinesweeperButtons(discord.ui.View):
             # Check for achievements
             from utils.achievements import check_dm_game_win
             await check_dm_game_win(interaction.user, "Minesweeper", interaction.channel, self.bot)
+        if self.test_mode:
+            TEST_MINESWEEPER_GAMES.pop(interaction.user.id, None)
 
 
 class MinesweeperListener(commands.Cog):
@@ -450,6 +472,10 @@ class MinesweeperListener(commands.Cog):
                     col = int(parts[2]) - 1  # Convert to 0-indexed
                     
                     if 0 <= row < 5 and 0 <= col < 5:
+                        try:
+                            await message.delete()
+                        except (discord.NotFound, discord.Forbidden):
+                            pass
                         # Find the active game for this user
                         db = await DatabasePool.get_instance()
                         rows = await db.execute(
@@ -523,7 +549,50 @@ class MinesweeperListener(commands.Cog):
                                     self.logger.error(traceback.format_exc())
                                     await message.reply("An error occurred while processing the flag command.", delete_after=5)
                         else:
-                            await message.reply("You don't have an active Minesweeper game!", delete_after=5)
+                            # No DB game - check for test game (in-memory)
+                            test_data = TEST_MINESWEEPER_GAMES.get(message.author.id)
+                            if test_data:
+                                try:
+                                    game_state = test_data.get('state')
+                                    message_id = test_data.get('message_id')
+                                    if not game_state or not message_id:
+                                        await message.reply("Test game state not found. Try revealing a cell first, or start a new test game.", delete_after=5)
+                                        return
+                                    found_message = await message.channel.fetch_message(message_id)
+                                    board = game_state.get('board', [[0 for _ in range(5)] for _ in range(5)])
+                                    mine_positions = game_state.get('mine_positions', [])
+                                    num_mines = len(mine_positions) if mine_positions else 4
+                                    config = self.minesweeper_game.config
+                                    game_config = self.minesweeper_game.game_config
+                                    view = MinesweeperButtons(
+                                        -999999, board, mine_positions, num_mines,
+                                        self.bot, config, game_config,
+                                        test_mode=True, saved_state=game_state
+                                    )
+                                    view.player_id = message.author.id
+                                    view.message = found_message
+                                    pos = (row, col)
+                                    if pos in view.revealed:
+                                        await message.reply("You cannot flag a revealed cell!", delete_after=5)
+                                        return
+                                    if pos in view.flagged:
+                                        view.flagged.remove(pos)
+                                        await message.reply(f"Unflagged cell at row {row+1}, column {col+1}.", delete_after=5)
+                                    else:
+                                        view.flagged.add(pos)
+                                        await message.reply(f"Flagged cell at row {row+1}, column {col+1}.", delete_after=5)
+                                    await view._save_state()
+                                    await view.update_embed(found_message)
+                                except discord.NotFound:
+                                    TEST_MINESWEEPER_GAMES.pop(message.author.id, None)
+                                    await message.reply("Your test game message was not found. Start a new test game.", delete_after=5)
+                                except Exception as e:
+                                    self.logger.error(f"Error handling flag command (test game): {e}")
+                                    import traceback
+                                    self.logger.error(traceback.format_exc())
+                                    await message.reply("An error occurred while processing the flag command.", delete_after=5)
+                            else:
+                                await message.reply("You don't have an active Minesweeper game!", delete_after=5)
                     else:
                         await message.reply("Invalid row/column! Use numbers 1-5.", delete_after=5)
                 except ValueError:
