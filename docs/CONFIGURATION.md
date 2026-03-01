@@ -1,6 +1,6 @@
 # Configuration
 
-This document describes how configuration is loaded, which files exist, and the main keys used by the bot. **Do not commit real tokens or database passwords;** use environment variables or local-only overrides.
+This document describes how configuration is loaded, which files exist, and the main keys used by the bot. **Do not commit real tokens or database passwords.** Use a `.env` file (copy from `.env.example`) for `DISCORD_TOKEN` and `DB_HOST` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` (and optionally `DB_PORT`, `DB_AUTOCOMMIT`); `.env` is in `.gitignore`.
 
 ---
 
@@ -12,6 +12,7 @@ This document describes how configuration is loaded, which files exist, and the 
   - If `key` is omitted, the whole config (dict) for `config_name` is returned.  
   - If `key` is given, that key is resolved (with backward-compat mapping when applicable) and the value returned.  
 - **Caching:** Configs are loaded and cached per `config_name`. File locks are used for thread-safe reads.  
+- **Secrets from .env:** The bot reads `DISCORD_TOKEN` from the environment first (see `bot.py`). The database pool reads `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT`, `DB_AUTOCOMMIT` from the environment when `DB_HOST` is set; otherwise it uses `DATABASE_CONFIG` from config (see `core/database/pool.py`).
 - **Backward compatibility:** The name `'config'` is special: it merges `bot.json` and `discord.json`. Many legacy keys (e.g. `TOKEN`, `DATABASE_CONFIG`, `ADMIN_ROLES`) are mapped to the merged structure (e.g. `token`, `database`, `permissions.admin_roles`). See `core/config/manager.py` for the full mapping.
 
 ---
@@ -20,9 +21,8 @@ This document describes how configuration is loaded, which files exist, and the 
 
 | File | Purpose |
 |------|---------|
-| `assets/Configs/bot.json` | Token, presence, database connection, embed defaults (color, footer, logo). |
-| `assets/Configs/discord.json` | Guild ID, roles, channel IDs (admin logs, logs, tickets, announce), permissions (admin/staff roles), etc. When using `config`, this is merged with `bot.json`. |
-| `assets/Configs/config.json` | Legacy/alternate; may hold same keys as bot + discord. ConfigManager can merge from bot + discord when you request `'config'`. |
+| `assets/Configs/bot.json` | Presence, counter_debug, embed defaults (color, footer, logo). Token and database are in `.env` (see above). |
+| `assets/Configs/discord.json` | Guild ID, channels (leveling, admin_logs, logs, tickets_category, announce), roles (games_notification, verified, winner), permissions (admin_roles, staff_roles). When you request `'config'`, ConfigManager merges `bot.json` and `discord.json` only. |
 | `assets/Configs/dm_games.json` | Global DM delay, button cooldown; per-game settings under `GAMES` (Wordle, TicTacToe, Connect Four, Memory, 2048, Minesweeper, Hangman). |
 | `assets/Configs/chat_games.json` | Chat game delay (LOWER/UPPER), channels with chance weights, winners count, game length, XP (base + position). High-level game list. |
 | `assets/Configs/games/*.json` | Per–chat-game data: trivia questions, unscramble words, flag/math/emoji quiz data, etc. |
@@ -38,19 +38,21 @@ This document describes how configuration is loaded, which files exist, and the 
 
 When you call `config.get('config', 'KEY')`, the manager may translate to the merged structure:
 
-- `TOKEN` → `token`  
-- `DATABASE_CONFIG` → `database` (host, port, user, password, database, autocommit)  
+- `TOKEN` → `token` (bot uses `DISCORD_TOKEN` from .env first)  
+- `DATABASE_CONFIG` → `database` (host, port, user, password, database, autocommit). Database pool uses `DB_*` from .env when `DB_HOST` is set.  
 - `ADMIN_ROLES` → `permissions.admin_roles`  
 - `STAFF_ROLES` → `permissions.staff_roles`  
 - `EMBED_COLOR`, `FOOTER`, `LOGO` → `embed.color`, `embed.footer`, `embed.logo`  
 - `GUILD_ID` → `guild_id`  
 - `ADMIN_LOGS` → `channels.admin_logs`  
+- `LEVELING_CHANNEL` → `channels.leveling`  
 - `LOGS_CHANNEL` → `channels.logs`  
 - `DISCORD_TICKETS` → `channels.tickets_category`  
 - `ANNOUNCE_CHANNELS` → `channels.announce`  
+- `COUNTER_DEBUG` → `counter_debug` (in `bot.json`)  
 - Plus others (see `core/config/manager.py`).
 
-So code that uses `config.get('config', 'DATABASE_CONFIG')` or `config.get('config', 'TOKEN')` still works via this mapping.
+Code that uses `config.get('config', 'DATABASE_CONFIG')` or `config.get('config', 'TOKEN')` still works for file-based config. The database pool and bot entry point prefer .env when those variables are set.
 
 ---
 

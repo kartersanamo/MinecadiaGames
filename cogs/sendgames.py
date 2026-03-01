@@ -30,7 +30,7 @@ class SendGames(commands.Cog):
             if not guild:
                 return
             
-            channel = guild.get_channel(1186036927514812426)
+            channel = guild.get_channel(self.config.get('config', 'LEVELING_CHANNEL'))
             if not channel:
                 return
             

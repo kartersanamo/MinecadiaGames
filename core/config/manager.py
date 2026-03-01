@@ -103,9 +103,11 @@ class ConfigManager:
                 'GAMES_ROLE': 'roles.games_notification',
                 'VERIFIED_ROLE': 'roles.verified',
                 'ADMIN_LOGS': 'channels.admin_logs',
+                'LEVELING_CHANNEL': 'channels.leveling',
                 'LOGS_CHANNEL': 'channels.logs',
                 'DISCORD_TICKETS': 'channels.tickets_category',
-                'ANNOUNCE_CHANNELS': 'channels.announce'
+                'ANNOUNCE_CHANNELS': 'channels.announce',
+                'COUNTER_DEBUG': 'counter_debug'
             }
             if key in key_mapping:
                 key = key_mapping[key]

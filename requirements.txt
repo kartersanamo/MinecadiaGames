@@ -1,0 +1,21 @@
+# Discord bot & API
+discord.py>=2.0.0
+
+# Database
+aiomysql>=0.2.0
+pymysql>=1.0.0
+
+# Data & HTTP
+pandas>=1.0.0
+requests>=2.28.0
+aiohttp>=3.8.0
+
+# Images
+Pillow>=9.0.0
+
+# Math quiz (latex, problem generation)
+mathgenerator>=0.1.0
+pylatexenc>=2.0.0
+
+# Environment (token from .env)
+python-dotenv>=1.0.0
