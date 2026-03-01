@@ -1,7 +1,11 @@
+import os
 import discord
 from discord.ext import commands
 from pathlib import Path
 from datetime import datetime, timezone
+from dotenv import load_dotenv  # type: ignore[reportMissingImports]
+
+load_dotenv()
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
 from core.cache.manager import CacheManager
@@ -814,7 +818,9 @@ class MinecadiaBot(commands.Bot):
 
 def main():
     bot = MinecadiaBot()
-    token = bot.config.get('config', 'TOKEN')
+    token = os.getenv('DISCORD_TOKEN') or bot.config.get('config', 'TOKEN')
+    if not token:
+        raise ValueError("Set DISCORD_TOKEN in .env or 'token' in assets/Configs/bot.json")
     bot.run(token)
 
 

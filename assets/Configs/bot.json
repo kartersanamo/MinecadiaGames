@@ -1,15 +1,7 @@
 {
-    "_comment": "Core bot configuration - DO NOT EDIT TOKEN OR DATABASE IN PRODUCTION",
-    "token": "MTM3MzEyODY5OTIzODY4MjcyNQ.GpST_3.EQ3y4Mt5cWE14nj3Ds8U4NXzhDIj6Oo8cwdrrU",
+    "_comment": "Bot appearance and behaviour. Token/database are in .env",
     "presence": "play.minecadia.com",
-    "database": {
-        "host": "127.0.0.1",
-        "user": "discord_bot",
-        "database": "discord_bot",
-        "password": "Z8587U3NRbvG",
-        "port": 3306,
-        "autocommit": true
-    },
+    "counter_debug": false,
     "embed": {
         "color": "0xF1C40F",
         "footer": "Minecadia Games Bot",

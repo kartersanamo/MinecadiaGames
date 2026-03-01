@@ -395,8 +395,8 @@ class GameManager:
         if not guild:
             return
         
-        leveling_channel = guild.get_channel(1186036927514812426)
-        games_role = guild.get_role(1190635899025891398)
+        leveling_channel = guild.get_channel(self.config.get('config', 'LEVELING_CHANNEL'))
+        games_role = guild.get_role(self.config.get('config', 'GAMES_ROLE'))
         
         if leveling_channel and games_role:
             # Delete the previous refresh message if it exists

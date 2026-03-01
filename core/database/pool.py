@@ -1,8 +1,30 @@
+import os
 import aiomysql
 from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
 import asyncio
 from ..config.manager import ConfigManager
+
+
+def _get_db_config() -> Dict[str, Any]:
+    """Build database config from .env (DB_*) or fall back to config file."""
+    if os.getenv('DB_HOST'):
+        port = os.getenv('DB_PORT', '3306')
+        try:
+            port = int(port)
+        except ValueError:
+            port = 3306
+        autocommit = os.getenv('DB_AUTOCOMMIT', 'true').lower() in ('1', 'true', 'yes')
+        return {
+            'host': os.getenv('DB_HOST', '127.0.0.1'),
+            'port': port,
+            'user': os.getenv('DB_USER', ''),
+            'password': os.getenv('DB_PASSWORD', ''),
+            'database': os.getenv('DB_NAME', '') or os.getenv('DB_DATABASE', ''),
+            'autocommit': autocommit,
+        }
+    config = ConfigManager.get_instance()
+    return config.get('config', 'DATABASE_CONFIG') or {}
 
 
 class DatabasePool:
@@ -28,20 +50,20 @@ class DatabasePool:
                 return
             
             try:
-                db_config = self.config.get('config', 'DATABASE_CONFIG')
-                if not db_config:
-                    raise ValueError("DATABASE_CONFIG not found in config")
-                
+                db_config = _get_db_config()
+                if not db_config or not db_config.get('host') or not db_config.get('database'):
+                    raise ValueError(
+                        "Database config missing: set DB_HOST, DB_USER, DB_PASSWORD, DB_NAME in .env "
+                        "or DATABASE_CONFIG in assets/Configs/bot.json"
+                    )
                 import logging
                 logger = logging.getLogger("DatabasePool")
                 logger.info(f"Connecting to database at {db_config.get('host', 'unknown')}:{db_config.get('port', 'unknown')}")
-                
-                # Create pool with timeout - if this hangs, the timeout will catch it
                 try:
                     self.pool = await asyncio.wait_for(
                         aiomysql.create_pool(
                             host=db_config['host'],
-                            port=db_config['port'],
+                            port=int(db_config['port']) if isinstance(db_config.get('port'), str) else db_config.get('port', 3306),
                             user=db_config['user'],
                             password=db_config['password'],
                             db=db_config['database'],
