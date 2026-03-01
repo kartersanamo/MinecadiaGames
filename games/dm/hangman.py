@@ -360,7 +360,10 @@ class HangmanButtons(discord.ui.View):
                 self.game_won = True
                 self._update_button_states()  # Disable all buttons
                 
-                xp = random.randint(40, 60)  # Base XP, can be configured later
+                xp = random.randint(
+                    self.game_config.get('WIN_XP', {}).get('LOWER', 80),
+                    self.game_config.get('WIN_XP', {}).get('UPPER', 120)
+                )
                 current_unix = int(datetime.now(timezone.utc).timestamp())
                 correct_count = len([c for c in word_display if c != '_' and c != ' '])
                 
@@ -787,7 +790,10 @@ class HangmanZButton(discord.ui.View):
                                 from utils.achievements import check_dm_game_win
                                 await check_dm_game_win(interaction.user, "Hangman", interaction.channel, self.bot)
                                 
-                                xp = random.randint(40, 60)
+                                xp = random.randint(
+                                    self.game_config.get('WIN_XP', {}).get('LOWER', 80),
+                                    self.game_config.get('WIN_XP', {}).get('UPPER', 120)
+                                )
                                 lvl_mng = LevelingManager(
                                     user=interaction.user,
                                     channel=interaction.channel,

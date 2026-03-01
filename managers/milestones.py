@@ -1,8 +1,25 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from core.database.pool import DatabasePool
 from core.config.manager import ConfigManager
+from managers.leveling import LevelingManager
 from core.logging.setup import get_logger
 import discord
+
+
+def _calculate_milestone_xp(milestone: dict, all_milestones: list) -> int:
+    """Calculate XP reward for a milestone based on its tier/position (400-700)."""
+    sorted_milestones = sorted(all_milestones, key=lambda x: x.get('threshold', 0))
+    try:
+        milestone_index = next(i for i, m in enumerate(sorted_milestones) if m.get('id') == milestone.get('id'))
+    except StopIteration:
+        milestone_index = 0
+    total_milestones = len(sorted_milestones)
+    if total_milestones == 1:
+        return 550
+    base_xp, max_xp = 400, 700
+    progress = milestone_index / (total_milestones - 1) if total_milestones > 1 else 0
+    xp = int(base_xp + (max_xp - base_xp) * progress)
+    return max(400, min(700, xp))
 
 
 class MilestonesManager:
@@ -10,42 +27,65 @@ class MilestonesManager:
         self.config = ConfigManager.get_instance()
         self.logger = get_logger("Milestones")
         self.milestones_config = self.config.get('milestones', {})
-    
-    async def check_achievements(self, user_id: int, game_type: str, metric: str, value: int):
-        """Check if user has earned any new achievements for a given metric"""
+
+    async def check_achievements(
+        self,
+        user_id: int,
+        game_type: str,
+        metric: str,
+        value: int,
+        user: Optional[discord.User] = None,
+        channel: Optional[discord.abc.Messageable] = None,
+        client: Optional[discord.Client] = None,
+    ):
+        """Check if user has earned any new achievements for a given metric.
+        When user/channel/client are provided, grants milestone XP via LevelingManager (database)."""
         db = await DatabasePool.get_instance()
-        
-        # Get all milestones for this game type and metric
+
         game_milestones = self.milestones_config.get(game_type, {})
         metric_milestones = game_milestones.get(metric, [])
-        
+
         if not metric_milestones:
             return []
-        
-        # Get user's current achievements
+
         user_achievements = await db.execute(
             "SELECT achievement_id FROM user_achievements WHERE user_id = %s",
             (str(user_id),)
         )
         earned_ids = {row['achievement_id'] for row in user_achievements}
-        
-        # Check which milestones the user has reached
+
         new_achievements = []
         for milestone in metric_milestones:
             milestone_id = milestone.get('id')
             threshold = milestone.get('threshold', 0)
-            
-            # Skip if already earned
+
             if milestone_id in earned_ids:
                 continue
-            
-            # Check if threshold is reached
+
             if value >= threshold:
-                # Award achievement
                 await self._award_achievement(db, user_id, milestone_id, milestone)
+
+                # Grant XP via LevelingManager (writes to xp_logs + leveling table)
+                if user is not None:
+                    xp = milestone.get('xp') if milestone.get('xp') is not None else _calculate_milestone_xp(milestone, metric_milestones)
+                    if xp > 0:
+                        try:
+                            lvl_mng = LevelingManager()
+                            await lvl_mng.award_xp(
+                                user=user,
+                                xp=xp,
+                                source=f"Milestone: {milestone_id} {milestone.get('name', '')}",
+                                game_id=-1,
+                                channel=channel,
+                                bot=client,
+                                test_mode=False,
+                            )
+                        except Exception as e:
+                            self.logger.error(f"Error awarding milestone XP to user {user_id}: {e}")
+
                 new_achievements.append(milestone)
                 earned_ids.add(milestone_id)
-        
+
         return new_achievements
     
     async def _award_achievement(self, db: DatabasePool, user_id: int, achievement_id: str, milestone: Dict):

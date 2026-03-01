@@ -531,10 +531,13 @@ class TwentyFortyEightButtons(discord.ui.View):
             from utils.achievements import check_dm_game_win
             await check_dm_game_win(interaction.user, "2048", interaction.channel, self.bot)
             
-            # Also check for best score achievement
+            # Also check for best score achievement (pass user/channel/client so XP is granted)
             from managers.milestones import MilestonesManager
             milestones_manager = MilestonesManager()
-            await milestones_manager.check_achievements(self.player_id, "2048", "best_score", self.score)
+            await milestones_manager.check_achievements(
+                self.player_id, "2048", "best_score", self.score,
+                user=interaction.user, channel=interaction.channel, client=self.bot
+            )
         except Exception as e:
             self.logger.error(f"Error in _handle_win_async: {e}")
     
@@ -630,10 +633,13 @@ class TwentyFortyEightButtons(discord.ui.View):
                 (status, self.score, self.moves, self.highest_tile, current_unix, self.player_id, self.game_id)
             )
             
-            # Check for best score achievement
+            # Check for best score achievement (pass user/channel/client so XP is granted)
             from managers.milestones import MilestonesManager
             milestones_manager = MilestonesManager()
-            await milestones_manager.check_achievements(self.player_id, "2048", "best_score", self.score)
+            await milestones_manager.check_achievements(
+                self.player_id, "2048", "best_score", self.score,
+                user=interaction.user, channel=interaction.channel, client=self.bot
+            )
         except Exception as e:
             self.logger.error(f"Error in _handle_loss_async: {e}")
     
@@ -782,10 +788,13 @@ class TwentyFortyEightButtons(discord.ui.View):
                 (self.score, self.moves, self.highest_tile, current_unix, self.player_id, self.game_id)
             )
             
-            # Check for best score achievement
+            # Check for best score achievement (pass user/channel/client so XP is granted)
             from managers.milestones import MilestonesManager
             milestones_manager = MilestonesManager()
-            await milestones_manager.check_achievements(self.player_id, "2048", "best_score", self.score)
+            await milestones_manager.check_achievements(
+                self.player_id, "2048", "best_score", self.score,
+                user=interaction.user, channel=interaction.channel, client=self.bot
+            )
         except Exception as e:
             self.logger.error(f"Error in _handle_cash_out_async: {e}")
     
