@@ -25,7 +25,7 @@ class Unscramble(ChatGame):
     async def _get_image(self, scrambled: str) -> str:
         from pathlib import Path
         bg_path = str(Path(__file__).parent.parent.parent / "assets" / "Images" / "Unscramble_BG_2.png")
-        output_path = f"Assets/Images/unscramble_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
+        output_path = f"assets/Images/unscramble_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
         
         with Image.open(bg_path) as image:
             draw = ImageDraw.Draw(image)
