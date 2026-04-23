@@ -86,6 +86,7 @@ class TicTacToeButtons(discord.ui.View):
         self.button_cooldown = self.dm_config.get('BUTTON_COOLDOWN', 0.8)
         self.message = None  # Store message reference for image updates
         self.cooldowns = {}
+        self.logger = get_logger("DMGames")
         
         # Initialize or restore game state
         if saved_state:
@@ -145,8 +146,7 @@ class TicTacToeButtons(discord.ui.View):
             await save_game_state('tictactoe', self.game_id, self.player_id, state, self.test_mode)
         except Exception as e:
             from core.logging.setup import get_logger
-            logger = get_logger("DMGames")
-            logger.error(f"Error saving TicTacToe game state: {e}")
+            self.logger.error(f"Error saving TicTacToe game state: {e}")
     
     def create_callback(self, index: int, row: int, col: int):
         async def callback(interaction: discord.Interaction):
@@ -337,7 +337,7 @@ class TicTacToeButtons(discord.ui.View):
                         )
             
             # Save image
-            output_path = f"tictactoe_{self.game_id}_{uuid.uuid4().hex[:8]}.png"
+            output_path = f"Assets/Images/tictactoe_{self.game_id}_{uuid.uuid4().hex[:8]}.png"
             base_image.save(output_path)
         
         return output_path
@@ -364,7 +364,7 @@ class TicTacToeButtons(discord.ui.View):
         try:
             os.remove(image_path)
         except:
-            pass
+            self.logger.error(f"Failed to delete the TicTacToe image at {image_path}")
         
         db = await DatabasePool.get_instance()
         current_unix = int(datetime.now(timezone.utc).timestamp())

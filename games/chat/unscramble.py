@@ -1,5 +1,6 @@
 import random
 import os
+import uuid
 import asyncio
 from datetime import datetime, timezone
 from typing import Optional, List, Dict
@@ -24,7 +25,7 @@ class Unscramble(ChatGame):
     async def _get_image(self, scrambled: str) -> str:
         from pathlib import Path
         bg_path = str(Path(__file__).parent.parent.parent / "assets" / "Images" / "Unscramble_BG_2.png")
-        output_path = "unscramble.png"
+        output_path = f"Assets/Images/unscramble_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
         
         with Image.open(bg_path) as image:
             draw = ImageDraw.Draw(image)
@@ -134,6 +135,12 @@ class Unscramble(ChatGame):
             message = await channel.send(content=role.mention, embed=embed, view=view, file=file)
             view.message = message  # Store message reference for real-time updates
             
+            # Delete the image file
+            try:
+                os.remove(image_path)
+            except:
+                self.logger.error(f"Failed to delete unscramble image at {image_path}")
+            
             # Register game in registry for admin commands
             from utils.chat_game_registry import registry
             original_state = {
@@ -225,12 +232,7 @@ class Unscramble(ChatGame):
                     # Unregister game from registry
                     from utils.chat_game_registry import registry
                     registry.unregister_game(message.id)
-                    
-                    # Delete the image file
-                    try:
-                        os.remove(image_path)
-                    except:
-                        pass
+
             except discord.NotFound:
                 # Message was deleted, that's okay
                 pass
