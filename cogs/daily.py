@@ -123,7 +123,7 @@ class Daily(commands.Cog):
         from utils.helpers import get_embed_logo_url
         logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed, ephemeral=False)
     
     @staticmethod
     async def get_daily_streak(user_id: int) -> dict:

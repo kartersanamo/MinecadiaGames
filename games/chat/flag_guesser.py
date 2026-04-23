@@ -54,7 +54,7 @@ class FlagGuesser(ChatGame):
     
     async def _build_embed(self, country_code: str, xp_multiplier: float, end_time: int, test_mode: bool = False) -> Tuple[discord.Embed, discord.File]:
         response = requests.get(f"https://flagcdn.com/w2560/{country_code}.png")
-        filename = f"{uuid.uuid4()}.png"
+        filename = f"assets/Images/flag_guesser_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
         
         with open(filename, 'wb') as f:
             f.write(response.content)
