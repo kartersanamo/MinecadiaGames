@@ -75,13 +75,35 @@ class WipeLevels(commands.Cog):
             9: "10th"
         }
         
-        # Support both old (winners) and new (rewards) structure
-        winners = self.config.get('winners', {}) or self.config.get('rewards', {})
+        # Load rewards/winners config and normalize structure
+        winners_config = self.config.get('winners', {}) or self.config.get('rewards', {})
+        
+        # Support both old (winners.json) and new (rewards.json) structure
+        # winners.json: {"Rewards": {"title": ..., "1": ..., "2": ...}}
+        # rewards.json: {"rewards": {"title": ..., "positions": {"1": ..., "2": ...}}}
+        if 'Rewards' in winners_config:
+            # Old structure (winners.json)
+            rewards_data = winners_config['Rewards']
+            positions = {k: v for k, v in rewards_data.items() if k.isdigit()}
+            title = rewards_data.get('title', '**{month} Winners**')
+            footer = rewards_data.get('footer', '')
+        elif 'rewards' in winners_config:
+            # New structure (rewards.json)
+            rewards_data = winners_config['rewards']
+            positions = rewards_data.get('positions', {})
+            title = rewards_data.get('title', '**{month} Winners**')
+            footer = rewards_data.get('footer', '')
+        else:
+            # Fallback if neither structure found
+            self.logger.warning("[WipeLevels] No rewards configuration found in winners/rewards config")
+            positions = {}
+            title = '**{month} Winners**'
+            footer = ''
         
         try:
             permissions = category.overwrites if hasattr(category, 'overwrites') else {}
             for index, row in enumerate(top_10_rows):
-                reward = winners.get('Rewards', {}).get(str(index + 1), '').split('» ')[-1]
+                reward = positions.get(str(index + 1), '').split('» ')[-1]
                 user = interaction.guild.get_member(int(row['user_id']))
                 if not user:
                     await interaction.followup.send(f"❌ Could not find user with ID {row['user_id']}")
@@ -226,14 +248,15 @@ class WipeLevels(commands.Cog):
             except Exception as e:
                 self.logger.error(f"Error awarding milestone to 1st place winner: {e}")
         
-        message = winners.get('Rewards', {}).get('title', '').replace('{month}', month) + "\n"
+        # Build the message for output using normalized structure
+        message = title.replace('{month}', month) + "\n"
         for index, row in enumerate(top_10_rows):
             if index in [0, 1, 2]:
                 member = interaction.guild.get_member(int(row['user_id']))
                 if member and role:
                     await member.add_roles(role)
-            message += winners.get('Rewards', {}).get(str(index + 1), '').replace('{user_id}', str(row['user_id'])) + "\n"
-        message += winners.get('Rewards', {}).get('footer', '')
+            message += positions.get(str(index + 1), '').replace('{user_id}', str(row['user_id'])) + "\n"
+        message += footer
         
         await interaction.edit_original_response(
             content=f"✅ Successfully wiped the leveling leaderboards! [Log]({msg_log.jump_url})\n```\n{message}\n```"

@@ -207,8 +207,34 @@ class Practice(commands.Cog):
                 await interaction.followup.send(f"`❌` Unknown DM game: {game_type}", ephemeral=True)
                 return
             
-            # Create game instance and run in test mode
-            game = game_class(self.bot)
+            # Use the game manager's instance instead of creating a new one
+            # This ensures the game's active_games dict is shared with the listener
+            # Map lowercase game_type to the dm_games key (capitalized display name)
+            dm_game_key_map = {
+                "wordle": "Wordle",
+                "tic tac toe": "TicTacToe",
+                "tictactoe": "TicTacToe",
+                "connect four": "Connect Four",
+                "memory": "Memory",
+                "twenty forty eight": "2048",
+                "2048": "2048",
+                "minesweeper": "Minesweeper",
+                "hangman": "Hangman"
+            }
+            
+            if self.bot.game_manager and hasattr(self.bot.game_manager, 'dm_games'):
+                dm_game_key = dm_game_key_map.get(game_type.lower())
+                game = self.bot.game_manager.dm_games.get(dm_game_key) if dm_game_key else None
+                self.logger.info(f"Using game_manager instance for {game_type} (key={dm_game_key}): {id(game)}")
+                if not game:
+                    # Fallback: create new instance if not found
+                    self.logger.warning(f"Game not found in game_manager, creating new instance")
+                    game = game_class(self.bot)
+            else:
+                # Fallback: create new instance if game_manager not available
+                self.logger.warning(f"game_manager not available, creating new instance")
+                game = game_class(self.bot)
+            
             success = await game.run(interaction.user, game_type, test_mode=True)
             
             if not success:

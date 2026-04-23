@@ -1146,7 +1146,21 @@ class TestDMGameSelect(discord.ui.Select):
             return
         
         try:
-            game = game_class(interaction.client)
+            # Use the game manager's instance instead of creating a new one
+            # This ensures the game's active_games dict is shared with the listener
+            logger = get_logger("Commands")
+            if interaction.client.game_manager and hasattr(interaction.client.game_manager, 'dm_games'):
+                game = interaction.client.game_manager.dm_games.get(game_display_name)
+                logger.info(f"Using game_manager instance for {game_display_name}: {id(game)}")
+                if not game:
+                    # Fallback: create new instance if not found
+                    logger.warning(f"Game not found in game_manager, creating new instance")
+                    game = game_class(interaction.client)
+            else:
+                # Fallback: create new instance if game_manager not available
+                logger.warning(f"game_manager not available, creating new instance")
+                game = game_class(interaction.client)
+            
             success = await game.run(interaction.user, game_display_name, test_mode=True)
             
             if success:

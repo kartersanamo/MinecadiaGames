@@ -39,7 +39,7 @@ class Minesweeper(DMGame):
             test_label = " 🧪 TEST GAME 🧪" if test_mode else ""
             
             # 10x5 board, same mine count = easier
-            num_mines = self.game_config.get('NUM_MINES', 4)
+            num_mines = self.game_config.get('NUM_MINES', 6)  # Default to 6 mines if not configured
             board, mine_positions = self._generate_board(ROWS, COLS, num_mines)
             mine_set = set(mine_positions)
             non_mine_positions = [(r, c) for r in range(ROWS) for c in range(COLS) if (r, c) not in mine_set]
@@ -394,7 +394,7 @@ class MinesweeperListener(commands.Cog):
     def set_minesweeper_game(self, minesweeper_game):
         self.minesweeper_game = minesweeper_game
     
-    @commands.Cog.listener()
+    @commands.Cog.listener("on_message")
     async def on_message(self, message: discord.Message):
         if not isinstance(message.channel, discord.DMChannel) or message.author.bot:
             return

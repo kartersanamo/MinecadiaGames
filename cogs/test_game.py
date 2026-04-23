@@ -159,8 +159,20 @@ class TestGame(commands.Cog):
                     await interaction.followup.send(f"`❌` Unknown DM game: {game_value}", ephemeral=True)
                     return
                 
-                # Create and run game in test mode
-                game = game_class(self.bot)
+                # Use the game manager's instance instead of creating a new one
+                # This ensures the game's active_games dict is shared with the listener
+                if self.bot.game_manager and hasattr(self.bot.game_manager, 'dm_games'):
+                    game = self.bot.game_manager.dm_games.get(game_display)
+                    self.logger.info(f"Using game_manager instance for {game_display}: {id(game)}")
+                    if not game:
+                        # Fallback: create new instance if not found
+                        self.logger.warning(f"Game not found in game_manager, creating new instance")
+                        game = game_class(self.bot)
+                else:
+                    # Fallback: create new instance if game_manager not available
+                    self.logger.warning(f"game_manager not available, creating new instance")
+                    game = game_class(self.bot)
+                
                 success = await game.run(interaction.user, game_display, test_mode=True)
                 
                 if success:
