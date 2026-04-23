@@ -135,7 +135,7 @@ class Counter(commands.Cog):
         one_minute_ago = current_time - 60
         self.user_mistakes[user_id] = [ts for ts in self.user_mistakes[user_id] if ts > one_minute_ago]
         
-        self._debug_log(f"[Counter] User {user_id} mistakes in last minute: {len(self.user_mistakes[user_id])}")
+        # self._debug_log(f"[Counter] User {user_id} mistakes in last minute: {len(self.user_mistakes[user_id])}")
         return len(self.user_mistakes[user_id])
     
     async def _mute_user(self, member: discord.Member, channel: discord.TextChannel, duration_seconds: int = 3600, reason: str = "Counting game violation") -> bool:
@@ -165,20 +165,28 @@ class Counter(commands.Cog):
         try:
             await asyncio.sleep(delay_seconds)
             
-            # Check if the user is still muted
+            # Check if the user is still tracked as muted
             if member.id in self.muted_users and time.time() >= self.muted_users[member.id]:
+                # Remove from tracking dict first
+                del self.muted_users[member.id]
+                
                 # Remove the permission override to restore default permissions
                 try:
-                    await channel.delete_permissions(member, reason="Counting game mute expired")
+                    await channel.set_permissions(member, overwrite=None, reason="Counting game mute expired")
                     self.logger.info(f"[Counter] Unmuted user {member.id} ({member.display_name}) in channel {channel.id}")
-                    del self.muted_users[member.id]
                 except discord.NotFound:
-                    # Permission override already deleted
-                    self._debug_log(f"[Counter] Permission override already gone for user {member.id}")
-                    if member.id in self.muted_users:
-                        del self.muted_users[member.id]
+                    # Permission override already deleted or member not found
+                    self._debug_log(f"[Counter] Permission override or member not found for user {member.id}")
                 except (discord.Forbidden, discord.HTTPException) as e:
                     self.logger.error(f"[Counter] Failed to unmute user {member.id}: {e}")
+            elif member.id in self.muted_users:
+                pass
+                # Mute time hasn't expired yet, which shouldn't happen
+                # self._debug_log(f"[Counter] Unmute task ran but mute hasn't expired for user {member.id}")
+            else:
+                pass
+                # Not in muted_users anymore, might have been cleared during startup
+                # self._debug_log(f"[Counter] User {member.id} not in muted_users when unmute task ran")
         except asyncio.CancelledError:
             self._debug_log(f"[Counter] Unmute task cancelled for user {member.id}")
         except Exception as e:
@@ -189,7 +197,7 @@ class Counter(commands.Cog):
         if user_id in self.muted_users:
             if time.time() >= self.muted_users[user_id]:
                 del self.muted_users[user_id]
-                self._debug_log(f"[Counter] User {user_id} mute expired")
+                # self._debug_log(f"[Counter] User {user_id} mute expired")
     
     def _is_user_muted(self, user_id: int) -> bool:
         """Check if a user is currently muted"""
@@ -240,20 +248,22 @@ class Counter(commands.Cog):
     
     async def cog_load(self):
         """Called when the cog is loaded"""
-        self.logger.info("[Counter] Counter cog loaded")
+        # self.logger.info("[Counter] Counter cog loaded")
         # Try to load immediately if bot is already ready
         if self.bot.is_ready():
             if not self._initialized:
                 self._initialized = True
-                self.logger.info("[Counter] Bot already ready, loading last number...")
+                # self.logger.info("[Counter] Bot already ready, loading last number...")
                 await self._load_last_number()
+                await self._cleanup_channel_permissions()
     
     @commands.Cog.listener()
     async def on_ready(self):
         if not self._initialized:
             self._initialized = True
-            self.logger.info("[Counter] Bot ready, Counter cog initialized, loading last number...")
+            # self.logger.info("[Counter] Bot ready, Counter cog initialized, loading last number...")
             await self._load_last_number()
+            await self._cleanup_channel_permissions()
     
     async def _load_last_number(self):
         try:
@@ -265,7 +275,7 @@ class Counter(commands.Cog):
             try:
                 db = await asyncio.wait_for(self._get_db(), timeout=5.0)
             except asyncio.TimeoutError:
-                self.logger.warning(f"[Counter] Database not ready after 5 seconds - using default last_number=0")
+                # self.logger.warning(f"[Counter] Database not ready after 5 seconds - using default last_number=0")
                 self.last_number = 0
                 self.last_user_id = None
                 return
@@ -303,13 +313,45 @@ class Counter(commands.Cog):
             self.last_number = 0
             self.last_user_id = None
     
+    async def _cleanup_channel_permissions(self):
+        """Remove all user-specific permission overrides from the counting channel.
+        Called on bot startup to clear any lingering mutes."""
+        try:
+            channel = self.bot.get_channel(self.COUNTING_CHANNEL_ID)
+            if not channel:
+                self.logger.warning("[Counter] Could not find counting channel for permission cleanup")
+                return
+            
+            # Clear the in-memory muted users dict
+            self.muted_users.clear()
+            
+            # Remove all user-specific permission overrides
+            cleaned_count = 0
+            for target, overwrite in channel.overwrites.items():
+                # Check if it's a user (not a role)
+                if isinstance(target, discord.Member):
+                    try:
+                        await channel.set_permissions(target, overwrite=None, reason="Counting mute cleanup on bot startup")
+                        cleaned_count += 1
+                        self.logger.info(f"[Counter] Removed permission override for user {target.id} ({target.display_name})")
+                    except (discord.Forbidden, discord.HTTPException) as e:
+                        self.logger.error(f"[Counter] Failed to remove permission override for user {target.id}: {e}")
+            
+            if cleaned_count > 0:
+                self.logger.info(f"[Counter] Cleaned up {cleaned_count} user permission override(s) from counting channel")
+            else:
+                self._debug_log("[Counter] No user permission overrides to clean up")
+                
+        except Exception as e:
+            self.logger.error(f"[Counter] Error during permission cleanup: {e}", exc_info=True)
+    
     async def _reset_counter(self, message: discord.Message, reason: str):
         """Reset the counter due to an error and notify the user"""
         try:
             guild_id = message.guild.id
             user_id = message.author.id
             
-            self.logger.info(f"[Counter] Resetting counter: {reason} (message: {message.id})")
+            # self.logger.info(f"[Counter] Resetting counter: {reason} (message: {message.id})")
             
             # Update database (with timeout to prevent hanging)
             try:
@@ -321,7 +363,7 @@ class Counter(commands.Cog):
                     ),
                     timeout=3.0
                 )
-                self._debug_log(f"[Counter] Updated mistakes for user {user_id}")
+                # self._debug_log(f"[Counter] Updated mistakes for user {user_id}")
                 
                 await asyncio.wait_for(
                     db.execute(
@@ -330,7 +372,7 @@ class Counter(commands.Cog):
                     ),
                     timeout=3.0
                 )
-                self._debug_log(f"[Counter] Reset counting_server for guild {guild_id}")
+                # self._debug_log(f"[Counter] Reset counting_server for guild {guild_id}")
             except asyncio.TimeoutError:
                 self.logger.warning(f"[Counter] Database operation timed out in reset_counter - continuing without DB update")
                 # Continue anyway - reset in-memory state
@@ -349,7 +391,7 @@ class Counter(commands.Cog):
             # Add reaction (before or after delete, doesn't matter if delete fails)
             try:
                 await message.add_reaction("❌")
-                self._debug_log(f"[Counter] Added ❌ reaction to message {message.id}")
+                # self._debug_log(f"[Counter] Added ❌ reaction to message {message.id}")
             except (discord.NotFound, discord.Forbidden, discord.HTTPException) as react_e:
                 self._debug_log(f"[Counter] Could not add reaction (message may be deleted): {react_e}")
             
@@ -367,7 +409,7 @@ class Counter(commands.Cog):
                         f"❌ {message.author.mention} **Count reset!** {reason}\n"
                         f"-# The count is now **0**. Start again with **1**."
                     )
-                self._debug_log(f"[Counter] Sent reset notification message")
+                # self._debug_log(f"[Counter] Sent reset notification message")
             except Exception as reply_e:
                 self.logger.error(f"[Counter] Failed to send reset notification: {reply_e}", exc_info=True)
                 
@@ -387,7 +429,7 @@ class Counter(commands.Cog):
             if self._is_user_muted(message.author.id):
                 remaining_time = self.muted_users[message.author.id] - time.time()
                 minutes = int(remaining_time // 60)
-                self.logger.info(f"[Counter] Muted user {message.author.id} tried to send message")
+                # self.logger.info(f"[Counter] Muted user {message.author.id} tried to send message")
                 try:
                     await message.delete()
                 except (discord.NotFound, discord.Forbidden, discord.HTTPException):
@@ -406,57 +448,57 @@ class Counter(commands.Cog):
                 return
             
             content = message.content.strip()
-            self.logger.info(f"[Counter] Processing message: '{content}' from {message.author.name} (ID: {message.author.id}), current last_number: {self.last_number}")
+            # self.logger.info(f"[Counter] Processing message: '{content}' from {message.author.name} (ID: {message.author.id}), current last_number: {self.last_number}")
             
             # Try to evaluate as math expression first
             result = None
             try:
                 result = SafeMathEvaluator.evaluate(content)
-                self.logger.info(f"[Counter] Evaluated '{content}' to {result} (type: {type(result)})")
+                # self.logger.info(f"[Counter] Evaluated '{content}' to {result} (type: {type(result)})")
             except Exception as e:
-                self.logger.warning(f"[Counter] Failed to evaluate '{content}' as math expression: {e}")
+                # self.logger.warning(f"[Counter] Failed to evaluate '{content}' as math expression: {e}")
                 # Try as plain number string as fallback
                 try:
                     # Check if it's a plain number (digits only, possibly with sign)
                     if content and (content.isdigit() or (len(content) > 1 and content[0] in '+-' and content[1:].isdigit())):
                         result = int(content)
-                        self.logger.info(f"[Counter] Parsed '{content}' as plain number: {result}")
+                        # self.logger.info(f"[Counter] Parsed '{content}' as plain number: {result}")
                     else:
-                        self.logger.info(f"[Counter] '{content}' is not a valid number or expression, ignoring")
+                        # self.logger.info(f"[Counter] '{content}' is not a valid number or expression, ignoring")
                         return  # Not a valid number or expression
                 except (ValueError, IndexError, AttributeError) as e2:
-                    self.logger.info(f"[Counter] Failed to parse '{content}' as number: {e2}")
+                    # self.logger.info(f"[Counter] Failed to parse '{content}' as number: {e2}")
                     return  # Not a number
             
             if result is None:
-                self.logger.warning(f"[Counter] Result is None for '{content}'")
+                # self.logger.warning(f"[Counter] Result is None for '{content}'")
                 return
             
             # Validate result
             if not isinstance(result, (int, float)):
-                self.logger.warning(f"[Counter] Result is not a number: {result} (type: {type(result)})")
+                # self.logger.warning(f"[Counter] Result is not a number: {result} (type: {type(result)})")
                 return
             
             if not float(result).is_integer():
-                self.logger.info(f"[Counter] Result is not an integer: {result}, ignoring")
+                # self.logger.info(f"[Counter] Result is not an integer: {result}, ignoring")
                 return
             
             result = int(result)
-            self.logger.info(f"[Counter] Validated number: {result}, expected: {self.last_number + 1}, last_user_id: {self.last_user_id}")
+            # self.logger.info(f"[Counter] Validated number: {result}, expected: {self.last_number + 1}, last_user_id: {self.last_user_id}")
             
             guild_id = message.guild.id
             user_id = message.author.id
             expected_number = self.last_number + 1
             
             if self.last_user_id == user_id:
-                self.logger.info(f"[Counter] User {user_id} tried to count twice in a row")
+                # self.logger.info(f"[Counter] User {user_id} tried to count twice in a row")
                 mistake_count = self._record_mistake(user_id)
-                self._debug_log(f"[Counter] Double count is mistake {mistake_count}/3")
+                # self._debug_log(f"[Counter] Double count is mistake {mistake_count}/3")
                 
                 try:
                     if mistake_count >= 3:
                         # 3rd mistake - mute for 1 hour
-                        self.logger.warning(f"[Counter] User {user_id} reached 3 mistakes in 1 minute, muting for 1 hour")
+                        # self.logger.warning(f"[Counter] User {user_id} reached 3 mistakes in 1 minute, muting for 1 hour")
                         await self._reset_counter(message, "You made **3 mistakes in 1 minute**! You are muted for **1 hour**.")
                         if message.guild:
                             member = message.guild.get_member(user_id)
@@ -478,7 +520,7 @@ class Counter(commands.Cog):
                 # Check if it's a valid number (within allowed difference)
                 if self._is_valid_number(expected_number, result):
                     # Within acceptable range, just reset without muting
-                    self.logger.info(f"[Counter] Number {result} is within acceptable range of {expected_number}")
+                    # self.logger.info(f"[Counter] Number {result} is within acceptable range of {expected_number}")
                     try:
                         await self._reset_counter(
                             message,
@@ -488,7 +530,7 @@ class Counter(commands.Cog):
                         self.logger.error(f"[Counter] Error in reset_counter (acceptable range): {e}", exc_info=True)
                 else:
                     # Outside acceptable range - IMMEDIATELY MUTE for 1 hour
-                    self.logger.warning(f"[Counter] User {user_id} entered number too far from expected: {result} vs {expected_number}")
+                    # self.logger.warning(f"[Counter] User {user_id} entered number too far from expected: {result} vs {expected_number}")
                     
                     try:
                         await self._reset_counter(
@@ -509,7 +551,7 @@ class Counter(commands.Cog):
                         self.logger.error(f"[Counter] Error handling large mistake mute: {e}", exc_info=True)
                 return
             
-            self.logger.info(f"[Counter] ✅ Correct number {result}! Updating counter...")
+            # self.logger.info(f"[Counter] ✅ Correct number {result}! Updating counter...")
             
             # Update in-memory state FIRST (before any async operations)
             self.last_number = result
@@ -522,7 +564,7 @@ class Counter(commands.Cog):
             # Add reaction FIRST (before database operations, so it happens even if DB hangs)
             try:
                 await message.add_reaction("✅")
-                self._debug_log(f"[Counter] Added ✅ reaction to message {message.id}")
+                # self._debug_log(f"[Counter] Added ✅ reaction to message {message.id}")
             except Exception as react_e:
                 self.logger.error(f"[Counter] Failed to add reaction: {react_e}", exc_info=True)
             
@@ -540,7 +582,7 @@ class Counter(commands.Cog):
                     ),
                     timeout=3.0
                 )
-                self._debug_log(f"[Counter] Updated counting_users for user {user_id}")
+                # self._debug_log(f"[Counter] Updated counting_users for user {user_id}")
                 
                 await asyncio.wait_for(
                     db.execute(
@@ -554,7 +596,7 @@ class Counter(commands.Cog):
                     ),
                     timeout=3.0
                 )
-                self._debug_log(f"[Counter] Updated counting_server for guild {guild_id}")
+                # self._debug_log(f"[Counter] Updated counting_server for guild {guild_id}")
             except asyncio.TimeoutError:
                 self.logger.warning(f"[Counter] Database operation timed out - continuing without DB update")
                 # Continue anyway - state is updated in memory
@@ -563,7 +605,7 @@ class Counter(commands.Cog):
                 # Continue anyway - state is updated in memory
             
             # Award XP randomly
-            if random.random() < 0.25:
+            if random.random() < 0.50:
                 try:
                     lvl = LevelingManager(
                         user=message.author,
@@ -574,7 +616,7 @@ class Counter(commands.Cog):
                         game_id=-1
                     )
                     await lvl.update()
-                    self._debug_log(f"[Counter] Awarded XP to user {user_id}")
+                    # self._debug_log(f"[Counter] Awarded XP to user {user_id}")
                 except Exception as xp_e:
                     self.logger.error(f"[Counter] Failed to award XP: {xp_e}", exc_info=True)
                     

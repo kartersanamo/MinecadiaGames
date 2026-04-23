@@ -79,13 +79,13 @@ class Hangman(DMGame):
             if not test_mode:
                 db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 6)
+                max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8)
                 await db.execute_insert(
                     "INSERT INTO users_hangman (game_id, user_id, word, won, wrong_guesses, correct_guesses, started_at, ended_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                     (last_game_id, user.id, word, 'Started', 0, 0, current_unix, 0)
                 )
             
-            max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 6)
+            max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8)
             test_label = " 🧪 TEST GAME 🧪" if test_mode else ""
             
             # Create button view
@@ -172,7 +172,7 @@ class HangmanButtons(discord.ui.View):
         else:
             self.guessed_letters: Set[str] = set()
             self.wrong_guesses = 0
-            self.max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 6)
+            self.max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8)
             self.game_ended = False
             self.game_won = False
         
@@ -222,7 +222,7 @@ class HangmanButtons(discord.ui.View):
         self.word = state.get('word', '')
         self.guessed_letters = set(state.get('guessed_letters', []))
         self.wrong_guesses = state.get('wrong_guesses', 0)
-        self.max_wrong = state.get('max_wrong', self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 6))
+        self.max_wrong = state.get('max_wrong', self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8))
         self.game_ended = state.get('game_ended', False)
         self.game_won = state.get('game_won', False)
     
@@ -607,7 +607,7 @@ class HangmanZButton(discord.ui.View):
                         'guessed_letters': [],  # Can't reconstruct from wrong_guesses/correct_guesses alone
                         'wrong_guesses': row.get('wrong_guesses', 0),
                         'correct_guesses': row.get('correct_guesses', 0),
-                        'max_wrong': self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 6),
+                        'max_wrong': self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8),
                         'game_ended': row.get('won', 'Started') != 'Started',
                         'game_won': row.get('won', '') == 'Won'
                     }
@@ -660,7 +660,7 @@ class HangmanZButton(discord.ui.View):
             guessed_letters = set(state.get('guessed_letters', []))
             game_ended = state.get('game_ended', False)
             wrong_guesses = state.get('wrong_guesses', 0)
-            max_wrong = state.get('max_wrong', self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 6))
+            max_wrong = state.get('max_wrong', self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8))
         
         if game_ended:
             await interaction.response.send_message("This game has already ended!", ephemeral=True)
@@ -880,7 +880,7 @@ class HangmanListener(commands.Cog):
     def set_hangman_game(self, hangman_game):
         self.hangman_game = hangman_game
     
-    @commands.Cog.listener()
+    @commands.Cog.listener("on_ready")
     async def on_ready(self):
         """Clean up stale Hangman games on bot startup"""
         if self._cleanup_done:

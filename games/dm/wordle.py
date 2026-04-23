@@ -96,7 +96,8 @@ class Wordle(DMGame):
                 'channel': None,
                 'test_mode': test_mode
             }
-            self.logger.info(f"Wordle: Stored game in active_games for user {user.id}: game_id={last_game_id}, test_mode={test_mode}, word={word}")
+            self.logger.info(f"Wordle instance {id(self)}: Stored game in active_games for user {user.id}: game_id={last_game_id}, test_mode={test_mode}, word={word}")
+            self.logger.info(f"Wordle instance {id(self)}: active_games now contains: {list(self.active_games.keys())}")
             
             # Initialize guesses and letter states for this user
             self.guesses[user.id] = []
@@ -212,14 +213,15 @@ class Wordle(DMGame):
             # Grid positions (6 rows x 5 columns)
             # Image is now 449x533, so we need to adjust positioning
             # Based on the cropped board, squares are approximately:
-            square_size = 52   # Size of each square
-            square_spacing = 6  # Spacing between squares horizontally
-            row_spacing = 6    # Spacing between rows vertically
+            square_size = 77   # Size of each square
+            square_spacing = 8  # Spacing between squares horizontally
+            row_spacing = 9    # Spacing between rows vertically
             
             # Calculate grid width and center it
-            grid_width = 5 * square_size + 4 * square_spacing
-            grid_start_x = (base_image.width - grid_width) // 2  # Center horizontally (~85px from left)
-            grid_start_y = 18  # Starting Y position of grid (top margin)
+            grid_width = 5 * square_size + 4 * square_spacing # = 417
+            # Adjusted positioning to align with background boxes
+            grid_start_x = ((base_image.width - grid_width) // 2)
+            grid_start_y = 11
             
             # Draw guesses on the grid
             for row_idx, guess_data in enumerate(guesses[:6]):  # Max 6 guesses
@@ -249,8 +251,9 @@ class Wordle(DMGame):
                     
                     # Draw letter centered in the square
                     letter = word[col_idx]
-                    center_x = x + square_size // 2
-                    center_y = y + square_size // 2
+                    # Add 1px offset to better center the text visually
+                    center_x = x + (square_size // 2) + 1
+                    center_y = y + (square_size // 2) + 1
                     
                     draw.text(
                         (center_x, center_y),
@@ -297,8 +300,9 @@ class WordleListener(commands.Cog):
     
     def set_wordle_game(self, wordle_game):
         self.wordle_game = wordle_game
+        self.logger.info(f"WordleListener.set_wordle_game: Set wordle_game instance {id(wordle_game)}")
     
-    @commands.Cog.listener()
+    @commands.Cog.listener("on_ready")
     async def on_ready(self):
         """Clean up stale Wordle games on bot startup"""
         if self._cleanup_done:
@@ -364,19 +368,25 @@ class WordleListener(commands.Cog):
             import traceback
             self.logger.error(traceback.format_exc())
     
-    @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        """Handle Wordle guess messages in DMs"""
+        # Log all messages to debug (remove once fixed)
+        if not message.author.bot:
+            pass
+            # self.logger.info(f"WordleListener.on_message called: channel_type={type(message.channel).__name__}, user={message.author.id}")
+        
         if not isinstance(message.channel, discord.DMChannel) or message.author.bot:
             return
         
         if not self.wordle_game:
-            self.logger.warning("WordleListener: wordle_game is None")
+            # self.logger.warning("WordleListener: wordle_game is None")
             return
         
-        self.logger.debug(f"WordleListener: Received message from {message.author.id}: {message.content[:20]}")
+        #self.logger.info(f"WordleListener: Processing guess from {message.author.id}: {message.content[:20]}")
         
         # Log active_games state for debugging
-        self.logger.debug(f"WordleListener: active_games keys: {list(self.wordle_game.active_games.keys())}")
+        #self.logger.info(f"WordleListener: Checking wordle_game instance {id(self.wordle_game)}")
+        #self.logger.info(f"WordleListener: active_games keys: {list(self.wordle_game.active_games.keys())}")
         
         # Check active_games FIRST (this includes test games that aren't in database)
         if message.author.id in self.wordle_game.active_games:
@@ -389,7 +399,7 @@ class WordleListener(commands.Cog):
             # For test games, we don't query the database - just use attempts from guesses
             if test_mode or game_id == -999999:
                 attempts = len(self.wordle_game.guesses.get(message.author.id, []))
-                self.logger.debug(f"WordleListener: Test game detected, using attempts from guesses: {attempts}")
+                #self.logger.debug(f"WordleListener: Test game detected, using attempts from guesses: {attempts}")
             else:
                 # For real games, get attempts from database
                 db = await DatabasePool.get_instance()
@@ -405,7 +415,7 @@ class WordleListener(commands.Cog):
             # Not in active_games, check database (bot restart scenario)
             # BUT: Test games are NOT in database, so if user has a test game, it MUST be in active_games
             # If not in active_games, query database but exclude test games
-            self.logger.debug(f"WordleListener: User {message.author.id} not in active_games, checking database (excluding test games)")
+            #self.logger.debug(f"WordleListener: User {message.author.id} not in active_games, checking database (excluding test games)")
             db = await DatabasePool.get_instance()
             
             # First, find all active games for this user
@@ -414,10 +424,10 @@ class WordleListener(commands.Cog):
                 (message.author.id,)
             )
             
-            self.logger.debug(f"WordleListener: Database query returned {len(all_active_games) if all_active_games else 0} active games")
+            #self.logger.debug(f"WordleListener: Database query returned {len(all_active_games) if all_active_games else 0} active games")
             
             if not all_active_games:
-                self.logger.debug(f"WordleListener: No active game found for user {message.author.id} (neither in active_games nor database)")
+                #self.logger.debug(f"WordleListener: No active game found for user {message.author.id} (neither in active_games nor database)")
                 return
             
             # Find the most recent Wordle message in the channel and match it to a game
@@ -456,7 +466,7 @@ class WordleListener(commands.Cog):
                 game_id = found_game['game_id']
                 word = found_game['word']
                 attempts = found_game.get('attempts', 0)
-                self.logger.debug(f"WordleListener: Found game in database with existing message: game_id={game_id}, word={word}, attempts={attempts}")
+                #self.logger.debug(f"WordleListener: Found game in database with existing message: game_id={game_id}, word={word}, attempts={attempts}")
             else:
                 # No message found for any active game - mark all games without messages as stale
                 current_unix = int(datetime.now(timezone.utc).timestamp())
@@ -475,7 +485,7 @@ class WordleListener(commands.Cog):
                                             "UPDATE users_wordle SET won = 'Lost', ended_at = %s WHERE game_id = %s AND user_id = %s AND won = 'Started'",
                                             (current_unix, message.author.id, game_id)
                                         )
-                                self.logger.debug(f"WordleListener: Marked stale game {game_id} as Lost (no message found)")
+                                #self.logger.debug(f"WordleListener: Marked stale game {game_id} as Lost (no message found)")
                             except Exception as e:
                                 self.logger.error(f"WordleListener: Error marking stale game {game_id} as Lost: {e}")
                             finally:
@@ -502,12 +512,12 @@ class WordleListener(commands.Cog):
                     )
                     
                     if not remaining_games:
-                        self.logger.debug(f"WordleListener: No active games remaining after cleanup for user {message.author.id}")
+                        #self.logger.debug(f"WordleListener: No active games remaining after cleanup for user {message.author.id}")
                         return
                     
                     # Use the most recent remaining game (but it has no message, so it will be marked as stale later)
                     found_game = remaining_games[0]
-                    self.logger.debug(f"WordleListener: Using most recent game after cleanup: game_id={found_game['game_id']}, but no message found")
+                    #self.logger.debug(f"WordleListener: Using most recent game after cleanup: game_id={found_game['game_id']}, but no message found")
                 
                 game_id = found_game['game_id']
                 word = found_game['word']
@@ -554,9 +564,10 @@ class WordleListener(commands.Cog):
                             # Successfully updated - log warning only once
                             self.logger.warning(f"WordleListener: Game {game_id} found in database but message not found - marked as Lost ({rows_affected} row(s) updated)")
                         else:
+                            pass
                             # Game was already updated by another handler - don't log as warning, just debug
                             # This happens when multiple messages come in rapidly
-                            self.logger.debug(f"WordleListener: Game {game_id} was already cleaned up by another handler (no rows affected)")
+                            #self.logger.debug(f"WordleListener: Game {game_id} was already cleaned up by another handler (no rows affected)")
                     except Exception as e:
                         self.logger.error(f"WordleListener: Error marking stale game {game_id} as Lost: {e}")
                         import traceback
@@ -589,15 +600,17 @@ class WordleListener(commands.Cog):
             await self.wordle_game._load_words_list()
         
         if attempts >= 6:
-            self.logger.debug(f"WordleListener: User has already used all 6 attempts")
+            #self.logger.debug(f"WordleListener: User has already used all 6 attempts")
             return
         
-        self.logger.debug(f"WordleListener: Processing guess: {message.content.strip()}")
+        #self.logger.debug(f"WordleListener: Processing guess: {message.content.strip()}")
         
         guess = message.content.strip().upper()
+        #self.logger.info(f"WordleListener: Validating guess '{guess}'")
         
         # Validate guess length and format
         if len(guess) != 5 or not guess.isalpha():
+            #self.logger.info(f"WordleListener: Invalid format: len={len(guess)}, isalpha={guess.isalpha()}")
             error = await message.reply(
                 "`❌` Failed! That is an invalid word. Please make sure that your word only contains letters and is five letters long!"
             )
@@ -609,6 +622,7 @@ class WordleListener(commands.Cog):
             return
         
         if not await self.wordle_game.check_word(guess):
+            self.logger.info(f"WordleListener: '{guess}' is not a valid word in the word list")
             error = await message.reply(
                 "`❌` Failed! That is not a valid word. Please try a different word!"
             )
@@ -634,20 +648,24 @@ class WordleListener(commands.Cog):
         await self.wordle_game.update_letter_states(message.author.id, guess, colors)
         
         # Generate image
-        self.logger.debug(f"WordleListener: Generating image for user {message.author.id}, game {game_id}")
+        self.logger.info(f"WordleListener: Generating image for user {message.author.id}, game {game_id}")
         image_path = await self.wordle_game.generate_wordle_image(message.author.id, game_id)
         image_file = discord.File(image_path, filename="wordle.png")
         
         found_wordle_message = None
         message_count = 0
+        self.logger.info(f"WordleListener: Looking for Wordle message in history (limit=50)")
         async for channel_message in message.channel.history(limit=50):
             message_count += 1
-            if channel_message.embeds and channel_message.author.bot and channel_message.embeds[0].title:
-                title = channel_message.embeds[0].title
-                if "Wordle" in title and f"#{game_id}" in title:
-                    found_wordle_message = channel_message
-                    self.logger.debug(f"WordleListener: Found Wordle message with game_id {game_id}")
-                    break
+            if channel_message.embeds and channel_message.author.bot:
+                try:
+                    title = channel_message.embeds[0].title
+                    if "Wordle" in title and f"#{game_id}" in title:
+                        found_wordle_message = channel_message
+                        self.logger.info(f"WordleListener: Found Wordle message with game_id {game_id}")
+                        break
+                except (IndexError, AttributeError):
+                    pass
         
         if not found_wordle_message:
             # Check if we're already cleaning up this game (prevent race conditions)
@@ -727,9 +745,9 @@ class WordleListener(commands.Cog):
             wordle_embed.description = f"Attempt {new_attempts}/6"
             wordle_embed.set_image(url="attachment://wordle.png")
             
-            self.logger.debug(f"WordleListener: Editing message with new image")
+            #self.logger.debug(f"WordleListener: Editing message with new image")
             await found_wordle_message.edit(embed=wordle_embed, attachments=[image_file])
-            self.logger.debug(f"WordleListener: Successfully updated Wordle message")
+            #self.logger.debug(f"WordleListener: Successfully updated Wordle message")
             
             # Clean up image file after sending
             try:
@@ -798,20 +816,10 @@ class WordleListener(commands.Cog):
                 del self.wordle_game.active_games[message.author.id]
         else:
             if attempts == 5:
-                # Generate final image showing the answer
-                final_image_path = await self.wordle_game.generate_wordle_image(message.author.id, game_id)
-                final_image_file = discord.File(final_image_path, filename="wordle_final.png")
-                
+                # Don't send final image, just send the loss message
                 await message.channel.send(
-                    f"`❌` Sorry, but you did not guess the word. The correct word was `{word}`.",
-                    file=final_image_file
+                    f"`❌` Sorry, but you did not guess the word. The correct word was `{word}`."
                 )
-                
-                # Clean up image
-                try:
-                    os.remove(final_image_path)
-                except:
-                    pass
                 
                 # Update database only for non-test games
                 if not test_mode and game_id != -999999:

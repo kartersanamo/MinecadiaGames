@@ -27,6 +27,9 @@ class MinecadiaBot(commands.Bot):
         super().__init__(command_prefix='.', intents=intents)
         
         self.game_manager: Optional[GameManager] = None
+        self.wordle_listener = None
+        self.minesweeper_listener = None
+        self.hangman_listener = None
     
     async def setup_hook(self):
         try:
@@ -90,18 +93,25 @@ class MinecadiaBot(commands.Bot):
         # Load Wordle listener for DM message handling
         try:
             from games.dm.wordle import WordleListener
-            wordle_listener = WordleListener(self)
+            
+            # Only create and add the listener once
+            if not self.wordle_listener:
+                self.wordle_listener = WordleListener(self)
+                self.logger.info("Created WordleListener instance")
+                await self.add_cog(self.wordle_listener)
+                self.logger.info("Added WordleListener cog")
+            
+            # Always update the wordle_game reference
             if self.game_manager and hasattr(self.game_manager, 'dm_games'):
                 wordle_game = self.game_manager.dm_games.get('Wordle')
                 if wordle_game:
-                    wordle_listener.set_wordle_game(wordle_game)
-                    self.logger.info("Wordle listener: Set wordle_game instance")
+                    self.wordle_listener.set_wordle_game(wordle_game)
+                    self.logger.info("Wordle listener: Set wordle_game instance") 
                 else:
                     self.logger.warning("Wordle listener: wordle_game not found in dm_games")
             else:
                 self.logger.warning("Wordle listener: game_manager or dm_games not available")
-            await self.add_cog(wordle_listener)
-            self.logger.info("Loaded Wordle listener")
+                
         except Exception as e:
             self.logger.error(f"Failed to load Wordle listener: {e}")
             import traceback
@@ -110,29 +120,43 @@ class MinecadiaBot(commands.Bot):
         # Load Minesweeper listener for DM message handling (flagging)
         try:
             from games.dm.minesweeper import MinesweeperListener
-            minesweeper_listener = MinesweeperListener(self)
+            
+            # Only create and add the listener once
+            if not self.minesweeper_listener:
+                self.minesweeper_listener = MinesweeperListener(self)
+                self.logger.info("Created MinesweeperListener instance")
+                await self.add_cog(self.minesweeper_listener)
+                self.logger.info("Added MinesweeperListener cog")
+            
+            # Always update the minesweeper_game reference
             if self.game_manager and hasattr(self.game_manager, 'dm_games'):
-                minesweeper_listener.set_minesweeper_game(self.game_manager.dm_games.get('Minesweeper'))
-            await self.add_cog(minesweeper_listener)
-            self.logger.info("Loaded Minesweeper listener")
+                self.minesweeper_listener.set_minesweeper_game(self.game_manager.dm_games.get('Minesweeper'))
+                
         except Exception as e:
             self.logger.error(f"Failed to load Minesweeper listener: {e}")
         
         # Load Hangman listener for DM message handling
         try:
             from games.dm.hangman import HangmanListener
-            hangman_listener = HangmanListener(self)
+            
+            # Only create and add the listener once
+            if not self.hangman_listener:
+                self.hangman_listener = HangmanListener(self)
+                self.logger.info("Created HangmanListener instance")
+                await self.add_cog(self.hangman_listener)
+                self.logger.info("Added HangmanListener cog")
+            
+            # Always update the hangman_game reference
             if self.game_manager and hasattr(self.game_manager, 'dm_games'):
                 hangman_game = self.game_manager.dm_games.get('Hangman')
                 if hangman_game:
-                    hangman_listener.set_hangman_game(hangman_game)
+                    self.hangman_listener.set_hangman_game(hangman_game)
                     self.logger.info("Hangman listener: Set hangman_game instance")
                 else:
                     self.logger.warning("Hangman listener: hangman_game not found in dm_games")
             else:
                 self.logger.warning("Hangman listener: game_manager or dm_games not available")
-            await self.add_cog(hangman_listener)
-            self.logger.info("Loaded Hangman listener")
+                
         except Exception as e:
             self.logger.error(f"Failed to load Hangman listener: {e}")
             import traceback
@@ -174,6 +198,15 @@ class MinecadiaBot(commands.Bot):
         self.logger.info("Bot connection resumed - checking game tasks")
         if self.game_manager:
             await self._ensure_game_tasks_running()
+    
+    async def on_message(self, message: discord.Message):
+        """Delegate DM messages to the appropriate game listener"""
+        # Let wordle listener handle DM messages
+        if self.wordle_listener:
+            await self.wordle_listener.on_message(message)
+        
+        # Continue processing commands normally
+        await self.process_commands(message)
     
     async def _ensure_game_tasks_running(self):
         """Ensure chat and DM game tasks are running, restart if needed"""
@@ -596,6 +629,7 @@ class MinecadiaBot(commands.Bot):
             }
             
             restored_count = 0
+            ended_count = 0
             
             for table_name, game_type in game_tables.items():
                 try:
@@ -622,7 +656,9 @@ class MinecadiaBot(commands.Bot):
                     if not active_games:
                         continue
                     
-                    self.logger.info(f"Found {len(active_games)} active {game_type} games to restore")
+                    # Track how many will actually be restored
+                    game_type_restored = 0
+                    game_type_ended = 0
                     
                     for game in active_games:
                         try:
@@ -636,7 +672,10 @@ class MinecadiaBot(commands.Bot):
                             # Only restore if this game is the most recent DM game for this user
                             most_recent = await self._get_most_recent_dm_game_for_user(user_id)
                             if most_recent is None or most_recent != (game_type, game_id):
+                                self.logger.debug(f"Ending non-most-recent {game_type} game #{game_id} for user {user_id} (most recent: {most_recent})")
                                 await self._end_dm_game_in_db(game_type, game_id, user_id)
+                                game_type_ended += 1
+                                ended_count += 1
                                 continue
                             
                             # Parse game state
@@ -650,29 +689,43 @@ class MinecadiaBot(commands.Bot):
                                 continue
                             
                             # Wordle doesn't use views - it uses WordleListener which restores on-demand
+                            # The listener checks the most recent Wordle message in the DM to determine which game to use
                             if game_type == 'wordle':
                                 continue
                             
-                            # Restore the view based on game type
-                            view = await self._restore_dm_game_view(game_type, game_id, user_id, game_state)
+                            # Restore the view(s) based on game type
+                            restored_views = await self._restore_dm_game_view(game_type, game_id, user_id, game_state)
                             
-                            if view:
-                                # Register view for persistence
-                                self.add_view(view)
-                                restored_count += 1
+                            if restored_views:
+                                # Register view(s) for persistence
+                                if isinstance(restored_views, list):
+                                    for view in restored_views:
+                                        self.add_view(view)
+                                        game_type_restored += 1
+                                        restored_count += 1
+                                else:
+                                    self.add_view(restored_views)
+                                    game_type_restored += 1
+                                    restored_count += 1
+                                self.logger.debug(f"Restored {game_type} game #{game_id} for user {user_id}")
                                 
                         except Exception as e:
                             self.logger.error(f"Error restoring {game_type} game {game.get('game_id')}: {e}")
                             import traceback
                             self.logger.error(traceback.format_exc())
+                    
+                    # Log summary for this game type
+                    if game_type_restored > 0 or game_type_ended > 0:
+                        self.logger.info(f"{game_type}: Restored {game_type_restored} most recent game(s), ended {game_type_ended} old game(s)")
                             
                 except Exception as e:
                     self.logger.error(f"Error querying {table_name} for active games: {e}")
                     import traceback
                     self.logger.error(traceback.format_exc())
             
-            if restored_count > 0:
-                self.logger.info(f"Restored {restored_count} active DM games")
+            # Summary logging
+            if restored_count > 0 or ended_count > 0:
+                self.logger.info(f"DM Games Summary: Restored {restored_count} most recent game(s), ended {ended_count} old game(s)")
             else:
                 self.logger.info("No active DM games to restore")
                 
@@ -735,7 +788,7 @@ class MinecadiaBot(commands.Bot):
                 return view
                 
             elif game_type == 'minesweeper':
-                from games.dm.minesweeper import MinesweeperButtons
+                from games.dm.minesweeper import MinesweeperButtons, MinesweeperState
                 # Minesweeper needs board and mine_positions - these should be in game_state
                 board = game_state.get('board', [[0 for _ in range(5)] for _ in range(5)])
                 mine_positions = game_state.get('mine_positions', [])
@@ -743,12 +796,38 @@ class MinecadiaBot(commands.Bot):
                 dm_config = config.get('dm_games')
                 games = dm_config.get('GAMES', {}) or dm_config.get('games', {})
                 game_config = games.get('Minesweeper', {})
-                view = MinesweeperButtons(
-                    game_id, board, mine_positions, num_mines, self, config, game_config,
-                    test_mode=False, saved_state=game_state
+                state = MinesweeperState(
+                    game_id=game_id,
+                    board=board,
+                    mine_positions=mine_positions,
+                    num_mines=num_mines,
+                    bot=self,
+                    config=config,
+                    game_config=game_config,
+                    test_mode=False,
+                    saved_state=game_state
                 )
-                view.player_id = user_id
-                return view
+                state.player_id = user_id
+
+                # Best-effort restore of message references used when updating both boards
+                message1_id = game_state.get('message1_id')
+                message2_id = game_state.get('message2_id')
+                if message1_id and message2_id:
+                    try:
+                        user = await self.fetch_user(user_id)
+                        channel = user.dm_channel or await user.create_dm()
+                        state.message1 = await channel.fetch_message(message1_id)
+                        state.message2 = await channel.fetch_message(message2_id)
+                        state.message1_id = message1_id
+                        state.message2_id = message2_id
+                    except Exception as e:
+                        self.logger.debug(f"Could not restore Minesweeper message refs for game {game_id}: {e}")
+
+                view_top = MinesweeperButtons(state, row_offset=0)
+                view_bottom = MinesweeperButtons(state, row_offset=5)
+                state.view_top = view_top
+                state.view_bottom = view_bottom
+                return [view_top, view_bottom]
             
             elif game_type == 'hangman':
                 from games.dm.hangman import HangmanButtons
