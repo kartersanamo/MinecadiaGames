@@ -713,6 +713,36 @@ class MinecadiaBot(commands.Bot):
                             self.logger.error(f"Error restoring {game_type} game {game.get('game_id')}: {e}")
                             import traceback
                             self.logger.error(traceback.format_exc())
+
+                    async def close(self):
+                        """Graceful shutdown: close database pool and cancel cache cleanup task."""
+                        try:
+                            self.logger.info("Bot shutting down - closing database pool")
+                            db = await DatabasePool.get_instance()
+                            if db is not None:
+                                try:
+                                    await db.close()
+                                    self.logger.info("Database pool closed")
+                                except Exception as e:
+                                    self.logger.error(f"Error closing database pool: {e}")
+                        except Exception as e:
+                            self.logger.error(f"Error during database pool shutdown: {e}")
+
+                        try:
+                            self.logger.info("Cancelling cache cleanup task")
+                            cache = CacheManager.get_instance()
+                            cleanup_task = getattr(cache, '_cleanup_task', None)
+                            if cleanup_task and not cleanup_task.done():
+                                cleanup_task.cancel()
+                                try:
+                                    await cleanup_task
+                                except asyncio.CancelledError:
+                                    pass
+                            self.logger.info("Cache cleanup task cancelled")
+                        except Exception as e:
+                            self.logger.error(f"Error cancelling cache cleanup task: {e}")
+
+                        await super().close()
                     
                     # Log summary for this game type
                     if game_type_restored > 0 or game_type_ended > 0:
