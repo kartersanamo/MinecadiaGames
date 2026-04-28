@@ -259,7 +259,7 @@ class TicTacToeButtons(discord.ui.View):
     async def generate_board_image(self) -> str:
         """Generate TicTacToe board image with X's and O's"""
         from pathlib import Path
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).resolve().parents[2]
         
         # Try .jpg first, then .png
         board_path = project_root / "assets" / "Images" / "TicTacToeBoard.jpg"
@@ -288,7 +288,7 @@ class TicTacToeButtons(discord.ui.View):
             
             # Load font for X and O - scale font size based on cell_size
             font_path = project_root / "assets" / "Fonts" / "ArcadeRounded.ttf"
-            font_size = int(cell_size * 0.65)  # Scale font to 65% of cell size for good fit
+            font_size = int(cell_size * 0.58)  # Slightly smaller so edge cells stay visually centered
             try:
                 symbol_font = ImageFont.truetype(str(font_path), font_size)
             except:
@@ -302,8 +302,8 @@ class TicTacToeButtons(discord.ui.View):
                         continue
                     
                     # Calculate center of cell
-                    x = grid_start_x + col * cell_size + cell_size // 2
-                    y = grid_start_y + row * cell_size + cell_size // 2
+                    x = grid_start_x + (col + 0.5) * cell_size
+                    y = grid_start_y + (row + 0.5) * cell_size
                     
                     if cell_value == 'X':
                         # Draw X in red/green color
@@ -337,10 +337,11 @@ class TicTacToeButtons(discord.ui.View):
                         )
             
             # Save image
-            output_path = f"assets/Images/tictactoe_{self.game_id}_{uuid.uuid4().hex[:8]}.png"
+            output_path = project_root / "assets" / "Images" / f"tictactoe_{self.game_id}_{uuid.uuid4().hex[:8]}.png"
+            output_path.parent.mkdir(parents=True, exist_ok=True)
             base_image.save(output_path)
         
-        return output_path
+        return str(output_path)
     
     async def _handle_win(self, interaction: discord.Interaction, result: str):
         self.game_ended = True

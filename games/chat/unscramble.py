@@ -24,13 +24,15 @@ class Unscramble(ChatGame):
     
     async def _get_image(self, scrambled: str) -> str:
         from pathlib import Path
-        bg_path = str(Path(__file__).parent.parent.parent / "assets" / "Images" / "Unscramble_BG_2.png")
-        output_path = f"assets/Images/unscramble_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
+        project_root = Path(__file__).resolve().parents[2]
+        bg_path = project_root / "assets" / "Images" / "Unscramble_BG_2.png"
+        output_path = project_root / "assets" / "Images" / f"unscramble_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         
         with Image.open(bg_path) as image:
             draw = ImageDraw.Draw(image)
             from pathlib import Path
-            font_path = Path(__file__).parent.parent.parent / "assets" / "Fonts" / "ArcadeRounded.ttf"
+            font_path = project_root / "assets" / "Fonts" / "ArcadeRounded.ttf"
             word_font = ImageFont.truetype(str(font_path), 130)
             word_bbox = draw.textbbox((0, 0), scrambled, font=word_font, anchor="lt")
             word_middle_x = (image.width - (word_bbox[2] - word_bbox[0])) // 2
@@ -45,7 +47,7 @@ class Unscramble(ChatGame):
             )
             image.save(output_path)
         
-        return output_path
+        return str(output_path)
     
     async def _run_game(self, channel: discord.TextChannel, xp_multiplier: float = 1.0, test_mode: bool = False) -> Optional[discord.Message]:
         try:
