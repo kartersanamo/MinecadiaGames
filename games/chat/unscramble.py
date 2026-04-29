@@ -222,11 +222,11 @@ class Unscramble(ChatGame):
                             if message.embeds and message.embeds[0].image and message.embeds[0].image.url:
                                 embed.set_image(url=message.embeds[0].image.url)
                     
-                    await message.edit(
-                        embed=embed,
-                        attachments=[file] if file else [],
-                        view=None
-                    )
+                    edit_kwargs = {'embed': embed, 'view': None}
+                    if file:
+                        edit_kwargs['attachments'] = [file]
+
+                    await message.edit(**edit_kwargs)
                     
                     # Update game status to Finished
                     await self._update_game_status('Finished')
@@ -446,10 +446,11 @@ class UnscrambleButtons(discord.ui.View):
                             if embed.image and embed.image.url:
                                 embed.set_image(url=embed.image.url)
 
-                    await self.message.edit(
-                        embed=embed,
-                        attachments=[file] if file else []
-                    )
+                    edit_kwargs = {'embed': embed}
+                    if file:
+                        edit_kwargs['attachments'] = [file]
+
+                    await self.message.edit(**edit_kwargs)
                 except Exception as e:
                     from core.logging.setup import get_logger
                     logger = get_logger("ChatGames")
