@@ -137,11 +137,8 @@ class Unscramble(ChatGame):
             message = await channel.send(content=role.mention, embed=embed, view=view, file=file)
             view.message = message  # Store message reference for real-time updates
             
-            # Delete the image file
-            try:
-                os.remove(image_path)
-            except:
-                self.logger.error(f"Failed to delete unscramble image at {image_path}")
+            # Defer deleting the image file until the game ends so we can reattach it on edits
+            # (Discord requires re-sending the attachment during edits to keep it embedded).
             
             # Register game in registry for admin commands
             from utils.chat_game_registry import registry
@@ -210,23 +207,22 @@ class Unscramble(ChatGame):
                     embed.clear_fields()
                     for field in fields_to_keep:
                         embed.add_field(name=field.name, value=field.value, inline=field.inline)
-                    
-                    # Preserve the image by re-attaching the file
+
+                    # Prefer to re-attach the original temp file so Discord preserves the embed image
                     file = None
                     if image_path and os.path.exists(image_path):
                         try:
                             file = discord.File(image_path, filename="unscramble.png")
                             embed.set_image(url=f"attachment://{file.filename}")
-                        except Exception as e:
-                            # If file doesn't exist, try to preserve existing image URL
-                            if message.embeds and message.embeds[0].image and message.embeds[0].image.url:
+                        except Exception:
+                            # Fall back to existing embed URL if file can't be attached
+                            if message.embeds and message.embeds[0].image and getattr(message.embeds[0].image, 'url', None):
                                 embed.set_image(url=message.embeds[0].image.url)
-                    
-                    edit_kwargs = {'embed': embed, 'view': None}
-                    if file:
-                        edit_kwargs['attachments'] = [file]
 
-                    await message.edit(**edit_kwargs)
+                    if file:
+                        await message.edit(embed=embed, attachments=[file], view=None)
+                    else:
+                        await message.edit(embed=embed, view=None)
                     
                     # Update game status to Finished
                     await self._update_game_status('Finished')
@@ -234,6 +230,13 @@ class Unscramble(ChatGame):
                     # Unregister game from registry
                     from utils.chat_game_registry import registry
                     registry.unregister_game(message.id)
+
+                    # Delete the temp image file now that the game has finished and no more edits will be made
+                    try:
+                        if image_path and os.path.exists(image_path):
+                            os.remove(image_path)
+                    except Exception:
+                        self.logger.error(f"Failed to delete unscramble image at {image_path}")
 
             except discord.NotFound:
                 # Message was deleted, that's okay
