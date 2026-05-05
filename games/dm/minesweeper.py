@@ -316,8 +316,8 @@ class MinesweeperState:
         await self.message1.edit(embed=emb, view=self.view_top)
         await self.message2.edit(view=self.view_bottom)
         xp = random.randint(
-            self.game_config.get('WIN_XP', {}).get('LOWER', 80),
-            self.game_config.get('WIN_XP', {}).get('UPPER', 120)
+            self.game_config.get('WIN_XP', {}).get('LOWER', 150),
+            self.game_config.get('WIN_XP', {}).get('UPPER', 220)
         )
         await interaction.followup.send(
             f"`✅` Congratulations {interaction.user.mention}! You won! You {'would have earned' if self.test_mode else 'earned'} `{xp}xp`!",
