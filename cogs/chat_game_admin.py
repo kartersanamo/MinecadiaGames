@@ -788,12 +788,12 @@ class ChatGameAdminView(discord.ui.View):
             if self.message.attachments:
                 image_file = game_data.get('image_file')
                 if is_real_view:
-                    await self.message.edit(embed=embed, view=view, attachments=[image_file] if image_file else [])
+                    await self.message.edit(embed=embed, view=None, attachments=[image_file] if image_file else [])
                 else:
                     await self.message.edit(embed=embed, attachments=[image_file] if image_file else [])
             else:
                 if is_real_view:
-                    await self.message.edit(embed=embed, view=view)
+                    await self.message.edit(embed=embed, view=None)
                 else:
                     await self.message.edit(embed=embed)
             
