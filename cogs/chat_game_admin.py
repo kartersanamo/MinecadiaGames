@@ -750,11 +750,6 @@ class ChatGameAdminView(discord.ui.View):
             # Check if view is a real Discord view (not DummyView)
             is_real_view = view and isinstance(view, discord.ui.View)
             
-            # Disable all buttons (only for real views)
-            if is_real_view:
-                for item in view.children:
-                    item.disabled = True
-            
             # Update embed
             embed = self.message.embeds[0]
             embed.description = f"This game ended <t:{int(datetime.now(timezone.utc).timestamp())}:R>"
