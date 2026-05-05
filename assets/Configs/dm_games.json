@@ -60,7 +60,7 @@
             "COOLDOWN": 43200,
             "BUTTON_COOLDOWN": 0.5,
             "IMAGE": "https://i.imgur.com/example.png",
-            "WIN_XP": {"LOWER": 120, "UPPER": 150}
+            "WIN_XP": {"LOWER": 150, "UPPER": 220}
         },
         "Hangman": {
             "COOLDOWN": 43200,
