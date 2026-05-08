@@ -60,7 +60,6 @@ class MilestonesManager:
             threshold = milestone.get('threshold', 0)
 
             if milestone_id in earned_ids:
-                self.logger.warning(f"Milestone ({milestone_id}) was already awarded, skipping {user}.")
                 continue
 
             if value >= threshold:
@@ -83,10 +82,6 @@ class MilestonesManager:
                             )
                         except Exception as e:
                             self.logger.error(f"Error awarding milestone XP to user {user_id}: {e}")
-                    else:
-                        self.logger.warning(f"XP was < 1 at {xp}, skipping {user}")
-                else:
-                    self.logger.warning(f"User {user} was none, skipping {user}")
                 new_achievements.append(milestone)
                 earned_ids.add(milestone_id)
 
@@ -101,7 +96,6 @@ class MilestonesManager:
                 "INSERT INTO user_achievements (user_id, achievement_id, earned_at) VALUES (%s, %s, %s)",
                 (str(user_id), achievement_id, int(datetime.now(timezone.utc).timestamp()))
             )
-            self.logger.info(f"Awarded achievement {achievement_id} to user {user_id}")
         except Exception as e:
             self.logger.error(f"Error awarding achievement {achievement_id} to user {user_id}: {e}")
     

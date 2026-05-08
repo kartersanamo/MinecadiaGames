@@ -75,20 +75,18 @@ class _LevelingManagerCore:
         """
         # Check for test mode - either explicitly set or if game_id is the test game ID (-999999)
         if test_mode or game_id == -999999:
-            self.logger.warning(f"Test mode ({test_mode}) or game_id ({game_id}), skipping {user}")
             self._log_test_mode(user, xp, source, channel)
             return False
         
         # Debounce check
-        if not self._should_award_xp(user.id):
-            self.logger.warning(f"{user} failed the debounce check, skipping")
-            return False
+        # if not self._should_award_xp(user.id):
+        #     self.logger.warning(f"{user} failed the debounce check, skipping")
+        #     return False
         
         try:
             # Get current stats
             stats = await self._get_user_stats(user.id)
             if stats is None:
-                self.logger.warning("{user} stats were none, creating entry")
                 stats = await self._create_user_entry(user.id)
             
             current_xp = int(stats.get('xp', 0))
