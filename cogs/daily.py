@@ -10,6 +10,8 @@ from typing import Optional
 
 
 class Daily(commands.Cog):
+    MAX_DAILY_XP = 300
+
     def __init__(self, bot):
         self.bot = bot
         self.config = ConfigManager.get_instance()
@@ -82,7 +84,7 @@ class Daily(commands.Cog):
                 streak = 1
             
             # Calculate XP based on streak: 10, 15, 20, 25, 30, 35, etc. (increases by 5 each day)
-            xp = 10 + (streak - 1) * 5
+            xp = min(10 + (streak - 1) * 5, self.MAX_DAILY_XP)
             
             # Update record
             await db.execute(
@@ -108,7 +110,7 @@ class Daily(commands.Cog):
                 f"You've claimed your daily reward!\n\n"
                 f"**XP Earned:** {xp} XP\n"
                 f"**Current Streak:** {streak} day{'s' if streak != 1 else ''} 🔥\n"
-                f"**Next Reward:** {xp + 5} XP (if you maintain your streak)"
+                f"**Next Reward:** {min(xp + 5, self.MAX_DAILY_XP)} XP (if you maintain your streak)"
             ),
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
         )
