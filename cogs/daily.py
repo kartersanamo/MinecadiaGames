@@ -5,6 +5,7 @@ from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
 from managers.leveling import LevelingManager
+from utils.achievements import check_game_achievements
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
@@ -102,6 +103,15 @@ class Daily(commands.Cog):
             game_id=0
         )
         await lvl_mng.update()
+
+        await check_game_achievements(
+            interaction.user,
+            "Daily",
+            "streak",
+            streak,
+            interaction.channel,
+            self.bot
+        )
         
         # Create success embed
         embed = discord.Embed(

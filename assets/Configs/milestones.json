@@ -240,6 +240,45 @@
                 "emoji": "👑"
             }
         ]
+    },
+    "Daily": {
+        "streak": [
+            {
+                "id": "daily_streak_7",
+                "name": "Daily Starter",
+                "description": "Claim your daily reward for 7 consecutive days",
+                "threshold": 7,
+                "emoji": "🌱"
+            },
+            {
+                "id": "daily_streak_14",
+                "name": "Daily Grinder",
+                "description": "Claim your daily reward for 14 consecutive days",
+                "threshold": 14,
+                "emoji": "🔥"
+            },
+            {
+                "id": "daily_streak_30",
+                "name": "Daily Veteran",
+                "description": "Claim your daily reward for 30 consecutive days",
+                "threshold": 30,
+                "emoji": "🏅"
+            },
+            {
+                "id": "daily_streak_60",
+                "name": "Daily Champion",
+                "description": "Claim your daily reward for 60 consecutive days",
+                "threshold": 60,
+                "emoji": "💎"
+            },
+            {
+                "id": "daily_streak_90",
+                "name": "Daily Legend",
+                "description": "Claim your daily reward for 90 consecutive days",
+                "threshold": 90,
+                "emoji": "👑"
+            }
+        ]
     }
 }
 
