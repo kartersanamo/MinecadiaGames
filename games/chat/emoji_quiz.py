@@ -279,116 +279,80 @@ class EmojiQuizButtons(discord.ui.View):
         guesses = self.user_guesses[user_id]
         guess_lower = guess.strip().lower()
         
-        # Check if guess matches the answer
-        if guess_lower == self.answer_lower:
-            # Re-check already won (defense in depth)
-            if user_id in [w['user_id'] for w in self.winners]:
-                await interaction.response.send_message("You've already won this game!", ephemeral=True)
-                return
-            # User won!
-            self.winner_count += 1
-            position = self.winner_count
+        xp = self._calculate_xp(position, guesses)
             
-            # Base XP by position (same as Guess the Number)
-            if position == 1:
-                base_xp = random.randint(50, 60)
-            elif position == 2:
-                base_xp = random.randint(40, 50)
-            elif position == 3:
-                base_xp = random.randint(30, 40)
-            elif position == 4:
-                base_xp = random.randint(20, 30)
-            elif position == 5:
-                base_xp = random.randint(10, 20)
-            else:  # 6th place and beyond
-                previous_final_xp = self.winners[-1]['xp'] if self.winners else 20 * self.xp_multiplier
-                max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
-                min_base_xp_required = max(1, int((10 / self.xp_multiplier) + 0.999))
-                min_base_xp = max(min_base_xp_required, max_base_xp - 9)
-                if min_base_xp >= max_base_xp:
-                    min_base_xp = max(1, max_base_xp - 1)
-                base_xp = random.randint(min_base_xp, max_base_xp) if min_base_xp < max_base_xp else min_base_xp
+        self.winners.append({
+            'user': interaction.user.mention,
+            'user_id': user_id,
+            'xp': xp,
+            'guesses': guesses
+        })
             
-            # Fewer guesses = more XP (same formula as Guess the Number)
-            guess_bonus = max(0, (6 - guesses) * 2)
-            guess_penalty = max(0, (guesses - 5) * 2)
-            xp = base_xp + guess_bonus - guess_penalty
-            xp = max(10, xp)
-            xp = int(xp * self.xp_multiplier)
-            xp = max(10, xp)
+        lvl_mng = LevelingManager(
+            user=interaction.user,
+            channel=interaction.channel,
+            client=self.bot,
+            xp=xp,
+            source="Emoji Quiz",
+            game_id=self.game_id,
+            test_mode=self.test_mode
+        )
+        await lvl_mng.update()
             
-            self.winners.append({
-                'user': interaction.user.mention,
-                'user_id': user_id,
-                'xp': xp,
-                'guesses': guesses
-            })
-            
-            lvl_mng = LevelingManager(
-                user=interaction.user,
-                channel=interaction.channel,
-                client=self.bot,
-                xp=xp,
-                source="Emoji Quiz",
-                game_id=self.game_id,
-                test_mode=self.test_mode
+        # Log activity
+        if self.message:
+            from utils.chat_game_registry import registry
+            registry.log_activity(
+                self.message.id,
+                user_id,
+                'correct_answer',
+                f'Won {xp} XP (position {position}, {guesses} guesses)',
+                True
             )
-            await lvl_mng.update()
-            
-            # Log activity
-            if self.message:
-                from utils.chat_game_registry import registry
-                registry.log_activity(
-                    self.message.id,
-                    user_id,
-                    'correct_answer',
-                    f'Won {xp} XP (position {position}, {guesses} guesses)',
-                    True
+        
+        # Build XP message
+        xp_msg = ""
+        if self.xp_multiplier == 2.0:
+            xp_msg = " (2x XP)"
+        elif self.xp_multiplier == 3.0:
+            xp_msg = " (3x XP)"
+        elif self.xp_multiplier > 1.0:
+            xp_msg = f" ({self.xp_multiplier:.1f}x XP)"
+        
+        test_prefix = "🧪 [TEST] " if self.test_mode else ""
+        xp_display = f"would have been awarded `{xp}xp`" if self.test_mode else f"have been awarded `{xp}xp`"
+        
+        await interaction.response.send_message(
+            f"`✅` {test_prefix}Correct! The answer was **{self.correct_answer}**! You {xp_display}{xp_msg} in {guesses} guess{'es' if guesses != 1 else ''}!",
+            ephemeral=True
+        )
+        
+        # Update embed with winners list immediately
+        if self.message:
+            try:
+                embed = self.message.embeds[0]
+                winners_text = "\n".join(
+                    f"`+{w['xp']}xp` {w['user']} ({w['guesses']} guess{'es' if w['guesses'] != 1 else ''})"
+                    for w in self.winners
                 )
-            
-            # Build XP message
-            xp_msg = ""
-            if self.xp_multiplier == 2.0:
-                xp_msg = " (2x XP)"
-            elif self.xp_multiplier == 3.0:
-                xp_msg = " (3x XP)"
-            elif self.xp_multiplier > 1.0:
-                xp_msg = f" ({self.xp_multiplier:.1f}x XP)"
-            
-            test_prefix = "🧪 [TEST] " if self.test_mode else ""
-            xp_display = f"would have been awarded `{xp}xp`" if self.test_mode else f"have been awarded `{xp}xp`"
-            
-            await interaction.response.send_message(
-                f"`✅` {test_prefix}Correct! The answer was **{self.correct_answer}**! You {xp_display}{xp_msg} in {guesses} guess{'es' if guesses != 1 else ''}!",
-                ephemeral=True
-            )
-            
-            # Update embed with winners list immediately
-            if self.message:
-                try:
-                    embed = self.message.embeds[0]
-                    winners_text = "\n".join(
-                        f"`+{w['xp']}xp` {w['user']} ({w['guesses']} guess{'es' if w['guesses'] != 1 else ''})"
-                        for w in self.winners
-                    )
-                    
-                    # Check if Winners field exists and update it, otherwise add it
-                    found_winners_field = False
-                    for i, field in enumerate(embed.fields):
-                        if field.name == "Winners":
-                            embed.set_field_at(i, name="Winners", value=winners_text, inline=False)
-                            found_winners_field = True
-                            break
-                    if not found_winners_field:
-                        embed.add_field(name="Winners", value=winners_text, inline=False)
-                    
-                    await self.message.edit(embed=embed)
-                except Exception as e:
-                    from core.logging.setup import get_logger
-                    logger = get_logger("ChatGames")
-                    logger.error(f"Error updating winners in embed: {e}")
-                    import traceback
-                    logger.error(traceback.format_exc())
+                
+                # Check if Winners field exists and update it, otherwise add it
+                found_winners_field = False
+                for i, field in enumerate(embed.fields):
+                    if field.name == "Winners":
+                        embed.set_field_at(i, name="Winners", value=winners_text, inline=False)
+                        found_winners_field = True
+                        break
+                if not found_winners_field:
+                    embed.add_field(name="Winners", value=winners_text, inline=False)
+                
+                await self.message.edit(embed=embed)
+            except Exception as e:
+                from core.logging.setup import get_logger
+                logger = get_logger("ChatGames")
+                logger.error(f"Error updating winners in embed: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
         else:
             # Wrong answer - allow infinite retries (like Guess the Number)
             if self.message:

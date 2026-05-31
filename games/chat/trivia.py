@@ -215,6 +215,36 @@ class TriviaButtons(discord.ui.View):
             self.answer_map[f"trivia_{i}_{game_id}"] = answer
             button.callback = self.create_callback(answer)
             self.add_item(button)
+
+    def _get_base_xp_for_position(self, position: int) -> int:
+        if position == 1:
+            return random.randint(50, 60)
+        if position == 2:
+            return random.randint(40, 50)
+        if position == 3:
+            return random.randint(30, 40)
+        if position == 4:
+            return random.randint(20, 30)
+        if position == 5:
+            return random.randint(10, 20)
+
+        previous_final_xp = self.winners[-1]['xp'] if self.winners else 20 * self.xp_multiplier
+        max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
+        min_base_xp = max(1, max_base_xp - 9)
+
+        if min_base_xp > max_base_xp:
+            min_base_xp = max_base_xp
+
+        return random.randint(min_base_xp, max_base_xp)
+
+    def _calculate_xp(self, position: int) -> int:
+        base_xp = self._get_base_xp_for_position(position)
+        xp = int(base_xp * self.xp_multiplier)
+
+        if self.winners:
+            xp = min(xp, self.winners[-1]['xp'] - 1)
+
+        return max(0, xp)
     
     def create_callback(self, answer: str):
         async def callback(interaction: discord.Interaction):
@@ -258,38 +288,8 @@ class TriviaButtons(discord.ui.View):
                 
                 self.winner_count += 1
                 
-                # New XP system: random ranges based on position
                 position = self.winner_count
-                if position == 1:
-                    xp = random.randint(50, 60)
-                elif position == 2:
-                    xp = random.randint(40, 50)
-                elif position == 3:
-                    xp = random.randint(30, 40)
-                elif position == 4:
-                    xp = random.randint(20, 30)
-                elif position == 5:
-                    xp = random.randint(10, 20)
-                else:  # 6th place and beyond - must be less than previous winner
-                    # Get previous winner's final XP (after multiplier)
-                    previous_final_xp = self.winners[-1]['xp'] if self.winners else 20 * self.xp_multiplier
-                    # Get base XP that would result in less final XP
-                    # We need: (base_xp * multiplier) < previous_final_xp
-                    # So: base_xp < previous_final_xp / multiplier
-                    max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
-                    # Ensure minimum base XP results in at least 10 XP after multiplier
-                    # Calculate minimum base XP needed: base_xp * multiplier >= 10, so base_xp >= 10 / multiplier
-                    min_base_xp_required = max(1, int((10 / self.xp_multiplier) + 0.999))  # Round up
-                    min_base_xp = max(min_base_xp_required, max_base_xp - 9)  # Keep range reasonable (up to 10 XP range)
-                    # Ensure min_base_xp < max_base_xp for randint
-                    if min_base_xp >= max_base_xp:
-                        min_base_xp = max(1, max_base_xp - 1)
-                    xp = random.randint(min_base_xp, max_base_xp) if min_base_xp < max_base_xp else min_base_xp
-                
-                # Apply XP multiplier
-                xp = int(xp * self.xp_multiplier)
-                # Ensure minimum XP is 10 (safety check)
-                xp = max(10, xp)
+                xp = self._calculate_xp(position)
                 
                 self.winners.append({
                     'user': interaction.user.mention,

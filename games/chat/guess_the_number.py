@@ -280,6 +280,38 @@ class GuessTheNumberButtons(discord.ui.View):
             self._user_locks[user_id] = asyncio.Lock()
         return self._user_locks[user_id]
 
+    def _get_base_xp_for_position(self, position: int) -> int:
+        if position == 1:
+            return random.randint(50, 60)
+        if position == 2:
+            return random.randint(40, 50)
+        if position == 3:
+            return random.randint(30, 40)
+        if position == 4:
+            return random.randint(20, 30)
+        if position == 5:
+            return random.randint(10, 20)
+
+        previous_final_xp = self.winners[-1]['xp'] if self.winners else int(20 * self.xp_multiplier)
+        max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
+        min_base_xp = max(1, max_base_xp - 9)
+
+        if min_base_xp > max_base_xp:
+            min_base_xp = max_base_xp
+
+        return random.randint(min_base_xp, max_base_xp)
+
+    def _calculate_xp(self, position: int, guesses: int) -> int:
+        base_xp = self._get_base_xp_for_position(position)
+        guess_bonus = max(0, (6 - guesses) * 2)
+        guess_penalty = max(0, (guesses - 5) * 2)
+        xp = int((base_xp + guess_bonus - guess_penalty) * self.xp_multiplier)
+
+        if self.winners:
+            xp = min(xp, self.winners[-1]['xp'] - 1)
+
+        return max(0, xp)
+
     async def handle_guess(self, interaction: discord.Interaction, guess: int):
         """Handle a user's guess"""
         user_id = interaction.user.id
@@ -333,41 +365,7 @@ class GuessTheNumberButtons(discord.ui.View):
             position = self.winner_count
             guesses = self.user_guesses[user_id]
             
-            # Calculate XP: Base on position, then adjust for guesses
-            # Position 1: 50-60, Position 2: 40-50, Position 3: 30-40, Position 4: 20-30, Position 5: 10-20
-            if position == 1:
-                base_xp = random.randint(50, 60)
-            elif position == 2:
-                base_xp = random.randint(40, 50)
-            elif position == 3:
-                base_xp = random.randint(30, 40)
-            elif position == 4:
-                base_xp = random.randint(20, 30)
-            elif position == 5:
-                base_xp = random.randint(10, 20)
-            else:
-                # 6th place and beyond - must be less than previous winner
-                previous_final_xp = self.winners[-1]['xp'] if self.winners else 20 * self.xp_multiplier
-                max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
-                min_base_xp_required = max(1, int((10 / self.xp_multiplier) + 0.999))
-                min_base_xp = max(min_base_xp_required, max_base_xp - 9)
-                # Ensure min_base_xp < max_base_xp for randint
-                if min_base_xp >= max_base_xp:
-                    min_base_xp = max(1, max_base_xp - 1)
-                base_xp = random.randint(min_base_xp, max_base_xp) if min_base_xp < max_base_xp else min_base_xp
-            
-            # Adjust for number of guesses (fewer guesses = bonus, more guesses = penalty)
-            # Perfect guess (1 guess) gets +5 bonus
-            # Each additional guess reduces by 2 XP (minimum 0 reduction)
-            guess_bonus = max(0, (6 - guesses) * 2)  # 1 guess = +10, 2 = +8, 3 = +6, etc.
-            guess_penalty = max(0, (guesses - 5) * 2)  # 6+ guesses = -2, 7+ = -4, etc.
-            
-            xp = base_xp + guess_bonus - guess_penalty
-            xp = max(10, xp)  # Ensure minimum 10 XP
-            
-            # Apply XP multiplier
-            xp = int(xp * self.xp_multiplier)
-            xp = max(10, xp)  # Ensure minimum 10 XP after multiplier
+            xp = self._calculate_xp(position, guesses)
             
             self.winners.append({
                 'user': interaction.user.mention,

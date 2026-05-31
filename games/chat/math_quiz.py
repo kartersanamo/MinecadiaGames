@@ -1,7 +1,7 @@
 import asyncio
 import random
 from datetime import datetime, timezone
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 import discord
 import mathgenerator
 from pylatexenc.latex2text import LatexNodes2Text
@@ -425,7 +425,7 @@ class MathQuizButtons(discord.ui.View):
             }
         self.xp_config = xp_config
         self.winner_count = 0
-        self.failed_users: set = set()  # Track users who have answered incorrectly
+        self.user_guesses: Dict[int, int] = {}  # Track guesses per user for XP scaling
         
         for idx, answer in enumerate(answers):
             button = discord.ui.Button(
@@ -435,22 +435,50 @@ class MathQuizButtons(discord.ui.View):
             )
             button.callback = self.create_callback(answer)
             self.add_item(button)
+
+    def _get_base_xp_for_position(self, position: int) -> int:
+        if position == 1:
+            return random.randint(50, 60)
+        if position == 2:
+            return random.randint(40, 50)
+        if position == 3:
+            return random.randint(30, 40)
+        if position == 4:
+            return random.randint(20, 30)
+        if position == 5:
+            return random.randint(10, 20)
+
+        previous_final_xp = self.winners[-1]['xp'] if self.winners else int(20 * self.xp_multiplier)
+        max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
+        min_base_xp = max(1, max_base_xp - 9)
+
+        if min_base_xp > max_base_xp:
+            min_base_xp = max_base_xp
+
+        return random.randint(min_base_xp, max_base_xp)
+
+    def _calculate_xp(self, position: int, guesses: int) -> int:
+        base_xp = self._get_base_xp_for_position(position)
+
+        # Fewer guesses should reward more XP, more guesses should reduce it.
+        guess_bonus = max(0, (6 - guesses) * 2)
+        guess_penalty = max(0, (guesses - 5) * 2)
+
+        xp = base_xp + guess_bonus - guess_penalty
+        xp = int(xp * self.xp_multiplier)
+
+        if self.winners:
+            xp = min(xp, self.winners[-1]['xp'] - 1)
+
+        return max(0, xp)
     
     def create_callback(self, answer: str):
         async def callback(interaction: discord.Interaction):
-            # Check if user has already answered incorrectly
-            if interaction.user.id in self.failed_users:
-                from utils.chat_game_registry import registry
-                if self.message:
-                    registry.log_activity(
-                        self.message.id,
-                        interaction.user.id,
-                        'denied',
-                        'Already failed - cannot retry',
-                        False
-                    )
-                await interaction.response.send_message("You've already answered incorrectly and cannot try again!", ephemeral=True)
-                return
+            user_id = interaction.user.id
+            if user_id not in self.user_guesses:
+                self.user_guesses[user_id] = 0
+            self.user_guesses[user_id] += 1
+            guesses = self.user_guesses[user_id]
             
             # Log activity
             from utils.chat_game_registry import registry
@@ -464,11 +492,11 @@ class MathQuizButtons(discord.ui.View):
                 )
             
             if answer == self.correct_answer:
-                if interaction.user.id in [w['user_id'] for w in self.winners]:
+                if user_id in [w['user_id'] for w in self.winners]:
                     if self.message:
                         registry.log_activity(
                             self.message.id,
-                            interaction.user.id,
+                            user_id,
                             'denied',
                             'Already won',
                             False
@@ -477,44 +505,14 @@ class MathQuizButtons(discord.ui.View):
                     return
                 
                 self.winner_count += 1
-                
-                # New XP system: random ranges based on position
                 position = self.winner_count
-                if position == 1:
-                    xp = random.randint(50, 60)
-                elif position == 2:
-                    xp = random.randint(40, 50)
-                elif position == 3:
-                    xp = random.randint(30, 40)
-                elif position == 4:
-                    xp = random.randint(20, 30)
-                elif position == 5:
-                    xp = random.randint(10, 20)
-                else:  # 6th place and beyond - must be less than previous winner
-                    # Get previous winner's final XP (after multiplier)
-                    previous_final_xp = self.winners[-1]['xp'] if self.winners else 20 * self.xp_multiplier
-                    # Get base XP that would result in less final XP
-                    # We need: (base_xp * multiplier) < previous_final_xp
-                    # So: base_xp < previous_final_xp / multiplier
-                    max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
-                    # Ensure minimum base XP results in at least 10 XP after multiplier
-                    # Calculate minimum base XP needed: base_xp * multiplier >= 10, so base_xp >= 10 / multiplier
-                    min_base_xp_required = max(1, int((10 / self.xp_multiplier) + 0.999))  # Round up
-                    min_base_xp = max(min_base_xp_required, max_base_xp - 9)  # Keep range reasonable (up to 10 XP range)
-                    # Ensure min_base_xp < max_base_xp for randint
-                    if min_base_xp >= max_base_xp:
-                        min_base_xp = max(1, max_base_xp - 1)
-                    xp = random.randint(min_base_xp, max_base_xp) if min_base_xp < max_base_xp else min_base_xp
-                
-                # Apply XP multiplier
-                xp = int(xp * self.xp_multiplier)
-                # Ensure minimum XP is 10 (safety check)
-                xp = max(10, xp)
+                xp = self._calculate_xp(position, guesses)
                 
                 self.winners.append({
                     'user': interaction.user.mention,
-                    'user_id': interaction.user.id,
-                    'xp': xp
+                    'user_id': user_id,
+                    'xp': xp,
+                    'guesses': guesses
                 })
                 
                 lvl_mng = LevelingManager(
@@ -532,9 +530,9 @@ class MathQuizButtons(discord.ui.View):
                 if self.message:
                     registry.log_activity(
                         self.message.id,
-                        interaction.user.id,
+                        user_id,
                         'correct_answer',
-                        f'Won {xp} XP (position {position})',
+                        f'Won {xp} XP (position {position}, {guesses} guesses)',
                         True
                     )
                 
@@ -551,7 +549,7 @@ class MathQuizButtons(discord.ui.View):
                 xp_display = f"would have been awarded `{xp}xp`" if self.test_mode else f"have been awarded `{xp}xp`"
                 
                 await interaction.response.send_message(
-                    f"`✅` {test_prefix}Correct! You {xp_display}{xp_msg}!",
+                    f"`✅` {test_prefix}Correct! You {xp_display}{xp_msg} in {guesses} guess{'es' if guesses != 1 else ''}!",
                     ephemeral=True
                 )
                 
@@ -559,7 +557,10 @@ class MathQuizButtons(discord.ui.View):
                 if self.message:
                     try:
                         embed = self.message.embeds[0]
-                        winners_text = "\n".join(f"`+{w['xp']}xp` {w['user']}" for w in self.winners)
+                        winners_text = "\n".join(
+                            f"`+{w['xp']}xp` {w['user']} ({w['guesses']} guess{'es' if w['guesses'] != 1 else ''})"
+                            for w in self.winners
+                        )
                         
                         # Check if Winners field exists and update it, otherwise add it
                         found_winners_field = False
@@ -579,19 +580,19 @@ class MathQuizButtons(discord.ui.View):
                         logger = get_logger("ChatGames")
                         logger.error(f"Error updating winners in embed: {e}\n{traceback.format_exc()}")
             else:
-                # Mark user as failed - they cannot try again
-                self.failed_users.add(interaction.user.id)
-                
                 # Log wrong answer
                 if self.message:
                     registry.log_activity(
                         self.message.id,
-                        interaction.user.id,
+                        user_id,
                         'wrong_answer',
-                        f'Selected: {answer[:50]}',
+                        f"Selected: {answer[:50]} ({guesses} guess{'es' if guesses != 1 else ''})",
                         False
                     )
-                await interaction.response.send_message("`❌` Incorrect answer! You cannot try again.", ephemeral=True)
+                await interaction.response.send_message(
+                    f"`❌` Incorrect answer! Try again. You have used {guesses} guess{'es' if guesses != 1 else ''}.",
+                    ephemeral=True
+                )
         
         return callback
 

@@ -299,6 +299,38 @@ class UnscrambleButtons(discord.ui.View):
         )
         guess_button.callback = self.create_guess_callback()
         self.add_item(guess_button)
+
+    def _get_base_xp_for_position(self, position: int) -> int:
+        if position == 1:
+            return random.randint(50, 60)
+        if position == 2:
+            return random.randint(40, 50)
+        if position == 3:
+            return random.randint(30, 40)
+        if position == 4:
+            return random.randint(20, 30)
+        if position == 5:
+            return random.randint(10, 20)
+
+        previous_final_xp = self.winners[-1]['xp'] if self.winners else int(20 * self.xp_multiplier)
+        max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
+        min_base_xp = max(1, max_base_xp - 9)
+
+        if min_base_xp > max_base_xp:
+            min_base_xp = max_base_xp
+
+        return random.randint(min_base_xp, max_base_xp)
+
+    def _calculate_xp(self, position: int, guesses: int) -> int:
+        base_xp = self._get_base_xp_for_position(position)
+        guess_bonus = max(0, (6 - guesses) * 2)
+        guess_penalty = max(0, (guesses - 5) * 2)
+        xp = int((base_xp + guess_bonus - guess_penalty) * self.xp_multiplier)
+
+        if self.winners:
+            xp = min(xp, self.winners[-1]['xp'] - 1)
+
+        return max(0, xp)
     
     def create_guess_callback(self):
         """Create callback for the guess button"""
@@ -345,33 +377,7 @@ class UnscrambleButtons(discord.ui.View):
             self.winner_count += 1
             position = self.winner_count
             
-            # Base XP by position (same as Guess the Number)
-            if position == 1:
-                base_xp = random.randint(50, 60)
-            elif position == 2:
-                base_xp = random.randint(40, 50)
-            elif position == 3:
-                base_xp = random.randint(30, 40)
-            elif position == 4:
-                base_xp = random.randint(20, 30)
-            elif position == 5:
-                base_xp = random.randint(10, 20)
-            else:  # 6th place and beyond
-                previous_final_xp = self.winners[-1]['xp'] if self.winners else 20 * self.xp_multiplier
-                max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
-                min_base_xp_required = max(1, int((10 / self.xp_multiplier) + 0.999))
-                min_base_xp = max(min_base_xp_required, max_base_xp - 9)
-                if min_base_xp >= max_base_xp:
-                    min_base_xp = max(1, max_base_xp - 1)
-                base_xp = random.randint(min_base_xp, max_base_xp) if min_base_xp < max_base_xp else min_base_xp
-            
-            # Fewer guesses = more XP (same formula as Guess the Number)
-            guess_bonus = max(0, (6 - guesses) * 2)
-            guess_penalty = max(0, (guesses - 5) * 2)
-            xp = base_xp + guess_bonus - guess_penalty
-            xp = max(10, xp)
-            xp = int(xp * self.xp_multiplier)
-            xp = max(10, xp)
+            xp = self._calculate_xp(position, guesses)
             
             self.winners.append({
                 'user': interaction.user.mention,
