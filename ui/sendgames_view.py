@@ -246,6 +246,23 @@ class SendGamesView:
             ),
             timeout=5.0
         )
+
+        # Try to fetch active (this month) and total historical participants counts.
+        active_count = 0
+        total_players = 0
+        try:
+            r = await db.execute("SELECT COUNT(*) as count FROM leveling WHERE active = 1")
+            if r:
+                active_count = int(r[0].get('count', 0))
+        except Exception:
+            active_count = 0
+
+        try:
+            r2 = await db.execute("SELECT COUNT(*) as count FROM leveling WHERE ever_played = 1")
+            if r2:
+                total_players = int(r2[0].get('count', 0))
+        except Exception:
+            total_players = 0
         
         leaderboard = []
         for index, row in enumerate(rows, 1):
@@ -268,7 +285,8 @@ class SendGamesView:
                 emoji = SendGamesView.POSITION_EMOJIS.get(index, f"**{index}.**")
                 leaderboard.append(f"{emoji} {badge_text}<@{user_id}> » Level {row['level']} ({row['xp']} XP)")
         
-        return "\n".join(leaderboard) if leaderboard else "No data available."
+        header = f"Active this month: {active_count} | Total players: {total_players}\n\n"
+        return header + ("\n".join(leaderboard) if leaderboard else "No data available.")
     
     @staticmethod
     async def get_full_leaderboard(guild: discord.Guild, bot) -> list:

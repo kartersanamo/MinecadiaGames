@@ -177,7 +177,9 @@ class WipeLevels(commands.Cog):
             return await interaction.edit_original_response(content=f"❌ Failed to export the leveling data to admin logs! {e}")
         
         try:
-            await db.execute("UPDATE leveling SET xp = 0, level = 1")
+            # Reset monthly XP and level, and clear the per-month `active` flag.
+            # Keep `ever_played` so we can count total historical participants.
+            await db.execute("UPDATE leveling SET xp = 0, level = 1, active = 0")
         except Exception as e:
             return await interaction.edit_original_response(content=f"❌ Failed to reset the leveling data! {e}")
         

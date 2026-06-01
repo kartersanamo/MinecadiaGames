@@ -137,28 +137,72 @@ class _LevelingManagerCore:
     async def _get_user_stats(self, user_id: int) -> Optional[Dict[str, str]]:
         """Get user's current leveling stats from database"""
         db = await self.db
-        rows = await db.execute(
-            "SELECT user_id, xp, level FROM leveling WHERE user_id = %s",
-            (str(user_id),)
-        )
+        # Try to select the newer schema first (with active/ever_played),
+        # fall back to the older schema if columns are missing.
+        try:
+            rows = await db.execute(
+                "SELECT user_id, xp, level, active, ever_played FROM leveling WHERE user_id = %s",
+                (str(user_id),)
+            )
+        except Exception:
+            rows = await db.execute(
+                "SELECT user_id, xp, level FROM leveling WHERE user_id = %s",
+                (str(user_id),)
+            )
+            # Add default flags when missing
+            if rows:
+                rows[0]['active'] = '0'
+                rows[0]['ever_played'] = '0'
+
         return rows[0] if rows else None
     
     async def _create_user_entry(self, user_id: int) -> Dict[str, str]:
         """Create a new user entry in the leveling table"""
         db = await self.db
-        await db.execute_insert(
-            "INSERT INTO leveling (user_id, xp, level) VALUES (%s, %s, %s)",
-            (str(user_id), '0', '0')
-        )
-        return {'user_id': str(user_id), 'xp': '0', 'level': '0'}
+        # Try to insert with the newer columns; if table lacks them, fall back.
+        try:
+            await db.execute_insert(
+                "INSERT INTO leveling (user_id, xp, level, active, ever_played) VALUES (%s, %s, %s, %s, %s)",
+                (str(user_id), '0', '0', '0', '0')
+            )
+            return {'user_id': str(user_id), 'xp': '0', 'level': '0', 'active': '0', 'ever_played': '0'}
+        except Exception:
+            await db.execute_insert(
+                "INSERT INTO leveling (user_id, xp, level) VALUES (%s, %s, %s)",
+                (str(user_id), '0', '0')
+            )
+            return {'user_id': str(user_id), 'xp': '0', 'level': '0', 'active': '0', 'ever_played': '0'}
     
     async def _update_user_xp(self, user_id: int, new_xp: int):
         """Update user's XP in the database"""
         db = await self.db
-        await db.execute(
-            "UPDATE leveling SET xp = %s WHERE user_id = %s",
-            (new_xp, str(user_id))
-        )
+        # Try to update flags as well (newer schema). If columns don't exist,
+        # fall back to updating only xp.
+        try:
+            await db.execute(
+                "UPDATE leveling SET xp = %s, active = %s, ever_played = %s WHERE user_id = %s",
+                (new_xp, '1', '1', str(user_id))
+            )
+        except Exception:
+            # Attempt to add the columns if they don't exist, then retry once.
+            try:
+                await db.execute("ALTER TABLE leveling ADD COLUMN IF NOT EXISTS active TINYINT(1) DEFAULT 0")
+                await db.execute("ALTER TABLE leveling ADD COLUMN IF NOT EXISTS ever_played TINYINT(1) DEFAULT 0")
+            except Exception:
+                # Some MySQL versions do not support IF NOT EXISTS for ADD COLUMN
+                # ignore errors here; we'll fall back to simple update
+                pass
+
+            try:
+                await db.execute(
+                    "UPDATE leveling SET xp = %s, active = %s, ever_played = %s WHERE user_id = %s",
+                    (new_xp, '1', '1', str(user_id))
+                )
+            except Exception:
+                await db.execute(
+                    "UPDATE leveling SET xp = %s WHERE user_id = %s",
+                    (new_xp, str(user_id))
+                )
     
     async def _log_xp_to_database(
         self,

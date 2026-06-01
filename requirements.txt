@@ -19,3 +19,5 @@ pylatexenc>=2.0.0
 
 # Environment (token from .env)
 python-dotenv>=1.0.0
+
+pytz>=2026.2
