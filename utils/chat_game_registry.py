@@ -97,6 +97,13 @@ class ChatGameRegistry:
             return self._games[message_id].get('activity_log', [])
         return []
 
+    def find_by_game_id(self, game_id: int):
+        """Return (message_id, game_data) for an active chat game, or (None, None)."""
+        for message_id, data in self._games.items():
+            if data.get("game_id") == game_id:
+                return message_id, data
+        return None, None
+
 
 # Global instance
 registry = ChatGameRegistry()

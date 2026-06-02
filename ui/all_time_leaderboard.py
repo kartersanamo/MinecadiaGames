@@ -214,29 +214,24 @@ class AllTimeLeaderboardView(discord.ui.View):
         return leaderboard if leaderboard else ["No data available."]
     
     async def _get_all_time_level_leaderboard(self, db: DatabasePool) -> list:
-        """Get all-time highest level leaderboard"""
-        # Get current levels (these reset monthly, but we can track all-time from xp_logs)
-        # For all-time, we'll calculate level from total XP
-        # Limit to top 500 for performance
+        """Global level = sum of each user's level at every monthly /wipe-levels."""
+        from managers.global_level import ensure_global_level_table
+
+        await ensure_global_level_table(db)
         rows = await db.execute(
             """
-            SELECT user_id, SUM(xp) as total_xp
-            FROM xp_logs
-            GROUP BY user_id
-            ORDER BY total_xp DESC
+            SELECT user_id, global_level
+            FROM leveling_global
+            WHERE global_level > 0
+            ORDER BY global_level DESC
             LIMIT 500
             """
         )
-        
+
         if not rows:
-            return ["No data available."]
-        
-        # Get level requirements
-        level_data = self.config.get('levels', {})
-        levels_dict = level_data.get('LEVELS', {}) or level_data.get('levels', {})
-        
-        # Batch fetch all badge preferences and achievements
-        user_ids = [str(row['user_id']) for row in rows]
+            return ["No data available. Levels are added here after each monthly wipe."]
+
+        user_ids = [str(row["user_id"]) for row in rows]
         
         # Get all selected badges in one query
         selected_badge_map = {}
@@ -294,18 +289,10 @@ class AllTimeLeaderboardView(discord.ui.View):
         
         leaderboard = []
         for index, row in enumerate(rows, 1):
-            user_id = int(row['user_id'])
+            user_id = int(row["user_id"])
             user_id_str = str(user_id)
-            total_xp = int(row['total_xp'])
-            
-            # Calculate level from total XP
-            level = 1
-            for lvl in sorted([int(k) for k in levels_dict.keys()], reverse=True):
-                required_xp = levels_dict.get(str(lvl), 0)
-                if total_xp >= required_xp:
-                    level = lvl
-                    break
-            
+            level = int(row["global_level"])
+
             user = self.bot.get_user(user_id)
             if not user and self.guild:
                 user = self.guild.get_member(user_id)
@@ -330,9 +317,13 @@ class AllTimeLeaderboardView(discord.ui.View):
             badge_text = f"{badge_emoji} " if badge_emoji else ""
             
             if user:
-                leaderboard.append(f"**{index}.** {badge_text}{user.mention} » Level {level} ({total_xp:,} XP)")
+                leaderboard.append(
+                    f"**{index}.** {badge_text}{user.mention} » Global Level {level}"
+                )
             else:
-                leaderboard.append(f"**{index}.** {badge_text}<@{user_id}> » Level {level} ({total_xp:,} XP)")
+                leaderboard.append(
+                    f"**{index}.** {badge_text}<@{user_id}> » Global Level {level}"
+                )
         
         return leaderboard if leaderboard else ["No data available."]
     
@@ -372,17 +363,27 @@ class AllTimeLeaderboardView(discord.ui.View):
         elif game_name in table_map:
             table_name, status_field, win_value = table_map[game_name]
             try:
-                # Use parameterized query to avoid SQL injection
-                # Note: table_name and status_field cannot be parameterized, but win_value can
-                query = f"""
-                    SELECT user_id, COUNT(*) as wins
-                    FROM {table_name}
-                    WHERE {status_field} = %s
-                    GROUP BY user_id
-                    ORDER BY wins DESC
-                    LIMIT 500
-                """
-                rows = await db.execute(query, (win_value,))
+                if game_name == "2048":
+                    win_clause = f"{status_field} IN ('Won', 'Cashed Out')"
+                    query = f"""
+                        SELECT user_id, COUNT(*) as wins
+                        FROM {table_name}
+                        WHERE {win_clause}
+                        GROUP BY user_id
+                        ORDER BY wins DESC
+                        LIMIT 500
+                    """
+                    rows = await db.execute(query)
+                else:
+                    query = f"""
+                        SELECT user_id, COUNT(*) as wins
+                        FROM {table_name}
+                        WHERE {status_field} = %s
+                        GROUP BY user_id
+                        ORDER BY wins DESC
+                        LIMIT 500
+                    """
+                    rows = await db.execute(query, (win_value,))
             except Exception as e:
                 from core.logging.setup import get_logger
                 logger = get_logger("UI")

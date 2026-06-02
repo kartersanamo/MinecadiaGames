@@ -65,6 +65,23 @@ class BaseGame(ABC):
         
         try:
             db = await self._get_db()
+            duration_seconds = None
+            game_name = self.__class__.__name__
+            try:
+                row = await db.fetch_one(
+                    "SELECT game_name, refreshed_at FROM games WHERE game_id = %s",
+                    (self._game_id,),
+                )
+                if row:
+                    game_name = row.get("game_name") or game_name
+                    refreshed = int(row.get("refreshed_at") or 0)
+                    if refreshed:
+                        from datetime import datetime, timezone
+                        duration_seconds = int(
+                            datetime.now(timezone.utc).timestamp() - refreshed
+                        )
+            except Exception:
+                pass
             # Try to update status column, ignore if it doesn't exist
             try:
                 await db.execute(
@@ -74,6 +91,22 @@ class BaseGame(ABC):
             except Exception:
                 # Status column doesn't exist, that's okay
                 pass
+            if status == "Finished":
+                try:
+                    import sys
+                    from pathlib import Path
+                    _root = Path(__file__).resolve().parents[3]
+                    if str(_root) not in sys.path:
+                        sys.path.insert(0, str(_root))
+                    from _analytics import logger as analytics
+                    analytics.record_game_outcome(
+                        game_name,
+                        "finished",
+                        game_id=self._game_id,
+                        duration_seconds=duration_seconds,
+                    )
+                except Exception:
+                    pass
         except Exception as e:
             self.logger.error(f"Error updating game status: {e}")
     

@@ -296,7 +296,7 @@ class MilestonesManager:
                 )
             elif game_type == "2048":
                 result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_2048 WHERE user_id = %s AND status = 'Won'",
+                    "SELECT COUNT(*) as count FROM users_2048 WHERE user_id = %s AND status IN ('Won', 'Cashed Out')",
                     (user_id_str,)
                 )
             elif game_type == "Minesweeper":

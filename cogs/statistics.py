@@ -797,7 +797,7 @@ class StatisticsView(discord.ui.View):
             """
             SELECT 
                 COUNT(*) as total_games,
-                SUM(CASE WHEN status = 'Won' THEN 1 ELSE 0 END) as wins,
+                SUM(CASE WHEN status IN ('Won', 'Cashed Out') THEN 1 ELSE 0 END) as wins,
                 SUM(CASE WHEN status = 'Lost' THEN 1 ELSE 0 END) as losses,
                 AVG(score) as avg_score,
                 MAX(score) as best_score,

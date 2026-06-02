@@ -177,6 +177,23 @@ class WipeLevels(commands.Cog):
             return await interaction.edit_original_response(content=f"❌ Failed to export the leveling data to admin logs! {e}")
         
         try:
+            from managers.global_level import (
+                archive_monthly_levels_to_global,
+                backfill_global_levels_from_winners,
+            )
+
+            await backfill_global_levels_from_winners(db)
+            archived = await archive_monthly_levels_to_global(db, month=month)
+            self.logger.info(
+                "[WipeLevels] Added month-end levels to global_level for %s users",
+                archived,
+            )
+        except Exception as e:
+            return await interaction.edit_original_response(
+                content=f"❌ Failed to archive levels into global leaderboard! {e}"
+            )
+
+        try:
             # Reset monthly XP and level, and clear the per-month `active` flag.
             # Keep `ever_played` so we can count total historical participants.
             await db.execute("UPDATE leveling SET xp = 0, level = 1, active = 0")
@@ -263,6 +280,48 @@ class WipeLevels(commands.Cog):
         await interaction.edit_original_response(
             content=f"✅ Successfully wiped the leveling leaderboards! [Log]({msg_log.jump_url})\n```\n{message}\n```"
         )
+
+
+    async def dashboard_wipe(
+        self,
+        guild: discord.Guild,
+        month: str,
+        actor: discord.Member,
+    ) -> str:
+        """Monthly wipe invoked from dashboard HTTP API."""
+
+        class _MockResponse:
+            async def send_message(self, *args, **kwargs):
+                pass
+
+        class _MockInteraction:
+            def __init__(self):
+                self.guild = guild
+                self.user = actor
+                self.channel = guild.system_channel or (
+                    guild.text_channels[0] if guild.text_channels else None
+                )
+                self.response = _MockResponse()
+                self._content = ""
+
+            async def edit_original_response(self, content=None, **kwargs):
+                self._content = content or kwargs.get("content") or ""
+
+            @property
+            def followup(self):
+                return self
+
+            async def send(self, *args, **kwargs):
+                pass
+
+        interaction = _MockInteraction()
+        original_check = self._check_admin
+        self._check_admin = lambda _i: True
+        try:
+            await self.wipe_levels(interaction, month)
+        finally:
+            self._check_admin = original_check
+        return interaction._content or "Wipe completed"
 
 
 async def setup(bot):

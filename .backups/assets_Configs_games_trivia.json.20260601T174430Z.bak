@@ -3,7 +3,7 @@
     "questions": {
         "918903892144717915": [
             {
-                "question": "Which event gives the “Disguise Potions Last Longer” buff?",
+                "question": "Which event gives the \u201cDisguise Potions Last Longer\u201d buff?",
                 "answers": [
                     "Citadel",
                     "Conquest",
@@ -150,7 +150,7 @@
                     "December 9th, 2021",
                     "November 9th, 2021"
                 ],
-                "difficulty": 2
+                "difficulty": 2.0
             },
             {
                 "question": "What are the faction names that won f top season 1?",
@@ -699,7 +699,7 @@
             {
                 "question": "Who is the manager of Lifesteal?",
                 "answers": [
-                    "Ryan",
+                    "Trojanfile",
                     "xPis",
                     "Xyrde",
                     "AP"

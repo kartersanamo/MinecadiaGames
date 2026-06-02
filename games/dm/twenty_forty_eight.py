@@ -780,14 +780,17 @@ class TwentyFortyEightButtons(discord.ui.View):
             )
             await lvl_mng.update()
             
-            # Update database with 'Cashed Out' status
             db = await DatabasePool.get_instance()
             current_unix = int(datetime.now(timezone.utc).timestamp())
+            # Record as Won so win leaderboards/milestones count cash-outs (UI still says Cashed Out).
             await db.execute(
-                "UPDATE users_2048 SET status = 'Cashed Out', score = %s, moves = %s, highest_tile = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
+                "UPDATE users_2048 SET status = 'Won', score = %s, moves = %s, highest_tile = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
                 (self.score, self.moves, self.highest_tile, current_unix, self.player_id, self.game_id)
             )
-            
+
+            from utils.achievements import check_dm_game_win
+            await check_dm_game_win(interaction.user, "2048", interaction.channel, self.bot)
+
             # Check for best score achievement (pass user/channel/client so XP is granted)
             from managers.milestones import MilestonesManager
             milestones_manager = MilestonesManager()

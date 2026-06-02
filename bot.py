@@ -46,6 +46,15 @@ class MinecadiaBot(commands.Bot):
             
             self.logger.info("Loading extensions...")
             await self.load_extensions()
+            import sys
+            from pathlib import Path
+
+            _root = Path(__file__).resolve().parent.parent
+            if str(_root) not in sys.path:
+                sys.path.insert(0, str(_root))
+            from _analytics.register import register_command_tracking
+
+            await register_command_tracking(self)
             self.logger.info("Bot setup complete")
         except Exception as e:
             self.logger.error(f"Error in setup_hook: {e}", exc_info=True)
@@ -192,6 +201,12 @@ class MinecadiaBot(commands.Bot):
         
         # Sync application commands
         await self._sync_commands()
+
+        try:
+            from Assets.dashboard_http import start_dashboard_http
+            await start_dashboard_http(self)
+        except Exception as e:
+            self.logger.error(f"Failed to start dashboard HTTP: {e}")
     
     async def on_resume(self):
         """Called when the bot resumes a connection after disconnection"""
