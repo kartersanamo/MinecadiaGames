@@ -104,6 +104,15 @@ class ChatGameRegistry:
                 return message_id, data
         return None, None
 
+    def active_game_ids(self) -> List[int]:
+        """Dashboard: all game_id values with a live chat game in registry."""
+        ids: List[int] = []
+        for data in self._games.values():
+            gid = data.get("game_id")
+            if gid is not None:
+                ids.append(int(gid))
+        return sorted(set(ids))
+
 
 # Global instance
 registry = ChatGameRegistry()

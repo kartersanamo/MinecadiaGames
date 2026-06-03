@@ -14,6 +14,22 @@ if TYPE_CHECKING:
     from bot import MinecadiaBot
 
 
+def _extract_correct_answer(game_type: str | None, original_state: dict) -> str | None:
+    """Match in-Discord Manage Chat Game → Show Answer logic."""
+    if not original_state:
+        return None
+    game_type = (game_type or "").lower()
+    if game_type in ("trivia", "math_quiz", "flag_guesser", "emoji_quiz"):
+        return original_state.get("correct_answer")
+    if game_type == "unscramble":
+        return original_state.get("word")
+    if game_type == "guess_the_number":
+        secret = original_state.get("secret_number")
+        if secret is not None:
+            return f"The number is **{secret}**"
+    return original_state.get("correct_answer") or original_state.get("word")
+
+
 def _serialize_live(message_id: int, game_data: dict, message_url: str | None = None) -> dict:
     view = game_data.get("view")
     winners = []
@@ -57,10 +73,22 @@ async def get_session_live(bot: "MinecadiaBot", game_id: int) -> dict:
 
     message_url = None
     msg = await _fetch_message(bot, message_id)
+    answer = None
+    answer_revealed = False
     if msg:
         message_url = msg.jump_url
+        if msg.embeds:
+            for field in msg.embeds[0].fields:
+                if field.name == "Answer":
+                    answer = field.value
+                    answer_revealed = True
+                    break
 
-    return _serialize_live(message_id, game_data, message_url)
+    out = _serialize_live(message_id, game_data, message_url)
+    if answer_revealed and answer:
+        out["answer"] = answer
+        out["answerRevealed"] = True
+    return out
 
 
 async def apply_chat_action(bot: "MinecadiaBot", game_id: int, action: str) -> dict:
@@ -98,6 +126,31 @@ async def apply_chat_action(bot: "MinecadiaBot", game_id: int, action: str) -> d
         registry.log_activity(message_id, 0, "toggle_2x", f"XP multiplier {new_mult}x (dashboard)", True)
         return {"ok": True, "xpMultiplier": new_mult}
 
+    if action == "show_correct_answer":
+        game_type = game_data.get("game_type")
+        original_state = game_data.get("original_state") or {}
+        answer = _extract_correct_answer(game_type, original_state)
+        if not answer:
+            return {"error": "Answer not available for this game"}
+
+        embed = message.embeds[0] if message.embeds else discord.Embed(title="Game")
+        if not any(f.name == "Answer" for f in embed.fields):
+            embed.add_field(name="Answer", value=str(answer), inline=False)
+        view = game_data.get("view")
+        is_real_view = view and isinstance(view, discord.ui.View)
+        if is_real_view:
+            await message.edit(embed=embed, view=view)
+        else:
+            await message.edit(embed=embed)
+        registry.log_activity(
+            message_id,
+            0,
+            "show_answer",
+            f"Revealed via dashboard: {answer}",
+            True,
+        )
+        return {"ok": True, "answer": str(answer), "revealed": True}
+
     if action == "end_game":
         view = game_data.get("view")
         is_real_view = view and isinstance(view, discord.ui.View)
@@ -127,6 +180,13 @@ async def handle_session_live(request: web.Request, bot: "MinecadiaBot") -> web.
         return web.json_response({"error": "Invalid game id"}, status=400)
     data = await get_session_live(bot, game_id)
     return web.json_response(data)
+
+
+async def handle_active_sessions(_request: web.Request, bot: "MinecadiaBot") -> web.Response:
+    from utils.chat_game_registry import registry
+
+    _ = bot
+    return web.json_response({"gameIds": registry.active_game_ids()})
 
 
 async def handle_session_chat_action(request: web.Request, bot: "MinecadiaBot") -> web.Response:

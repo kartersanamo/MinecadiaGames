@@ -217,7 +217,11 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
     app.router.add_post("/reload-config", wrap(reload_config))
     app.router.add_post("/wipe-levels", wrap(wipe_levels))
 
-    from Assets.session_http import handle_session_live, handle_session_chat_action
+    from Assets.session_http import (
+        handle_session_live,
+        handle_session_chat_action,
+        handle_active_sessions,
+    )
 
     async def session_live(request: web.Request) -> web.Response:
         return await handle_session_live(request, bot)
@@ -225,7 +229,11 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
     async def session_chat_action(request: web.Request) -> web.Response:
         return await handle_session_chat_action(request, bot)
 
+    async def active_sessions(_request: web.Request) -> web.Response:
+        return await handle_active_sessions(_request, bot)
+
     app.router.add_get("/session/{game_id}", wrap(session_live))
+    app.router.add_get("/sessions/active", wrap(active_sessions))
     app.router.add_post("/session/chat-action", wrap(session_chat_action))
 
     runner = web.AppRunner(app)
