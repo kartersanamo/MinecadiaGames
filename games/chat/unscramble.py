@@ -26,8 +26,9 @@ class Unscramble(ChatGame):
         from pathlib import Path
         project_root = Path(__file__).resolve().parents[2]
         bg_path = project_root / "assets" / "Images" / "Unscramble_BG_2.png"
-        output_path = project_root / "assets" / "Images" / f"unscramble_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        from utils.paths import generated_image_path
+
+        output_path = generated_image_path("unscramble", self._game_id)
         
         with Image.open(bg_path) as image:
             draw = ImageDraw.Draw(image)

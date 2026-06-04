@@ -54,9 +54,10 @@ class FlagGuesser(ChatGame):
     
     async def _build_embed(self, country_code: str, xp_multiplier: float, end_time: int, test_mode: bool = False) -> Tuple[discord.Embed, discord.File]:
         response = requests.get(f"https://flagcdn.com/w2560/{country_code}.png")
-        filename = f"assets/Images/flag_guesser_{self._game_id}_{uuid.uuid4().hex[:8]}.png"
-        
-        with open(filename, 'wb') as f:
+        from utils.paths import generated_image_path
+
+        output_path = generated_image_path("flag_guesser", self._game_id)
+        with open(output_path, "wb") as f:
             f.write(response.content)
         
         # Build title with XP multiplier and test mode
@@ -76,9 +77,9 @@ class FlagGuesser(ChatGame):
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR')),
             timestamp=datetime.now(timezone.utc)
         )
-        embed.set_image(url=f"attachment://{filename}")
-        
-        file = discord.File(filename, filename=filename)
+        embed.set_image(url=f"attachment://{output_path.name}")
+
+        file = discord.File(str(output_path), filename=output_path.name)
         return embed, file
     
     async def _run_game(self, channel: discord.TextChannel, xp_multiplier: float = 1.0, test_mode: bool = False) -> Optional[discord.Message]:

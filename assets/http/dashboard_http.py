@@ -139,7 +139,6 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
 
         trivia_path = (
             Path(__file__).resolve().parent.parent
-            / "assets"
             / "Configs"
             / "games"
             / "trivia.json"
@@ -217,7 +216,7 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
     app.router.add_post("/reload-config", wrap(reload_config))
     app.router.add_post("/wipe-levels", wrap(wipe_levels))
 
-    from Assets.session_http import (
+    from assets.http.session_http import (
         handle_session_live,
         handle_session_chat_action,
         handle_active_sessions,

@@ -1,38 +1,9 @@
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-# Keep secrets private (token, etc.)
 .env
-.venv
-env/
-venv/
-ENV/
-logs/
 *.log
-.DS_Store
-*.swp
-*.swo
-*~
+*.py[cod]
+.venv/
+logs/
 
-assets/Images/ConnectFourOutput.png
-CHANGELOG.md
-assets/Images/tictactoe*.png
-assets/Images/unscramble*.png
-assets/Images/flag_guesser*.png
+# Ephemeral images produced during games (boards, flags, unscramble, etc.)
+assets/Images/generated/*
+!assets/Images/generated/.gitkeep

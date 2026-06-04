@@ -4,7 +4,9 @@ from typing import List, Optional
 from core.config.manager import ConfigManager
 
 
-LOGO = "Assets/Logo.png"
+from utils.paths import LOGO_PATH
+
+LOGO = LOGO_PATH
 
 
 class Paginator(discord.ui.View):

@@ -265,11 +265,12 @@ class Wordle(DMGame):
                         stroke_fill="black"
                     )
             
-            # Save image
-            output_path = f"wordle_{user_id}_{game_id}_{uuid.uuid4().hex[:8]}.png"
+            from utils.paths import generated_image_path
+
+            output_path = generated_image_path(f"wordle_{user_id}", game_id)
             base_image.save(output_path)
-        
-        return output_path
+
+        return str(output_path)
     
     async def update_letter_states(self, user_id: int, guess: str, colors: List[str]):
         """Update letter states based on guess colors (green > yellow > gray)"""

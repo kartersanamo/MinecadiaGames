@@ -337,8 +337,9 @@ class TicTacToeButtons(discord.ui.View):
                         )
             
             # Save image
-            output_path = project_root / "assets" / "Images" / f"tictactoe_{self.game_id}_{uuid.uuid4().hex[:8]}.png"
-            output_path.parent.mkdir(parents=True, exist_ok=True)
+            from utils.paths import generated_image_path
+
+            output_path = generated_image_path("tictactoe", self.game_id)
             base_image.save(output_path)
         
         return str(output_path)

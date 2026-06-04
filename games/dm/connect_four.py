@@ -310,7 +310,9 @@ class ConnectFourButtons(discord.ui.View):
         # Support both old and new structure
         assets = self.game_config.get('assets', {})
         base_image_path = project_root / (self.game_config.get("base_image_path") or assets.get("board", "assets/Images/ConnectFourBoard.png"))
-        output_image_path = project_root / (self.game_config.get("output_image_path") or assets.get("output", f"assets/Images/connectfour_{self.game_id}_{uuid.uuid4().hex[:8]}.png"))
+        from utils.paths import generated_image_path
+
+        output_image_path = generated_image_path("connectfour", self.game_id)
         red_piece_path = project_root / (self.game_config.get("red_piece_path") or assets.get("red_piece", "assets/Images/RedPiece.png"))
         yellow_piece_path = project_root / (self.game_config.get("yellow_piece_path") or assets.get("yellow_piece", "assets/Images/YellowPiece.png"))
         

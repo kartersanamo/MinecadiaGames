@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from dotenv import load_dotenv  # type: ignore[reportMissingImports]
 
+os.chdir(Path(__file__).resolve().parent)
 load_dotenv()
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
@@ -203,7 +204,7 @@ class MinecadiaBot(commands.Bot):
         await self._sync_commands()
 
         try:
-            from Assets.dashboard_http import start_dashboard_http
+            from assets.http.dashboard_http import start_dashboard_http
             await start_dashboard_http(self)
         except Exception as e:
             self.logger.error(f"Failed to start dashboard HTTP: {e}")

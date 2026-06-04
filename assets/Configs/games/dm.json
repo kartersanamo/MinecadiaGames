@@ -29,7 +29,6 @@
       "image_url": "https://i.imgur.com/BqUhwZd.png",
       "assets": {
         "board": "assets/Images/ConnectFourBoard.png",
-        "output": "assets/Images/ConnectFourOutput.png",
         "red_piece": "assets/Images/RedPiece.png",
         "yellow_piece": "assets/Images/YellowPiece.png"
       }
