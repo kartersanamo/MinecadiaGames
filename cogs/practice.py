@@ -154,7 +154,7 @@ class Practice(commands.Cog):
                     if interaction.user.id in self.active_practice_sessions:
                         try:
                             del self.active_practice_sessions[interaction.user.id]
-                        except:
+                        except Exception:
                             pass
                     return
                 raise
@@ -167,7 +167,7 @@ class Practice(commands.Cog):
                 if interaction.user.id in self.active_practice_sessions:
                     try:
                         del self.active_practice_sessions[interaction.user.id]
-                    except:
+                    except Exception:
                         pass
             else:
                 self.logger.error(f"Error starting chat practice: {e}", exc_info=True)
@@ -306,7 +306,7 @@ class Practice(commands.Cog):
                             await self._handle_dm_error(dm_error, user)
                             try:
                                 del self.active_practice_sessions[user_id]
-                            except:
+                            except Exception:
                                 pass
                 raise
     
@@ -317,14 +317,14 @@ class Practice(commands.Cog):
             if interaction:
                 try:
                     await interaction.followup.send(error_msg, ephemeral=True)
-                except:
+                except Exception:
                     pass
             # Try to send in the games channel as fallback
             try:
                 games_channel = self.bot.get_channel(self.GAMES_CHANNEL_ID)
                 if games_channel:
                     await games_channel.send(f"{user.mention} {error_msg}", delete_after=30)
-            except:
+            except Exception:
                 pass
             return True
         return False
@@ -342,7 +342,7 @@ class Practice(commands.Cog):
                     if user.id in self.active_practice_sessions:
                         try:
                             del self.active_practice_sessions[user.id]
-                        except:
+                        except Exception:
                             pass
             raise
     
@@ -370,7 +370,7 @@ class Practice(commands.Cog):
                 if user and user.id in self.active_practice_sessions:
                     try:
                         del self.active_practice_sessions[user.id]
-                    except:
+                    except Exception:
                         pass
             else:
                 self.logger.error(f"Error running chat game practice: {e}", exc_info=True)
@@ -452,7 +452,7 @@ class Practice(commands.Cog):
                 if user.id in self.active_practice_sessions:
                     try:
                         del self.active_practice_sessions[user.id]
-                    except:
+                    except Exception:
                         pass
             raise
     
@@ -573,7 +573,7 @@ class Practice(commands.Cog):
                 if user.id in self.active_practice_sessions:
                     try:
                         del self.active_practice_sessions[user.id]
-                    except:
+                    except Exception:
                         pass
             raise
     
@@ -593,7 +593,7 @@ class Practice(commands.Cog):
         
         # Build embed with flag image
         current_unix = int(datetime.now(timezone.utc).timestamp())
-        embed, file = await game._build_embed(country_code, 1.0, current_unix, test_mode=True)
+        embed, file, _image_path = await game._build_embed(country_code, 1.0, current_unix, test_mode=True)
         embed.title = "🧪 Practice Flag Guesser"
         embed.description = "Click an answer below!"
         logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
@@ -640,14 +640,14 @@ class Practice(commands.Cog):
                 if user.id in self.active_practice_sessions:
                     try:
                         del self.active_practice_sessions[user.id]
-                    except:
+                    except Exception:
                         pass
             raise
         
         # Clean up file
         try:
             os.remove(file.filename)
-        except:
+        except Exception:
             pass
         
         # Register view as persistent
@@ -723,14 +723,14 @@ class Practice(commands.Cog):
                 if user.id in self.active_practice_sessions:
                     try:
                         del self.active_practice_sessions[user.id]
-                    except:
+                    except Exception:
                         pass
             raise
         
         # Clean up file
         try:
             os.remove(image_path)
-        except:
+        except Exception:
             pass
         
         # Register view and message listener

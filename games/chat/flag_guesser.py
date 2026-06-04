@@ -52,7 +52,7 @@ class FlagGuesser(ChatGame):
         random.shuffle(answers)
         return country_code, correct_answer, answers
     
-    async def _build_embed(self, country_code: str, xp_multiplier: float, end_time: int, test_mode: bool = False) -> Tuple[discord.Embed, discord.File]:
+    async def _build_embed(self, country_code: str, xp_multiplier: float, end_time: int, test_mode: bool = False) -> Tuple[discord.Embed, discord.File, str]:
         response = requests.get(f"https://flagcdn.com/w2560/{country_code}.png")
         
         output_path = AssetPathService.generated_image_path("flag_guesser", self._game_id)
@@ -79,7 +79,7 @@ class FlagGuesser(ChatGame):
         embed.set_image(url=f"attachment://{output_path.name}")
 
         file = discord.File(str(output_path), filename=output_path.name)
-        return embed, file
+        return embed, file, str(output_path)
     
     async def _run_game(self, channel: discord.TextChannel, xp_multiplier: float = 1.0, test_mode: bool = False) -> Optional[discord.Message]:
         try:
@@ -110,14 +110,13 @@ class FlagGuesser(ChatGame):
             
             self.logger.info(f"Flag Guesser '{correct_answer}' #{channel.name}")
             
-            view = CountryButtons(correct_answer, answers, xp_mult, game_id, self.bot, self.config, test_mode=test_mode)
-            embed, file = await self._build_embed(country_code, xp_mult, end_time, test_mode=test_mode)
+            embed, file, image_path = await self._build_embed(country_code, xp_mult, end_time, test_mode=test_mode)
+            view = CountryButtons(
+                correct_answer, answers, xp_mult, game_id, self.bot, self.config,
+                test_mode=test_mode, image_path=image_path,
+            )
             logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
-            
-            # Store the file object and path for later edits (need to re-attach on every edit)
-            view.current_image_file = file
-            view.current_image_path = file.filename  # Store path to recreate file object
             
             # Register view for persistence across bot restarts
             self.bot.add_view(view)
@@ -153,6 +152,7 @@ class FlagGuesser(ChatGame):
             game_data = registry.get_game(message.id)
             if game_data:
                 game_data['image_file'] = file
+                game_data['image_path'] = image_path
             
             # Store message and end_time for timer task
             view.message = message
@@ -160,14 +160,14 @@ class FlagGuesser(ChatGame):
             view.game_id = game_id
             
             # Start timer task that will end the game
-            asyncio.create_task(self._game_timer(message, view, end_time, game_id, file))
+            asyncio.create_task(self._game_timer(message, view, end_time, game_id, image_path))
             
             return message
         except Exception as e:
             self.logger.error(f"Flag Guesser error: {e}")
             return None
     
-    async def _game_timer(self, message: discord.Message, view, end_time: int, game_id: int, file: discord.File):
+    async def _game_timer(self, message: discord.Message, view, end_time: int, game_id: int, image_path: str):
         """Timer task that ends the game at the specified time"""
         try:
             current_time = int(datetime.now(timezone.utc).timestamp())
@@ -182,25 +182,23 @@ class FlagGuesser(ChatGame):
                     embed = message.embeds[0] if message.embeds else discord.Embed()
                     embed.description = f"This game ended <t:{end_time}:R>"
                     
-                    # Preserve the image by re-attaching the file
+                    # Preserve the image by re-attaching the file (same pattern as unscramble)
                     file_obj = None
-                    if hasattr(view, 'current_image_path') and view.current_image_path and os.path.exists(view.current_image_path):
+                    path = image_path or getattr(view, 'image_path', None)
+                    if path and os.path.exists(path):
                         try:
-                            file_obj = discord.File(view.current_image_path, filename=os.path.basename(view.current_image_path))
+                            file_obj = discord.File(path, filename=os.path.basename(path))
                             embed.set_image(url=f"attachment://{file_obj.filename}")
-                        except Exception as e:
-                            # If file doesn't exist, try to preserve existing image URL
+                        except Exception:
                             if message.embeds and message.embeds[0].image and message.embeds[0].image.url:
                                 embed.set_image(url=message.embeds[0].image.url)
                     elif message.embeds and message.embeds[0].image and message.embeds[0].image.url:
-                        # Fallback: preserve existing image URL
                         embed.set_image(url=message.embeds[0].image.url)
-                    
-                    await message.edit(
-                        embed=embed,
-                        attachments=[file_obj] if file_obj else [],
-                        view=None
-                    )
+
+                    edit_kwargs = {'embed': embed, 'view': None}
+                    if file_obj:
+                        edit_kwargs['attachments'] = [file_obj]
+                    await message.edit(**edit_kwargs)
                     
                     # Update game status to Finished
                     await self._update_game_status('Finished')
@@ -211,8 +209,9 @@ class FlagGuesser(ChatGame):
                     
                     # Clean up the image file at the end
                     try:
-                        if hasattr(view, 'current_image_path') and view.current_image_path and os.path.exists(view.current_image_path):
-                            os.remove(view.current_image_path)
+                        cleanup_path = image_path or getattr(view, 'image_path', None)
+                        if cleanup_path and os.path.exists(cleanup_path):
+                            os.remove(cleanup_path)
                     except Exception as e:
                         self.logger.error(f"Error removing flag guesser image file: {e}")
             except discord.NotFound:
@@ -228,7 +227,17 @@ class FlagGuesser(ChatGame):
 
 
 class CountryButtons(discord.ui.View):
-    def __init__(self, correct_answer: str, answers: List[str], xp_multiplier: float, game_id: int, bot, config, test_mode: bool = False):
+    def __init__(
+        self,
+        correct_answer: str,
+        answers: List[str],
+        xp_multiplier: float,
+        game_id: int,
+        bot,
+        config,
+        test_mode: bool = False,
+        image_path: Optional[str] = None,
+    ):
         super().__init__(timeout=None)
         self.correct_answer = correct_answer
         self.answers = answers
@@ -238,10 +247,9 @@ class CountryButtons(discord.ui.View):
         self.bot = bot
         self.config = config
         self.test_mode = test_mode
+        self.image_path = image_path
         self.winners: List[dict] = []
         self.message: Optional[discord.Message] = None  # Store message reference
-        self.current_image_file: Optional[discord.File] = None  # Store file for re-attaching on edits
-        self.current_image_path: Optional[str] = None  # Store file path to recreate file object
         # Support both old and new XP structure
         chat_config = config.get('chat_games', {})
         xp_config = chat_config.get('XP', {})
@@ -416,21 +424,23 @@ class CountryButtons(discord.ui.View):
                             if not found_winners_field:
                                 embed.add_field(name="Winners", value=winners_text, inline=False)
                             
-                            # Preserve the image by re-attaching the file
+                            # Preserve the image by re-attaching the file (same pattern as unscramble)
                             file = None
-                            if hasattr(self, 'current_image_path') and self.current_image_path and os.path.exists(self.current_image_path):
+                            if self.image_path and os.path.exists(self.image_path):
                                 try:
-                                    file = discord.File(self.current_image_path, filename=os.path.basename(self.current_image_path))
+                                    file = discord.File(
+                                        self.image_path,
+                                        filename=os.path.basename(self.image_path),
+                                    )
                                     embed.set_image(url=f"attachment://{file.filename}")
-                                except Exception as e:
-                                    # If file doesn't exist, try to preserve existing image URL
+                                except Exception:
                                     if embed.image and embed.image.url:
                                         embed.set_image(url=embed.image.url)
 
-                            await self.message.edit(
-                                embed=embed,
-                                attachments=[file] if file else []
-                            )
+                            edit_kwargs = {'embed': embed}
+                            if file:
+                                edit_kwargs['attachments'] = [file]
+                            await self.message.edit(**edit_kwargs)
 
                         except Exception as e:
                             # If updating fails, log but don't break the game
@@ -475,7 +485,7 @@ class CountryButtons(discord.ui.View):
                         await interaction.response.send_message("`❌` An error occurred. Please try again.", ephemeral=True)
                     else:
                         await interaction.followup.send("`❌` An error occurred. Please try again.", ephemeral=True)
-                except:
+                except Exception:
                     pass
         
         return callback

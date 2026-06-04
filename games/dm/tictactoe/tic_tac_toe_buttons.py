@@ -136,7 +136,7 @@ class TicTacToeButtons(discord.ui.View):
         # Clean up old image file
         try:
             os.remove(image_path)
-        except:
+        except Exception:
             pass
     
     async def _check_valid_game(self, interaction: discord.Interaction) -> bool:
@@ -222,7 +222,7 @@ class TicTacToeButtons(discord.ui.View):
             font_size = int(cell_size * 0.58)  # Slightly smaller so edge cells stay visually centered
             try:
                 symbol_font = ImageFont.truetype(str(font_path), font_size)
-            except:
+            except Exception:
                 symbol_font = ImageFont.load_default()
             
             # Draw X's and O's on the board
@@ -295,7 +295,7 @@ class TicTacToeButtons(discord.ui.View):
         # Clean up image
         try:
             os.remove(image_path)
-        except:
+        except Exception:
             self.logger.error(f"Failed to delete the TicTacToe image at {image_path}")
         
         db = await DatabasePool.get_instance()

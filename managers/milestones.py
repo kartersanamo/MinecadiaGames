@@ -74,7 +74,7 @@ class MilestonesManager:
                             await lvl_mng.award_xp(
                                 user=user,
                                 xp=xp,
-                                source=f"Milestone: {milestone_id} {milestone.get('name', '')}",
+                                source=f"Milestone: {milestone_id}",
                                 game_id=-1,
                                 channel=channel,
                                 bot=client,

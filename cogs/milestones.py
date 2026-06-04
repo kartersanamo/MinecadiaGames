@@ -87,7 +87,7 @@ class Milestones(commands.Cog):
             self.logger.error(traceback.format_exc())
             try:
                 await interaction.followup.send(f"`❌` An error occurred while loading milestones: {str(e)}", ephemeral=False)
-            except:
+            except Exception:
                 pass
     
     async def _create_overview_embed(self, user: discord.Member) -> discord.Embed:

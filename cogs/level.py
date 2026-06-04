@@ -166,7 +166,7 @@ class Level(commands.Cog):
                         # Clean up temp file after use
                         try:
                             os.remove(temp_path)
-                        except:
+                        except Exception:
                             pass
                     else:
                         profile_picture = Image.open(BytesIO(response.content))

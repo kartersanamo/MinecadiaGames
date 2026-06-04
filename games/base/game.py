@@ -37,22 +37,8 @@ class BaseGame(ABC):
         db = await self._get_db()
         refreshed_at = int(datetime.now(timezone.utc).timestamp())
         
-        # Try to insert with status and end_time columns, fallback if columns don't exist
-        try:
-            if end_time:
-                query = "INSERT INTO games (game_name, refreshed_at, dm_game, status, end_time) VALUES (%s, %s, %s, %s, %s)"
-                game_id = await db.execute_insert(query, (game_name, refreshed_at, dm_game, 'Started', end_time))
-            else:
-                query = "INSERT INTO games (game_name, refreshed_at, dm_game, status) VALUES (%s, %s, %s, %s)"
-                game_id = await db.execute_insert(query, (game_name, refreshed_at, dm_game, 'Started'))
-        except Exception:
-            # If status/end_time columns don't exist, insert without them
-            try:
-                query = "INSERT INTO games (game_name, refreshed_at, dm_game, status) VALUES (%s, %s, %s, %s)"
-                game_id = await db.execute_insert(query, (game_name, refreshed_at, dm_game, 'Started'))
-            except Exception:
-                query = "INSERT INTO games (game_name, refreshed_at, dm_game) VALUES (%s, %s, %s)"
-                game_id = await db.execute_insert(query, (game_name, refreshed_at, dm_game))
+        query = "INSERT INTO games (game_name, refreshed_at, dm_game) VALUES (%s, %s, %s)"
+        game_id = await db.execute_insert(query, (game_name, refreshed_at, dm_game))
         
         self._game_id = game_id
         return game_id
@@ -80,15 +66,6 @@ class BaseGame(ABC):
                             datetime.now(timezone.utc).timestamp() - refreshed
                         )
             except Exception:
-                pass
-            # Try to update status column, ignore if it doesn't exist
-            try:
-                await db.execute(
-                    "UPDATE games SET status = %s WHERE game_id = %s",
-                    (status, self._game_id)
-                )
-            except Exception:
-                # Status column doesn't exist, that's okay
                 pass
             if status == "Finished":
                 try:

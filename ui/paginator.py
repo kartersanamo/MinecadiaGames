@@ -5,14 +5,16 @@ from core.config.manager import ConfigManager
 
 
 from services.asset_path_service import AssetPathService
+from services.embed_service import EmbedService
 
 LOGO = AssetPathService.LOGO_PATH
 
 
 class Paginator(discord.ui.View):
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: Optional[float] = None, bot=None):
         # Use None for persistent views (default)
         super().__init__(timeout=None)
+        self.bot = bot
         self.data: List[str] = []
         self.title: str = ""
         self.sep: int = 5
@@ -41,7 +43,7 @@ class Paginator(discord.ui.View):
                     msg = await interaction.followup.send(embed=embed, view=self, ephemeral=True)
                 else:
                     msg = await interaction.response.send_message(embed=embed, view=self, ephemeral=True)
-            except:
+            except Exception:
                 # Fallback to followup if response fails
                 msg = await interaction.followup.send(embed=embed, view=self, ephemeral=True)
             return msg
@@ -53,9 +55,16 @@ class Paginator(discord.ui.View):
             # Regular non-ephemeral response
             try:
                 await interaction.response.send_message(view=self, content="")
-            except:
+            except Exception:
                 await interaction.edit_original_response(view=self, content="")
             await self.update_message(interaction)
+
+    def _resolve_logo_url(self) -> Optional[str]:
+        config = ConfigManager.get_instance()
+        logo_path = config.get('config', 'LOGO') or LOGO
+        if self.bot and getattr(self.bot, 'app', None):
+            return self.bot.app.embeds.get_logo_url(logo_path)
+        return EmbedService.get_logo_url(logo_path)
     
     def create_embed(self) -> discord.Embed:
         config = ConfigManager.get_instance()
@@ -73,8 +82,7 @@ class Paginator(discord.ui.View):
                     embed.description += f"{item}\n"
         
         if footer_text:
-            
-            logo_url = self.bot.app.embeds.get_logo_url(LOGO)
+            logo_url = self._resolve_logo_url()
             embed.set_footer(icon_url=logo_url, text=footer_text)
         
         return embed
@@ -544,8 +552,8 @@ class GameIdSelect(discord.ui.Select):
                 inline=False
             )
         
-        
-        logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
+
+        logo_url = self.parent_view._resolve_logo_url()
         embed.set_footer(text=config.get('config', 'FOOTER'), icon_url=logo_url)
         
         # Try to get game_manager from paginator first, then from client
@@ -571,6 +579,6 @@ class GameIdSelect(discord.ui.Select):
             # Try to send error message
             try:
                 await interaction.followup.send(f"`❌` Error loading game details: {str(e)}", ephemeral=True)
-            except:
+            except Exception:
                 pass
 

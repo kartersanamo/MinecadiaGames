@@ -130,7 +130,7 @@ class BadgeSelectMenu(discord.ui.Select):
             # Update the message to reflect the change
             try:
                 await interaction.edit_original_response(view=self.view)
-            except:
+            except Exception:
                 pass
                 
         except Exception as e:

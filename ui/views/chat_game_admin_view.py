@@ -103,7 +103,7 @@ class ChatGameAdminView(discord.ui.View):
         # Log activity (will silently fail if game not in registry, which is fine)
         try:
             registry.log_activity(self.message.id, interaction.user.id, 'show_answer', f'Viewed correct answer: {answer}', True)
-        except:
+        except Exception:
             pass
         
         await interaction.followup.send(embed=embed, ephemeral=True)
@@ -366,7 +366,7 @@ class ChatGameAdminView(discord.ui.View):
                 # Rebuild embed and file
                 from datetime import datetime, timezone
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                embed, file = await game._build_embed(country_code, xp_mult, current_unix, test_mode)
+                embed, file, image_path = await game._build_embed(country_code, xp_mult, current_unix, test_mode)
                 logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 
@@ -377,6 +377,7 @@ class ChatGameAdminView(discord.ui.View):
                     view.answers = answers
                     view.winners = []
                     view.winner_count = 0
+                    view.image_path = image_path
                     
                     # Update button labels
                     view.clear_items()
@@ -389,9 +390,8 @@ class ChatGameAdminView(discord.ui.View):
                         button.callback = view.create_callback(answer)
                         view.add_item(button)
                     
-                    # Store new file
                     game_data['image_file'] = file
-                    view.current_image_file = file
+                    game_data['image_path'] = image_path
                 
                 # Update original state
                 original_state = game_data.get('original_state', {})

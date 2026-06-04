@@ -49,7 +49,7 @@ class Statistics(commands.Cog):
                     await interaction.followup.send(f"`❌` An error occurred while fetching statistics. This might be because you have no game data yet. Error: {str(e)}", ephemeral=False)
                 else:
                     await interaction.response.send_message(f"`❌` An error occurred while fetching statistics. This might be because you have no game data yet. Error: {str(e)}", ephemeral=False)
-            except:
+            except Exception:
                 pass
     
     async def _create_overview_embed(self, user: discord.Member) -> discord.Embed:

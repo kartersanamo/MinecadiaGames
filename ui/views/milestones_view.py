@@ -1,6 +1,8 @@
 import discord
+from core.logging.setup import get_logger
 from managers.milestones import MilestonesManager
 from ui.paginator import Paginator
+from _errors.decorators import safe_interaction
 
 
 class MilestonesView(discord.ui.View):
@@ -11,6 +13,7 @@ class MilestonesView(discord.ui.View):
         self.user_id = user_id
         self.milestones_manager = milestones_manager
         self.is_own = is_own
+        self.logger = get_logger("UI")
         
         # Add badge selection dropdown (only if viewing own milestones)
         # We'll add this dynamically in the command since we need async access to achievements
@@ -37,21 +40,15 @@ class MilestonesView(discord.ui.View):
             self.add_item(button)
     
     def create_callback(self, game_type: str):
+        @safe_interaction(
+            self.logger,
+            bot_name="Games",
+            component=f"milestones_{game_type}",
+        )
         async def callback(interaction: discord.Interaction):
-            try:
-                await interaction.response.defer(ephemeral=True)
-                await self.show_game_milestones(interaction, game_type)
-            except Exception as e:
-                self.logger.error(f"Error in milestones button callback for {game_type}: {e}")
-                import traceback
-                self.logger.error(traceback.format_exc())
-                try:
-                    if interaction.response.is_done():
-                        await interaction.followup.send(f"`❌` An error occurred: {str(e)}", ephemeral=True)
-                    else:
-                        await interaction.response.send_message(f"`❌` An error occurred: {str(e)}", ephemeral=True)
-                except:
-                    pass
+            await interaction.response.defer(ephemeral=True)
+            await self.show_game_milestones(interaction, game_type)
+
         return callback
     
     async def show_game_milestones(self, interaction: discord.Interaction, game_type: str):
@@ -96,7 +93,7 @@ class MilestonesView(discord.ui.View):
             await interaction.followup.send(f"No milestones found for {game_type}.", ephemeral=True)
             return
         
-        paginator = Paginator()
+        paginator = Paginator(bot=self.bot)
         paginator.title = f"🏆 {game_type} Milestones - {user.display_name}"
         paginator.data = pages
         paginator.sep = 1

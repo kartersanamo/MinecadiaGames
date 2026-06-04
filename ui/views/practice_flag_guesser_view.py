@@ -104,7 +104,7 @@ class PracticeFlagGuesserView(discord.ui.View):
         try:
             if self.message:
                 await self.message.delete()
-        except:
+        except Exception:
             pass
         
         await self.practice_cog._send_chat_practice_game(interaction.user, self.session_data['game_type'], self.session_data)

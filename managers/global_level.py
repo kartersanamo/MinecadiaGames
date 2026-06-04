@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import time
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -24,7 +25,13 @@ CREATE TABLE IF NOT EXISTS leveling_global (
 
 
 async def ensure_global_level_table(db: "DatabasePool") -> None:
-    await db.execute(CREATE_TABLE_SQL)
+    # MySQL notes "Table already exists" for CREATE TABLE IF NOT EXISTS; harmless noise.
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r"Table 'leveling_global' already exists",
+        )
+        await db.execute(CREATE_TABLE_SQL)
 
 
 async def archive_monthly_levels_to_global(

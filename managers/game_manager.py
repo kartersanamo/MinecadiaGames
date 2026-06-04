@@ -513,7 +513,7 @@ class GameManager:
             if self.last_chat_game_msg:
                 try:
                     await self.last_chat_game_msg.delete()
-                except:
+                except Exception:
                     pass
             
             msg = await game.run()

@@ -47,7 +47,7 @@ class TicTacToe(DMGame):
             # Clean up initial image after sending
             try:
                 os.remove(initial_image_path)
-            except:
+            except Exception:
                 pass
             
             if not test_mode:

@@ -254,7 +254,7 @@ class WipeLevels(commands.Cog):
                             await lvl_mng.award_xp(
                                 user=member,
                                 xp=550,
-                                source="Milestone: monthly_leaderboard_champion Monthly Leaderboard Champion",
+                                source="Milestone: monthly_leaderboard_champion",
                                 game_id=-1,
                                 channel=interaction.channel,
                                 bot=self.bot,

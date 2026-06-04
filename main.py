@@ -4,9 +4,16 @@ from pathlib import Path
 
 os.chdir(Path(__file__).resolve().parent)
 
+import sys
+
+_minecadia_root = Path(__file__).resolve().parent.parent
+if str(_minecadia_root) not in sys.path:
+    sys.path.insert(0, str(_minecadia_root))
+
 from core.app import BotApp
 from core.decorators import task
-from core.loggers import log_tasks
+from core.loggers import log_commands, log_tasks
+from _errors.setup import wire_bot
 from bot import game_tasks, listeners, restore, startup, views
 from core.cache.manager import CacheManager
 from core.config.manager import ConfigManager
@@ -42,6 +49,7 @@ class Client(commands.Bot):
         self.wordle_listener = None
         self.minesweeper_listener = None
         self.hangman_listener = None
+        wire_bot(self, bot_name="Games", log_commands=log_commands, log_tasks=log_tasks)
 
     @task("Initialize Database Pool")
     async def initialize_database_pool(self):
@@ -70,6 +78,9 @@ class Client(commands.Bot):
 
     @task("Setup Hook")
     async def setup_hook(self):
+        from _errors.setup import wire_bot_async_setup
+
+        await wire_bot_async_setup(self, bot_name="Games", log_tasks=log_tasks)
         self.app = BotApp.from_bot(self)
         try:
             log_tasks.info("Starting bot setup...")
@@ -205,16 +216,6 @@ async def cog_autocomplete(_: discord.Interaction, current: str):
 @app_commands.autocomplete(cog=cog_autocomplete)
 async def gamesreload(interaction: discord.Interaction, cog: str):
     await games_reload_command(interaction, cog)
-
-
-@gamesreload.error
-async def gamesreload_error(
-    interaction: discord.Interaction, error: discord.app_commands.AppCommandError
-):
-    if interaction.response.is_done():
-        await interaction.followup.send(content=error, ephemeral=True)
-    else:
-        await interaction.response.send_message(content=error, ephemeral=True)
 
 
 TOKEN = os.getenv("DISCORD_TOKEN") or client.config.get("config", "TOKEN")

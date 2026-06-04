@@ -85,6 +85,11 @@ async def get_session_live(bot: "MinecadiaBot", game_id: int) -> dict:
                     break
 
     out = _serialize_live(message_id, game_data, message_url)
+    game_type = game_data.get("game_type")
+    original_state = game_data.get("original_state") or {}
+    staff_answer = _extract_correct_answer(game_type, original_state)
+    if staff_answer:
+        out["staffAnswer"] = str(staff_answer)
     if answer_revealed and answer:
         out["answer"] = answer
         out["answerRevealed"] = True
@@ -133,20 +138,11 @@ async def apply_chat_action(bot: "MinecadiaBot", game_id: int, action: str) -> d
         if not answer:
             return {"error": "Answer not available for this game"}
 
-        embed = message.embeds[0] if message.embeds else discord.Embed(title="Game")
-        if not any(f.name == "Answer" for f in embed.fields):
-            embed.add_field(name="Answer", value=str(answer), inline=False)
-        view = game_data.get("view")
-        is_real_view = view and isinstance(view, discord.ui.View)
-        if is_real_view:
-            await message.edit(embed=embed, view=view)
-        else:
-            await message.edit(embed=embed)
         registry.log_activity(
             message_id,
             0,
             "show_answer",
-            f"Revealed via dashboard: {answer}",
+            f"Viewed via dashboard (not posted to channel): {answer}",
             True,
         )
         return {"ok": True, "answer": str(answer), "revealed": True}

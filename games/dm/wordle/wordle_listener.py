@@ -334,7 +334,7 @@ class WordleListener(commands.Cog):
             await asyncio.sleep(4)
             try:
                 await error.delete()
-            except:
+            except Exception:
                 pass
             return
         
@@ -346,7 +346,7 @@ class WordleListener(commands.Cog):
             await asyncio.sleep(4)
             try:
                 await error.delete()
-            except:
+            except Exception:
                 pass
             return
         
@@ -392,7 +392,7 @@ class WordleListener(commands.Cog):
                 # Clean up image file before returning
                 try:
                     os.remove(image_path)
-                except:
+                except Exception:
                     pass
                 return
             
@@ -438,7 +438,7 @@ class WordleListener(commands.Cog):
                 # Notify user about the stale game
                 try:
                     await message.reply("`⚠️` Your previous Wordle game message was not found. The game has been ended. Start a new game using `/dm-games` or the DM games panel.", delete_after=10)
-                except:
+                except Exception:
                     pass
             finally:
                 # Remove from cleanup tracking after a delay
@@ -450,7 +450,7 @@ class WordleListener(commands.Cog):
                 # Clean up image file after all processing
                 try:
                     os.remove(image_path)
-                except:
+                except Exception:
                     pass
             
             # Return after cleanup
@@ -469,7 +469,7 @@ class WordleListener(commands.Cog):
             # Clean up image file after sending
             try:
                 os.remove(image_path)
-            except:
+            except Exception:
                 pass
         except Exception as e:
             self.logger.error(f"WordleListener: Error editing message: {e}")
@@ -478,7 +478,7 @@ class WordleListener(commands.Cog):
             # Clean up image file on error
             try:
                 os.remove(image_path)
-            except:
+            except Exception:
                 pass
             return
         

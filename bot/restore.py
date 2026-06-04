@@ -16,42 +16,18 @@ async def restore_active_chat_games(client) -> None:
         chat_config = client.config.get("chat_games")
         game_length = chat_config.get("GAME_LENGTH") or chat_config.get("game_duration", 600)
 
-        try:
-            active_games = await db.execute(
-                """
-                SELECT game_id, game_name, refreshed_at, end_time
-                FROM games
-                WHERE dm_game = FALSE
-                AND (status = 'Started' OR status IS NULL)
-                AND (end_time > %s OR (end_time IS NULL AND refreshed_at + %s > %s))
-                ORDER BY refreshed_at DESC
-                """,
-                (current_time, game_length, current_time),
-            )
-        except Exception:
-            try:
-                active_games = await db.execute(
-                    """
-                    SELECT game_id, game_name, refreshed_at
-                    FROM games
-                    WHERE dm_game = FALSE
-                    AND refreshed_at + %s > %s
-                    ORDER BY refreshed_at DESC
-                    """,
-                    (game_length, current_time),
-                )
-            except Exception:
-                active_games = await db.execute(
-                    """
-                    SELECT game_id, game_name, refreshed_at
-                    FROM games
-                    WHERE dm_game = FALSE
-                    AND refreshed_at > %s
-                    ORDER BY refreshed_at DESC
-                    LIMIT 10
-                    """,
-                    (current_time - 3600,),
-                )
+        # Production schema: game_id, game_name, refreshed_at, dm_game (no status/end_time)
+        active_games = await db.execute(
+            """
+            SELECT game_id, game_name, refreshed_at
+            FROM games
+            WHERE dm_game = FALSE
+            AND refreshed_at + %s > %s
+            ORDER BY refreshed_at DESC
+            LIMIT 20
+            """,
+            (game_length, current_time),
+        )
 
         if not active_games:
             log_tasks.info("No active chat games to restore")
@@ -70,13 +46,6 @@ async def restore_active_chat_games(client) -> None:
                     end_time = refreshed_at + game_length
 
                 if end_time <= current_time:
-                    try:
-                        await db.execute(
-                            "UPDATE games SET status = 'Finished' WHERE game_id = %s",
-                            (game_id,),
-                        )
-                    except Exception:
-                        pass
                     continue
 
                 remaining_time = end_time - current_time
@@ -415,15 +384,6 @@ async def restore_chat_game_timer(
     try:
         if remaining_time > 0:
             await asyncio.sleep(remaining_time)
-
-        db = await DatabasePool.get_instance()
-        try:
-            await db.execute(
-                "UPDATE games SET status = 'Finished' WHERE game_id = %s",
-                (game_id,),
-            )
-        except Exception:
-            pass
 
         if client.game_manager:
             try:

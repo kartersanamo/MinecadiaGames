@@ -13,6 +13,8 @@ class _LevelingManagerCore:
     Follows proper OOP principles with separation of concerns.
     """
     _instance: Optional['_LevelingManagerCore'] = None
+    # xp_logs.source column length in production schema
+    _xp_log_source_max_len = 40
     _debounce_ms = 2500
     _last_xp_times: Dict[int, float] = {}
     
@@ -215,7 +217,9 @@ class _LevelingManagerCore:
         db = await self.db
         timestamp = int(datetime.now(timezone.utc).timestamp())
         channel_id = channel.id if channel else 0
-        
+        if len(source) > self._xp_log_source_max_len:
+            source = source[: self._xp_log_source_max_len]
+
         try:
             await db.execute_insert(
                 "INSERT INTO xp_logs (game_id, user_id, xp, channel_id, source, timestamp) VALUES (%s, %s, %s, %s, %s, %s)",

@@ -79,7 +79,7 @@ class DMGamesView(discord.ui.View):
                     await loading_msg.edit(embed=error_embed)
                     return
                 
-                paginator = Paginator()
+                paginator = Paginator(bot=self.bot)
                 paginator.title = "Full Leaderboard <:minecadia_2:1444800686372950117>"
                 paginator.data = leaderboard_data
                 paginator.sep = 20  # 20 entries per page
@@ -98,7 +98,7 @@ class DMGamesView(discord.ui.View):
                         await interaction.followup.send("`❌` An error occurred while loading the leaderboard. Please try again later.", ephemeral=True)
                     else:
                         await interaction.response.send_message("`❌` An error occurred while loading the leaderboard. Please try again later.", ephemeral=True)
-                except:
+                except Exception:
                     pass
         
         button.callback = callback
@@ -201,13 +201,13 @@ class DMGamesView(discord.ui.View):
                         "`❌` An error occurred while starting the game. Please try again later.",
                         ephemeral=True
                     )
-            except:
+            except Exception:
                 try:
                     await interaction.followup.send(
                         "`❌` An error occurred while starting the game. Please try again later.",
                         ephemeral=True
                     )
-                except:
+                except Exception:
                     pass
     
     def memory_button(self):

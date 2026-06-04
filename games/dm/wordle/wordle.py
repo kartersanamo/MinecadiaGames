@@ -114,7 +114,7 @@ class Wordle(DMGame):
             # Clean up initial image after sending
             try:
                 os.remove(initial_image_path)
-            except:
+            except Exception:
                 pass
             
             self.logger.info(f"Wordle '{word}' ({user.name}#{user.discriminator})")
@@ -196,7 +196,7 @@ class Wordle(DMGame):
             font_path = project_root / "assets" / "Fonts" / "ArcadeRounded.ttf"
             try:
                 letter_font = ImageFont.truetype(str(font_path), 36)
-            except:
+            except Exception:
                 letter_font = ImageFont.load_default()
             
             # Grid positions (6 rows x 5 columns)

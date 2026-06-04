@@ -265,7 +265,7 @@ class Logs(commands.Cog):
         if not user:
             try:
                 user = await self.bot.fetch_user(user_id)
-            except:
+            except Exception:
                 await interaction.followup.send(f"User {user_id} not found.", ephemeral=True)
                 return
         

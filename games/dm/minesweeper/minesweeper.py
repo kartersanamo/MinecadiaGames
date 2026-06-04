@@ -36,6 +36,7 @@ class Minesweeper(DMGame):
             initial_revealed = random.choice(non_mine_positions)
             
             from games.dm.minesweeper.minesweeper_state import MinesweeperState
+            from games.dm.minesweeper.minesweeper_buttons import MinesweeperButtons
             state = MinesweeperState(
                 game_id=last_game_id,
                 board=board,

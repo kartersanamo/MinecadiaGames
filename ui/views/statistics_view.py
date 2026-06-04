@@ -1,8 +1,10 @@
 
 import discord
 from core.database.pool import DatabasePool
+from core.logging.setup import get_logger
 from datetime import datetime, timezone
 from ui.paginator import Paginator
+from _errors.decorators import safe_interaction
 
 
 class StatisticsView(discord.ui.View):
@@ -11,6 +13,7 @@ class StatisticsView(discord.ui.View):
         self.bot = bot
         self.config = config
         self.user_id = user_id
+        self.logger = get_logger("UI")
         
         # Add game-specific buttons
         self.add_item(self.create_game_button("Trivia", "trivia"))
@@ -51,9 +54,14 @@ class StatisticsView(discord.ui.View):
         return button_index // buttons_per_row
     
     def create_callback(self, game_type: str):
+        @safe_interaction(
+            self.logger,
+            bot_name="Games",
+            component=f"statistics_{game_type}",
+        )
         async def callback(interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=False)
-            
+
             if game_type == "all":
                 await self.show_all_games_stats(interaction)
             elif game_type == "monthly":
@@ -62,7 +70,7 @@ class StatisticsView(discord.ui.View):
                 await self.show_game_history(interaction)
             else:
                 await self.show_game_specific_stats(interaction, game_type)
-        
+
         return callback
     
     async def show_all_games_stats(self, interaction: discord.Interaction):
@@ -158,7 +166,7 @@ class StatisticsView(discord.ui.View):
                     )
             pages.append(page_text)
         
-        paginator = Paginator()
+        paginator = Paginator(bot=self.bot)
         paginator.title = f"📊 All Games Statistics - {user.display_name}"
         paginator.data = pages
         paginator.sep = 1
@@ -228,7 +236,7 @@ class StatisticsView(discord.ui.View):
                     f"`❌` An error occurred while fetching monthly statistics. Error: {str(e)}",
                     ephemeral=False
                 )
-            except:
+            except Exception:
                 pass
     
     async def show_game_history(self, interaction: discord.Interaction):
@@ -266,7 +274,7 @@ class StatisticsView(discord.ui.View):
                 )
             pages.append(page_text)
         
-        paginator = Paginator()
+        paginator = Paginator(bot=self.bot)
         paginator.title = f"📜 Game History - {user.display_name}"
         paginator.data = pages
         paginator.sep = 1

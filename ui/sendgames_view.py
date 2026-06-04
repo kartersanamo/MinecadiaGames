@@ -126,7 +126,7 @@ class ViewMore(discord.ui.View):
             await interaction.response.defer(ephemeral=True)
             
             # Create paginator for past winners by month
-            paginator = Paginator()
+            paginator = Paginator(bot=interaction.client)
             paginator.title = f"Leveling Leaderboard <:minecadia_2:1444800686372950117>"
             paginator.sep = 1  # 1 month per page
             paginator.ephemeral = True  # Mark as ephemeral
@@ -201,7 +201,7 @@ class ViewMore(discord.ui.View):
         db = await DatabasePool.get_instance()
         game_ids = await db.execute("SELECT game_id, game_name, refreshed_at, dm_game FROM games ORDER BY refreshed_at DESC LIMIT 100")
         
-        paginator = Paginator()
+        paginator = Paginator(bot=interaction.client)
         paginator.title = "Recent Games"
         paginator.data = games_str
         paginator.games = games_list

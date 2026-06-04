@@ -145,22 +145,34 @@ class DatabasePool:
             # Clean up on timeout
             try:
                 await cm.__aexit__(None, None, None)
-            except:
+            except Exception:
                 pass
             raise RuntimeError(f"Failed to acquire database connection from pool within {timeout} seconds - pool may be exhausted")
         except Exception as e:
             # Clean up on any error
             try:
                 await cm.__aexit__(None, None, None)
-            except:
+            except Exception:
                 pass
             raise
     
     async def execute(self, query: str, params: Optional[tuple] = None) -> List[Dict[str, Any]]:
-        async with self.acquire() as conn:
-            async with conn.cursor() as cursor:
-                await cursor.execute(query, params)
-                return await cursor.fetchall()
+        import logging
+
+        db_log = logging.getLogger("DatabasePool")
+        try:
+            async with self.acquire() as conn:
+                async with conn.cursor() as cursor:
+                    await cursor.execute(query, params)
+                    return await cursor.fetchall()
+        except Exception as exc:
+            try:
+                from _errors.db import log_db_failure
+
+                log_db_failure(db_log, exc, query_hint=query)
+            except ImportError:
+                db_log.error("Query failed: %s", query[:120], exc_info=exc)
+            raise
     
     async def execute_many(self, query: str, params_list: List[tuple]) -> int:
         async with self.acquire() as conn:

@@ -42,5 +42,5 @@ class StartTicTacToeView(discord.ui.View):
                         "`❌` An error occurred while starting the game. Please try again later.",
                         ephemeral=True
                     )
-            except:
+            except Exception:
                 pass

@@ -3,6 +3,8 @@ import discord
 from discord.ext import commands
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+from games.dm.minesweeper.minesweeper_buttons import MinesweeperButtons
+from games.dm.minesweeper.minesweeper_state import MinesweeperState
 ROWS, COLS = 10, 5
 TOTAL_CELLS = ROWS * COLS  # 50
 TEST_MINESWEEPER_GAMES: Dict[int, dict] = {}  # user_id -> {'state': {...}, 'message1_id': int, 'message2_id': int}

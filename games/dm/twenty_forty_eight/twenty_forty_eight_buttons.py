@@ -460,7 +460,7 @@ class TwentyFortyEightButtons(discord.ui.View):
             if hasattr(interaction, 'followup') and hasattr(interaction.followup, 'edit_message'):
                 try:
                     await interaction.followup.edit_message(interaction.message.id, embed=embed, view=self)
-                except:
+                except Exception:
                     await interaction.message.edit(embed=embed, view=self)
             else:
                 await interaction.message.edit(embed=embed, view=self)
@@ -469,7 +469,7 @@ class TwentyFortyEightButtons(discord.ui.View):
             # Try to update just the view if embed update fails
             try:
                 await interaction.message.edit(view=self)
-            except:
+            except Exception:
                 pass
     
     async def _handle_loss(self, interaction: discord.Interaction):

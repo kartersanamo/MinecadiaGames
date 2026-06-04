@@ -333,7 +333,7 @@ class HangmanZButton(discord.ui.View):
                     "`❌` An error occurred while processing your guess. Please try again.",
                     ephemeral=True
                 )
-            except:
+            except Exception:
                 pass
         finally:
             self.is_processing = False
