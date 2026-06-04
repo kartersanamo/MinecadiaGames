@@ -1,0 +1,31 @@
+import time
+
+from core.logging.setup import get_logger
+
+log_tasks = get_logger("Tasks")
+log_commands = get_logger("Commands")
+
+
+def task(action_name: str, log: bool = None):
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            try:
+                result = await func(*args, **kwargs)
+                time_elapsed = round((time.perf_counter() - start_time), 2)
+                if time_elapsed > 3:
+                    log_tasks.warning(
+                        f"{action_name} took a long time to complete and finished in {time_elapsed}s"
+                    )
+                elif log:
+                    log_tasks.info(f"{action_name} completed in {time_elapsed}s")
+                return result
+            except Exception as error:
+                log_tasks.error(
+                    f"{action_name} failed after {round((time.perf_counter() - start_time), 2)}s : {error}"
+                )
+                raise error
+
+        return wrapper
+
+    return decorator
