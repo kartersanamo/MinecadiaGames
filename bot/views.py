@@ -1,6 +1,6 @@
 import traceback
 
-from assets.functions import log_tasks
+from core.loggers import log_tasks
 
 
 async def register_persistent_views(client) -> None:

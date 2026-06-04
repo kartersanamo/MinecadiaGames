@@ -4,7 +4,8 @@ from pathlib import Path
 
 os.chdir(Path(__file__).resolve().parent)
 
-from assets.functions import log_tasks, task
+from core.decorators import task
+from core.loggers import log_tasks
 from bot import game_tasks, listeners, restore, startup, views
 from core.cache.manager import CacheManager
 from core.config.manager import ConfigManager

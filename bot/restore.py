@@ -5,7 +5,7 @@ import traceback
 from datetime import datetime, timezone
 from typing import Optional, Tuple
 
-from assets.functions import log_tasks
+from core.loggers import log_tasks
 from core.database.pool import DatabasePool
 
 

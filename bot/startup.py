@@ -2,7 +2,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-from assets.functions import log_tasks
+from core.loggers import log_tasks
 from core.cache.manager import CacheManager
 from core.database.pool import DatabasePool
 
@@ -43,9 +43,10 @@ async def load_extensions(client) -> None:
 
 
 async def register_analytics(client) -> None:
-    _root = Path(__file__).resolve().parent.parent
-    if str(_root) not in sys.path:
-        sys.path.insert(0, str(_root))
+    # _analytics lives in Minecadia/ (parent of MinecadiaGames/)
+    _minecadia = Path(__file__).resolve().parent.parent.parent
+    if str(_minecadia) not in sys.path:
+        sys.path.insert(0, str(_minecadia))
     from _analytics.register import register_command_tracking
 
     await register_command_tracking(client)

@@ -1,6 +1,6 @@
 import asyncio
 
-from assets.functions import log_tasks
+from core.loggers import log_tasks
 
 
 async def ensure_game_tasks_running(client) -> None:

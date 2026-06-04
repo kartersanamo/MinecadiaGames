@@ -1,6 +1,6 @@
 import traceback
 
-from assets.functions import log_tasks
+from core.loggers import log_tasks
 
 
 async def setup_dm_listeners(client) -> None:
