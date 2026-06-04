@@ -139,7 +139,7 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
 
         trivia_path = (
             Path(__file__).resolve().parent.parent
-            / "Configs"
+            / "configs"
             / "games"
             / "trivia.json"
         )

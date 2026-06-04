@@ -1,5 +1,1 @@
-from .dm_games_view import DMGamesView
-from .sendgames_view import SendGamesView
-
-__all__ = ['DMGamesView', 'SendGamesView']
-
+# UI package — import views from ui.views.* directly to avoid circular imports.

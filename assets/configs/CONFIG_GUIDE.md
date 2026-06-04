@@ -5,7 +5,7 @@ This guide explains the new optimized configuration structure for the Minecadia 
 ## File Structure
 
 ```
-assets/Configs/
+assets/configs/
 ├── bot.json              # Core bot settings (token, database, embed colors)
 ├── discord.json          # Discord server settings (guild, channels, roles)
 ├── leveling.json         # Leveling system (XP requirements per level)

@@ -202,7 +202,7 @@ class WipeLevels(commands.Cog):
         
         try:
             from pathlib import Path
-            winners_file = str(Path(__file__).parent.parent / "assets" / "Configs" / "winners.json")
+            winners_file = str(Path(__file__).parent.parent / "assets" / "configs" / "winners.json")
             with open(winners_file, "r+") as file:
                 data = json.load(file)
                 new_month_data = {month: top_users}

@@ -20,7 +20,7 @@
       "enabled": true,
       "refresh_cooldown": 43200,
       "image_url": "https://i.imgur.com/cFJkVEl.png",
-      "words_file": "assets/Configs/data/words.txt"
+      "words_file": "assets/configs/data/words.txt"
     },
     "Connect Four": {
       "enabled": true,
@@ -75,7 +75,7 @@
       "enabled": true,
       "refresh_cooldown": 43200,
       "max_wrong_guesses": 8,
-      "words_file": "assets/Configs/data/words.txt",
+      "words_file": "assets/configs/data/words.txt",
       "image_url": "https://i.imgur.com/example.png"
     }
   }

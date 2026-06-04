@@ -12,7 +12,7 @@ class ConfigManager:
     def __init__(self, config_dir: str = None):
         if config_dir is None:
             from pathlib import Path
-            config_dir = str(Path(__file__).parent.parent.parent / "assets" / "Configs")
+            config_dir = str(Path(__file__).parent.parent.parent / "assets" / "configs")
         self.config_dir = Path(config_dir)
         self._cache: Dict[str, Dict[str, Any]] = {}
         self._file_locks: Dict[str, Lock] = {}

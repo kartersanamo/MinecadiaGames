@@ -18,7 +18,7 @@ This document describes the core services, database usage, managers, and how the
 
 ### ConfigManager (`core/config/manager.py`)
 
-- Singleton. Loads JSON from `assets/Configs/`.  
+- Singleton. Loads JSON from `assets/configs/`.  
 - `get(config_name, key=None, default=None)`.  
 - Special handling: `config` = merge of `bot` + `discord`; key mapping for backward compatibility.  
 - Used everywhere for token, database, channels, roles, game options, leveling, milestones.

@@ -38,7 +38,7 @@ A full-featured Discord bot for the Minecadia community: **leveling**, **achieve
 
 - **Python 3** with **discord.py** (commands + app_commands)
 - **MySQL** via **aiomysql** (async connection pool)
-- **JSON configs** under `assets/Configs/` (games, leveling, milestones, rewards, etc.)
+- **JSON configs** under `assets/configs/` (games, leveling, milestones, rewards, etc.)
 - **Singleton/core services**: ConfigManager, DatabasePool, CacheManager, LevelingManager, MilestonesManager, GameManager
 
 ---
@@ -57,9 +57,9 @@ A full-featured Discord bot for the Minecadia community: **leveling**, **achieve
 
    - Copy `.env.example` to `.env` and fill in your values. The bot reads these first; `.env` is in `.gitignore` so secrets stay private.
    - **Required in .env:** `DISCORD_TOKEN` (your bot token).
-   - **Database (recommended in .env):** Set `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (and optionally `DB_PORT`, `DB_AUTOCOMMIT`). If `DB_HOST` is set, the bot uses these instead of `assets/Configs/bot.json` for the database connection.
-   - **Optional:** You can instead set `token` and `database` in `assets/Configs/bot.json` (not recommended for production; avoid committing real secrets).
-   - Edit `assets/Configs/bot.json` and `assets/Configs/discord.json` as needed for presence, guild/channel IDs, etc. (see [Configuration](docs/CONFIGURATION.md)).
+   - **Database (recommended in .env):** Set `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (and optionally `DB_PORT`, `DB_AUTOCOMMIT`). If `DB_HOST` is set, the bot uses these instead of `assets/configs/bot.json` for the database connection.
+   - **Optional:** You can instead set `token` and `database` in `assets/configs/bot.json` (not recommended for production; avoid committing real secrets).
+   - Edit `assets/configs/bot.json` and `assets/configs/discord.json` as needed for presence, guild/channel IDs, etc. (see [Configuration](docs/CONFIGURATION.md)).
    - Ensure MySQL is running and the database/schema exist (see [Architecture](docs/ARCHITECTURE.md#database)).
 
 3. **Run**
@@ -77,7 +77,7 @@ A full-featured Discord bot for the Minecadia community: **leveling**, **achieve
 ```
 MinecadiaGames/
 ├── bot.py                 # Entry point, MinecadiaBot, extension loading, view registration
-├── assets/Configs/        # JSON configs (bot, discord, dm_games, chat_games, milestones, levels, etc.)
+├── assets/configs/        # JSON configs (bot, discord, dm_games, chat_games, milestones, levels, etc.)
 ├── core/                  # Config, database pool, cache, logging
 ├── cogs/                  # Discord cogs (commands + listeners)
 ├── games/                 # Game logic
@@ -106,12 +106,12 @@ MinecadiaGames/
 
 ## Configuration
 
-- **Secrets in .env (recommended):** Copy `.env.example` to `.env` and set `DISCORD_TOKEN` and, for the database, `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (and optionally `DB_PORT`, `DB_AUTOCOMMIT`). The bot uses these first; `.env` is in `.gitignore` so they are never committed. You can fall back to `token` and `database` in `assets/Configs/bot.json` if you leave the env vars unset.
-- **Rest of config:** Set in `assets/Configs/bot.json` and `assets/Configs/discord.json`. The app reads `config` as a merge of `bot` + `discord` (see [Configuration](docs/CONFIGURATION.md)).
-- **Game behavior**: DM games → `assets/Configs/dm_games.json`; chat games → `assets/Configs/chat_games.json` and `assets/Configs/games/*.json`.
-- **Leveling**: `assets/Configs/leveling.json` and `assets/Configs/levels.json`.
-- **Milestones**: `assets/Configs/milestones.json`.
-- **Rewards / winners**: `assets/Configs/rewards.json`, `assets/Configs/winners.json`.
+- **Secrets in .env (recommended):** Copy `.env.example` to `.env` and set `DISCORD_TOKEN` and, for the database, `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (and optionally `DB_PORT`, `DB_AUTOCOMMIT`). The bot uses these first; `.env` is in `.gitignore` so they are never committed. You can fall back to `token` and `database` in `assets/configs/bot.json` if you leave the env vars unset.
+- **Rest of config:** Set in `assets/configs/bot.json` and `assets/configs/discord.json`. The app reads `config` as a merge of `bot` + `discord` (see [Configuration](docs/CONFIGURATION.md)).
+- **Game behavior**: DM games → `assets/configs/dm_games.json`; chat games → `assets/configs/chat_games.json` and `assets/configs/games/*.json`.
+- **Leveling**: `assets/configs/leveling.json` and `assets/configs/levels.json`.
+- **Milestones**: `assets/configs/milestones.json`.
+- **Rewards / winners**: `assets/configs/rewards.json`, `assets/configs/winners.json`.
 
 Do not commit real tokens or database credentials; use env vars or local overrides as needed.
 

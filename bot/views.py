@@ -4,18 +4,7 @@ from core.loggers import log_tasks
 
 
 async def register_persistent_views(client) -> None:
-    from cogs.chat_game_admin import ChatGameAdminView
-    from cogs.config_management import ConfigManagement, ConfigManagerView, ConfigViewer
-    from cogs.game_manager_cog import (
-        ChatGamesManageView,
-        ChatGamesView,
-        DMGamesManageView,
-        DMGamesManagerView,
-        MainGameManagerView,
-    )
-    from cogs.logs import LogsView
-    from cogs.milestones import MilestonesView
-    from cogs.statistics import StatisticsView
+    from cogs.config_management import ConfigManagement
     from managers.milestones import MilestonesManager
     from ui.all_time_leaderboard import AllTimeLeaderboardView
     from ui.dm_games_view import (
@@ -28,6 +17,17 @@ async def register_persistent_views(client) -> None:
         StartWordleView,
     )
     from ui.sendgames_view import ViewMore
+    from ui.views.chat_game_admin_view import ChatGameAdminView
+    from ui.views.chat_games_manage_view import ChatGamesManageView
+    from ui.views.chat_games_view import ChatGamesView
+    from ui.views.config_manager_view import ConfigManagerView
+    from ui.views.config_viewer_modal import ConfigViewer
+    from ui.views.d_m_games_manage_view import DMGamesManageView
+    from ui.views.d_m_games_manager_view import DMGamesManagerView
+    from ui.views.logs_view import LogsView
+    from ui.views.main_game_manager_view import MainGameManagerView
+    from ui.views.milestones_view import MilestonesView
+    from ui.views.statistics_view import StatisticsView
     from utils.paginator import Paginator
 
     class DummyInteraction:
@@ -99,6 +99,7 @@ async def register_persistent_views(client) -> None:
         log_tasks.error(f"Failed to register Paginator: {e}")
 
     try:
+
         class DummyMessage:
             id = 0
 

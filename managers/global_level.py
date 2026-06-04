@@ -80,7 +80,7 @@ async def backfill_global_levels_from_winners(db: "DatabasePool") -> int:
         return 0
 
     winners_path = (
-        Path(__file__).parent.parent / "assets" / "Configs" / "winners.json"
+        Path(__file__).parent.parent / "assets" / "configs" / "winners.json"
     )
     if not winners_path.is_file():
         return 0

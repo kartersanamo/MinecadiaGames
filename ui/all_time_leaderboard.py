@@ -5,7 +5,6 @@ from managers.milestones import MilestonesManager
 from utils.paginator import Paginator
 from typing import Optional
 
-
 class AllTimeLeaderboardView(discord.ui.View):
     def __init__(self, bot, guild: discord.Guild):
         super().__init__(timeout=None)
@@ -45,7 +44,13 @@ class AllTimeLeaderboardView(discord.ui.View):
             return
         
         # Create paginator with message reference
-        paginator = AllTimeLeaderboardPaginator(self, leaderboard_type, leaderboard_data, message=loading_msg)
+        from ui.all_time_leaderboard_alltimeleaderboardpaginator import (
+            AllTimeLeaderboardPaginator,
+        )
+
+        paginator = AllTimeLeaderboardPaginator(
+            self, leaderboard_type, leaderboard_data, message=loading_msg
+        )
         
         # Edit the loading message with the actual leaderboard
         embed = paginator.create_embed()
@@ -595,169 +600,3 @@ class AllTimeLeaderboardView(discord.ui.View):
                 leaderboard.append(f"**{index}.** {badge_text}<@{user_id}> » {best_score:,} points")
         
         return leaderboard if leaderboard else ["No data available."]
-
-
-class AllTimeLeaderboardPaginator(Paginator):
-    def __init__(self, parent_view: AllTimeLeaderboardView, leaderboard_type: str, leaderboard_data: list, message: Optional[discord.Message] = None):
-        super().__init__(timeout=900)
-        self.parent_view = parent_view
-        self.leaderboard_type = leaderboard_type
-        self.title = f"🏆 All Time Leaderboard - {parent_view._get_leaderboard_title(leaderboard_type)}"
-        self.data = leaderboard_data
-        self.sep = 20  # 20 entries per page
-        self.ephemeral = True
-        self._message = message  # Store message reference for editing
-        
-        # Add select menu
-        self.add_item(AllTimeLeaderboardSelect(self))
-    
-    async def update_message(self, interaction: discord.Interaction):
-        """Override to use stored message reference if available"""
-        self.update_buttons()
-        embed = self.create_embed()
-        
-        # If we have a stored message reference, use it (for the loading message we edited)
-        if self._message:
-            await self._message.edit(embed=embed, view=self)
-        else:
-            # Fall back to default behavior
-            if self.ephemeral:
-                await interaction.edit_original_response(embed=embed, view=self)
-            else:
-                await interaction.message.edit(embed=embed, view=self)
-    
-    async def update_leaderboard_type(self, interaction: discord.Interaction, new_type: str):
-        """Update the leaderboard type and refresh the display"""
-        await interaction.response.defer(ephemeral=True)
-        
-        # Get new leaderboard data
-        leaderboard_data = await self.parent_view.get_all_time_leaderboard(new_type)
-        
-        if not leaderboard_data:
-            await interaction.followup.send("No leaderboard data available.", ephemeral=True)
-            return
-        
-        # Update paginator
-        self.leaderboard_type = new_type
-        self.title = f"🏆 All Time Leaderboard - {self.parent_view._get_leaderboard_title(new_type)}"
-        self.data = leaderboard_data
-        self.current_page = 1
-        
-        # Update display
-        self.update_buttons()
-        embed = self.create_embed()
-        # Use stored message reference if available, otherwise use edit_original_response
-        if self._message:
-            await self._message.edit(embed=embed, view=self)
-        else:
-            await interaction.edit_original_response(embed=embed, view=self)
-
-
-class AllTimeLeaderboardSelect(discord.ui.Select):
-    def __init__(self, paginator: AllTimeLeaderboardPaginator):
-        self.paginator = paginator
-        
-        options = [
-            discord.SelectOption(
-                label="All Time XP",
-                value="all_time_xp",
-                description="Total XP earned across all time",
-                emoji="💰"
-            ),
-            discord.SelectOption(
-                label="All Time Level",
-                value="all_time_level",
-                description="Highest level achieved (calculated from total XP)",
-                emoji="⭐"
-            ),
-            discord.SelectOption(
-                label="Trivia Wins",
-                value="trivia_wins",
-                description="Total Trivia games won",
-                emoji="❓"
-            ),
-            discord.SelectOption(
-                label="Math Quiz Wins",
-                value="math_quiz_wins",
-                description="Total Math Quiz games won",
-                emoji="➕"
-            ),
-            discord.SelectOption(
-                label="Flag Guesser Wins",
-                value="flag_guesser_wins",
-                description="Total Flag Guesser games won",
-                emoji="🏳️"
-            ),
-            discord.SelectOption(
-                label="Unscramble Wins",
-                value="unscramble_wins",
-                description="Total Unscramble games won",
-                emoji="🔤"
-            ),
-            discord.SelectOption(
-                label="Emoji Quiz Wins",
-                value="emoji_quiz_wins",
-                description="Total Emoji Quiz games won",
-                emoji="😀"
-            ),
-            discord.SelectOption(
-                label="TicTacToe Wins",
-                value="tictactoe_wins",
-                description="Total TicTacToe games won",
-                emoji="⭕"
-            ),
-            discord.SelectOption(
-                label="Wordle Wins",
-                value="wordle_wins",
-                description="Total Wordle games won",
-                emoji="📝"
-            ),
-            discord.SelectOption(
-                label="Connect Four Wins",
-                value="connect_four_wins",
-                description="Total Connect Four games won",
-                emoji="❌"
-            ),
-            discord.SelectOption(
-                label="Memory Wins",
-                value="memory_wins",
-                description="Total Memory games won",
-                emoji="🧠"
-            ),
-            discord.SelectOption(
-                label="2048 Wins",
-                value="2048_wins",
-                description="Total 2048 games won (reached 2048 tile)",
-                emoji="🔢"
-            ),
-            discord.SelectOption(
-                label="Minesweeper Wins",
-                value="minesweeper_wins",
-                description="Total Minesweeper games won",
-                emoji="💣"
-            ),
-            discord.SelectOption(
-                label="Hangman Wins",
-                value="hangman_wins",
-                description="Total Hangman games won",
-                emoji="🪢"
-            ),
-            discord.SelectOption(
-                label="2048 Best Score",
-                value="2048_best_score",
-                description="Best score achieved in 2048",
-                emoji="🎯"
-            ),
-        ]
-        
-        super().__init__(
-            placeholder="Select leaderboard type...",
-            options=options,
-            row=1
-        )
-    
-    async def callback(self, interaction: discord.Interaction):
-        """Handle select menu selection"""
-        leaderboard_type = self.values[0]
-        await self.paginator.update_leaderboard_type(interaction, leaderboard_type)
-

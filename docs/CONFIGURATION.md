@@ -7,7 +7,7 @@ This document describes how configuration is loaded, which files exist, and the 
 ## ConfigManager
 
 - **Singleton:** `ConfigManager.get_instance()`.  
-- **Location:** By default, config directory is `assets/Configs` (relative to the project root).  
+- **Location:** By default, config directory is `assets/configs` (relative to the project root).  
 - **API:** `config.get(config_name, key=None, default=None)`.  
   - If `key` is omitted, the whole config (dict) for `config_name` is returned.  
   - If `key` is given, that key is resolved (with backward-compat mapping when applicable) and the value returned.  
@@ -21,16 +21,16 @@ This document describes how configuration is loaded, which files exist, and the 
 
 | File | Purpose |
 |------|---------|
-| `assets/Configs/bot.json` | Presence, counter_debug, embed defaults (color, footer, logo). Token and database are in `.env` (see above). |
-| `assets/Configs/discord.json` | Guild ID, channels (leveling, admin_logs, logs, tickets_category, announce), roles (games_notification, verified, winner), permissions (admin_roles, staff_roles). When you request `'config'`, ConfigManager merges `bot.json` and `discord.json` only. |
-| `assets/Configs/dm_games.json` | Global DM delay, button cooldown; per-game settings under `GAMES` (Wordle, TicTacToe, Connect Four, Memory, 2048, Minesweeper, Hangman). |
-| `assets/Configs/chat_games.json` | Chat game delay (LOWER/UPPER), channels with chance weights, winners count, game length, XP (base + position). High-level game list. |
-| `assets/Configs/games/*.json` | Per–chat-game data: trivia questions, unscramble words, flag/math/emoji quiz data, etc. |
-| `assets/Configs/leveling.json` | Leveling system (often used in conjunction with levels data). |
-| `assets/Configs/levels.json` | Level thresholds (level number → XP required). Used for level calculation. |
-| `assets/Configs/milestones.json` | All milestone definitions by game type and metric (wins, total_games, best_score, level, total_xp_all, leaderboard_first). |
-| `assets/Configs/rewards.json` | Rewards / winner messages (e.g. monthly wipe text). |
-| `assets/Configs/winners.json` | Winner-related copy (titles, placeholders). |
+| `assets/configs/bot.json` | Presence, counter_debug, embed defaults (color, footer, logo). Token and database are in `.env` (see above). |
+| `assets/configs/discord.json` | Guild ID, channels (leveling, admin_logs, logs, tickets_category, announce), roles (games_notification, verified, winner), permissions (admin_roles, staff_roles). When you request `'config'`, ConfigManager merges `bot.json` and `discord.json` only. |
+| `assets/configs/dm_games.json` | Global DM delay, button cooldown; per-game settings under `GAMES` (Wordle, TicTacToe, Connect Four, Memory, 2048, Minesweeper, Hangman). |
+| `assets/configs/chat_games.json` | Chat game delay (LOWER/UPPER), channels with chance weights, winners count, game length, XP (base + position). High-level game list. |
+| `assets/configs/games/*.json` | Per–chat-game data: trivia questions, unscramble words, flag/math/emoji quiz data, etc. |
+| `assets/configs/leveling.json` | Leveling system (often used in conjunction with levels data). |
+| `assets/configs/levels.json` | Level thresholds (level number → XP required). Used for level calculation. |
+| `assets/configs/milestones.json` | All milestone definitions by game type and metric (wins, total_games, best_score, level, total_xp_all, leaderboard_first). |
+| `assets/configs/rewards.json` | Rewards / winner messages (e.g. monthly wipe text). |
+| `assets/configs/winners.json` | Winner-related copy (titles, placeholders). |
 
 ---
 

@@ -6,7 +6,7 @@ This document covers all playable games, where they’re configured, how XP and 
 
 ## DM games
 
-Played in DMs. Triggered from the DM games UI (e.g. **Send Games** flow). Each game has its own cooldown and optional per-game config in `assets/Configs/dm_games.json` under `GAMES`.
+Played in DMs. Triggered from the DM games UI (e.g. **Send Games** flow). Each game has its own cooldown and optional per-game config in `assets/configs/dm_games.json` under `GAMES`.
 
 | Game | Module | Config key | Main features |
 |------|--------|------------|----------------|
@@ -22,13 +22,13 @@ Played in DMs. Triggered from the DM games UI (e.g. **Send Games** flow). Each g
 
 **2048 best score:** 2048 also calls `milestones_manager.check_achievements(..., "best_score", self.score, user=..., channel=..., client=...)` on win/loss/cash out so best-score milestones grant XP.
 
-**Config:** `assets/Configs/dm_games.json` — global `DELAY`, `BUTTON_COOLDOWN`, then `GAMES.<name>` for per-game cooldowns, images, XP ranges, word lists, etc.
+**Config:** `assets/configs/dm_games.json` — global `DELAY`, `BUTTON_COOLDOWN`, then `GAMES.<name>` for per-game cooldowns, images, XP ranges, word lists, etc.
 
 ---
 
 ## Chat games
 
-Run in a single channel on a timer. The **GameManager** chat loop picks a channel (from `CHANNELS` with `CHANCE`), then a game, posts the game message, and tracks time. Winners get position-based XP (e.g. 1st–3rd get more). Config: `assets/Configs/chat_games.json` and per-game files under `assets/Configs/games/`.
+Run in a single channel on a timer. The **GameManager** chat loop picks a channel (from `CHANNELS` with `CHANCE`), then a game, posts the game message, and tracks time. Winners get position-based XP (e.g. 1st–3rd get more). Config: `assets/configs/chat_games.json` and per-game files under `assets/configs/games/`.
 
 | Game | Module | Config | Notes |
 |------|--------|--------|--------|
@@ -43,7 +43,7 @@ Run in a single channel on a timer. The **GameManager** chat loop picks a channe
 
 **Config:**  
 - `chat_games.json`: `DELAY` (LOWER/UPPER seconds between games), `CHANNELS`, `WINNERS`, `GAME_LENGTH`, `XP`, and high-level `GAMES` mapping.  
-- Per-game: `assets/Configs/games/trivia.json`, `unscramble.json`, `flag_guesser.json`, `math_quiz.json`, `emoji_quiz.json`, `chat.json` (etc.) for questions, word lists, and options.
+- Per-game: `assets/configs/games/trivia.json`, `unscramble.json`, `flag_guesser.json`, `math_quiz.json`, `emoji_quiz.json`, `chat.json` (etc.) for questions, word lists, and options.
 
 ---
 

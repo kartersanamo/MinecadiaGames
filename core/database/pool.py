@@ -54,7 +54,7 @@ class DatabasePool:
                 if not db_config or not db_config.get('host') or not db_config.get('database'):
                     raise ValueError(
                         "Database config missing: set DB_HOST, DB_USER, DB_PASSWORD, DB_NAME in .env "
-                        "or DATABASE_CONFIG in assets/Configs/bot.json"
+                        "or DATABASE_CONFIG in assets/configs/bot.json"
                     )
                 import logging
                 logger = logging.getLogger("DatabasePool")

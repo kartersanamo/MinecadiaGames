@@ -4,6 +4,7 @@ from pathlib import Path
 
 os.chdir(Path(__file__).resolve().parent)
 
+from core.app import BotApp
 from core.decorators import task
 from core.loggers import log_tasks
 from bot import game_tasks, listeners, restore, startup, views
@@ -69,6 +70,7 @@ class Client(commands.Bot):
 
     @task("Setup Hook")
     async def setup_hook(self):
+        self.app = BotApp.from_bot(self)
         try:
             log_tasks.info("Starting bot setup...")
             await self.initialize_database_pool()
@@ -217,7 +219,7 @@ async def gamesreload_error(
 
 TOKEN = os.getenv("DISCORD_TOKEN") or client.config.get("config", "TOKEN")
 if not TOKEN:
-    raise ValueError("Set DISCORD_TOKEN in .env or 'token' in assets/Configs/bot.json")
+    raise ValueError("Set DISCORD_TOKEN in .env or 'token' in assets/configs/bot.json")
 
 if __name__ == "__main__":
     client.run(TOKEN)

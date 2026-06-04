@@ -6,7 +6,7 @@ This document describes the leveling system, XP sources, milestone/achievement f
 
 ## Leveling system
 
-- **Levels** are derived from total XP using thresholds in `assets/Configs/levels.json` (or `leveling.json`).  
+- **Levels** are derived from total XP using thresholds in `assets/configs/levels.json` (or `leveling.json`).  
 - **Total XP** is stored in the `leveling` table and also logged per award in `xp_logs` (user_id, xp, source, game_id, channel_id, timestamp).  
 - **LevelingManager** (`managers/leveling.py`): Singleton-style API. Use `LevelingManager()` then `award_xp(user, xp, source, game_id, channel=..., bot=..., test_mode=...)` for all XP grants.  
 - **Debouncing:** Optional per-user debounce to avoid duplicate XP in a short window.  
@@ -33,7 +33,7 @@ All of the above go through `LevelingManager.award_xp`, which updates the leveli
 
 ## Achievements & milestones
 
-- **Definitions:** `assets/Configs/milestones.json` — per game type and metric (e.g. TicTacToe wins, 2048 best_score, Global level, total_xp_all). Each milestone has id, name, threshold, emoji.  
+- **Definitions:** `assets/configs/milestones.json` — per game type and metric (e.g. TicTacToe wins, 2048 best_score, Global level, total_xp_all). Each milestone has id, name, threshold, emoji.  
 - **Storage:** Earned achievements are stored in `user_achievements` (user_id, achievement_id, earned_at).  
 - **MilestonesManager** (`managers/milestones.py`):  
   - `check_achievements(user_id, game_type, metric, value, user=None, channel=None, client=None)` — checks thresholds, calls `_award_achievement` (DB insert), then **if `user` is not None** computes milestone XP (tier-based 400–700 or `milestone['xp']`) and calls `LevelingManager().award_xp(...)`. So **any time a milestone is awarded and `user` is passed, XP is granted via the database.**  
