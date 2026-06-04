@@ -80,7 +80,7 @@ class GameManagerCog(commands.Cog):
             inline=True
         )
         
-   logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         return embed
 

@@ -156,7 +156,7 @@ class ChatGameAdminView(discord.ui.View):
                         value=field.get('value', ''),
                         inline=field.get('inline', False)
                     )
-            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+                logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 
                 # Check if view is a real Discord view (not DummyView)
@@ -367,7 +367,7 @@ class ChatGameAdminView(discord.ui.View):
                 from datetime import datetime, timezone
                 current_unix = int(datetime.now(timezone.utc).timestamp())
                 embed, file = await game._build_embed(country_code, xp_mult, current_unix, test_mode)
-            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+                logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 
                 # Update view

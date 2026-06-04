@@ -167,8 +167,8 @@ class ChatGamesView(discord.ui.View):
     async def recent_games_callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         try:
-                        from core.database.pool import DatabasePool
-            
+            from core.database.pool import DatabasePool
+
             games_str, games_list = await self.bot.app.games.get_recent_games()
             db = await DatabasePool.get_instance()
             game_ids = await db.execute(

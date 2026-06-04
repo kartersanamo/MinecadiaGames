@@ -252,7 +252,7 @@ class Logs(commands.Cog):
             except Exception as e:
                 self.logger.error(f"Error fetching game data from {table_name}: {e}")
         
-   logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         await interaction.followup.send(embed=embed, ephemeral=True)
@@ -349,7 +349,7 @@ class Logs(commands.Cog):
                 inline=False
             )
         
-   logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         await interaction.followup.send(embed=embed, ephemeral=True)

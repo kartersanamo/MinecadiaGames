@@ -138,7 +138,7 @@ class WipeLevels(commands.Cog):
                         f"**One of our staff members will be with you shortly.**"
                     )
                 )
-            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+                logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 await channel.send(content=user.mention)
                 await channel.send(embed=embed)
@@ -164,7 +164,7 @@ class WipeLevels(commands.Cog):
                     timestamp=datetime.now(timezone.utc)
                 )
                 log_embed.set_thumbnail(url=interaction.user.avatar.url if interaction.user.avatar else None)
-            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+                logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 log_embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 files = [discord.File("leveling.csv")]
                 if logo_url and logo_url.startswith("attachment://") and not self.config.get('config', 'LOGO').startswith(("http://", "https://")):

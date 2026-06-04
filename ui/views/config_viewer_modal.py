@@ -180,7 +180,7 @@ class ConfigViewer(discord.ui.View):
             
             view = ConfigViewer(self.config_manager, self.config_name, config_data, self.path)
             embed = await view.create_embed()
-                        logo_url = self.bot.app.embeds.get_logo_url(self.config_manager.get('config', 'LOGO'))
+            logo_url = interaction.client.app.embeds.get_logo_url(self.config_manager.get('config', 'LOGO'))
             embed.set_footer(text=self.config_manager.get('config', 'FOOTER'), icon_url=logo_url)
             await interaction.response.edit_message(embed=embed, view=view)
         except Exception as e:

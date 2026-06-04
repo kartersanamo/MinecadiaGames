@@ -61,7 +61,7 @@ class DMGamesView(discord.ui.View):
                     description="⏳ Loading leaderboard data... Please wait.",
                     color=discord.Color.from_str(config.get('config', 'EMBED_COLOR'))
                 )
-            logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
+                logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
                 loading_embed.set_footer(text=config.get('config', 'FOOTER'), icon_url=logo_url)
                 loading_msg = await interaction.followup.send(embed=loading_embed, ephemeral=True, wait=True)
                 
@@ -74,7 +74,7 @@ class DMGamesView(discord.ui.View):
                         description="No leaderboard data available.",
                         color=discord.Color.from_str(config.get('config', 'EMBED_COLOR'))
                     )
-            logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
+                    logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
                     error_embed.set_footer(text=config.get('config', 'FOOTER'), icon_url=logo_url)
                     await loading_msg.edit(embed=error_embed)
                     return
