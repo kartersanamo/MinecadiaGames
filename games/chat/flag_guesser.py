@@ -1,7 +1,7 @@
+from services.asset_path_service import AssetPathService
 import asyncio
 import random
 import os
-import uuid
 import urllib.request
 import json
 import requests
@@ -54,9 +54,8 @@ class FlagGuesser(ChatGame):
     
     async def _build_embed(self, country_code: str, xp_multiplier: float, end_time: int, test_mode: bool = False) -> Tuple[discord.Embed, discord.File]:
         response = requests.get(f"https://flagcdn.com/w2560/{country_code}.png")
-        from utils.paths import generated_image_path
-
-        output_path = generated_image_path("flag_guesser", self._game_id)
+        
+        output_path = AssetPathService.generated_image_path("flag_guesser", self._game_id)
         with open(output_path, "wb") as f:
             f.write(response.content)
         
@@ -113,8 +112,7 @@ class FlagGuesser(ChatGame):
             
             view = CountryButtons(correct_answer, answers, xp_mult, game_id, self.bot, self.config, test_mode=test_mode)
             embed, file = await self._build_embed(country_code, xp_mult, end_time, test_mode=test_mode)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             # Store the file object and path for later edits (need to re-attach on every edit)
@@ -132,7 +130,7 @@ class FlagGuesser(ChatGame):
             view.message = message  # Store message reference for real-time updates
             
             # Register game in registry for admin commands
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             original_state = {
                 'correct_answer': correct_answer,
                 'country_code': country_code,
@@ -208,7 +206,7 @@ class FlagGuesser(ChatGame):
                     await self._update_game_status('Finished')
                     
                     # Unregister game from registry
-                    from utils.chat_game_registry import registry
+                    from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
                     
                     # Clean up the image file at the end
@@ -300,7 +298,7 @@ class CountryButtons(discord.ui.View):
         async def callback(interaction: discord.Interaction):
             # One answer per user: reject if they already answered (right or wrong)
             if interaction.user.id in self.answered_user_ids:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 if self.message:
                     registry.log_activity(
                         self.message.id,
@@ -316,7 +314,7 @@ class CountryButtons(discord.ui.View):
                 return
             
             # Log activity
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             if self.message:
                 registry.log_activity(
                     self.message.id,

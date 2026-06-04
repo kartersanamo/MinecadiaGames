@@ -5,10 +5,8 @@ from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
 from pathlib import Path
 import json
-from typing import Any, Dict, List
+from typing import Any, List
 from ui.views.config_manager_view import ConfigManagerView
-from ui.views.config_viewer_modal import ConfigViewer
-from ui.modals.edit_config_modal import EditConfigModal
 
 class ConfigManagement(commands.Cog):
     def __init__(self, bot):
@@ -183,8 +181,7 @@ class ConfigManagement(commands.Cog):
             description="Select a configuration file to view and edit:",
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         await interaction.response.send_message(embed=embed, view=view)
 

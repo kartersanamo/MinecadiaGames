@@ -8,7 +8,6 @@ from games.dm.connect_four import ConnectFour
 from games.dm.memory import Memory
 from games.dm.twenty_forty_eight import TwentyFortyEight
 from games.dm.hangman import Hangman
-from utils.helpers import check_dm_game_requirements
 
 class DMGamesView(discord.ui.View):
     def __init__(self, bot, active_game: str):
@@ -48,7 +47,7 @@ class DMGamesView(discord.ui.View):
             try:
                 await interaction.response.defer(ephemeral=True)
                 
-                from utils.paginator import Paginator
+                from ui.paginator import Paginator
                 from ui.sendgames_view import SendGamesView
                 from core.logging.setup import get_logger
                 from core.config.manager import ConfigManager
@@ -62,8 +61,7 @@ class DMGamesView(discord.ui.View):
                     description="⏳ Loading leaderboard data... Please wait.",
                     color=discord.Color.from_str(config.get('config', 'EMBED_COLOR'))
                 )
-                from utils.helpers import get_embed_logo_url
-                logo_url = get_embed_logo_url(config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
                 loading_embed.set_footer(text=config.get('config', 'FOOTER'), icon_url=logo_url)
                 loading_msg = await interaction.followup.send(embed=loading_embed, ephemeral=True, wait=True)
                 
@@ -76,8 +74,7 @@ class DMGamesView(discord.ui.View):
                         description="No leaderboard data available.",
                         color=discord.Color.from_str(config.get('config', 'EMBED_COLOR'))
                     )
-                    from utils.helpers import get_embed_logo_url
-                    logo_url = get_embed_logo_url(config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
                     error_embed.set_footer(text=config.get('config', 'FOOTER'), icon_url=logo_url)
                     await loading_msg.edit(embed=error_embed)
                     return
@@ -116,7 +113,7 @@ class DMGamesView(discord.ui.View):
         )
         
         async def callback(interaction: discord.Interaction):
-            can_play, game_id, error = await check_dm_game_requirements(interaction, 'wordle', self.config)
+            can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(interaction, 'wordle', self.config)
             if not can_play:
                 await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
                 return
@@ -137,8 +134,7 @@ class DMGamesView(discord.ui.View):
             )
             wordle_config = self.config.get('wordle', {})
             embed.set_image(url=wordle_config.get('IMAGE'))
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = StartWordleView(interaction, self.bot)
@@ -163,7 +159,7 @@ class DMGamesView(discord.ui.View):
         from core.logging.setup import get_logger
         logger = get_logger("UI")
         try:
-            can_play, game_id, error = await check_dm_game_requirements(interaction, 'tictactoe', self.config)
+            can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(interaction, 'tictactoe', self.config)
             if not can_play:
                 await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
                 return
@@ -186,8 +182,7 @@ class DMGamesView(discord.ui.View):
             image_url = tictactoe_config.get('IMAGE') or tictactoe_config.get('image_url')
             if image_url:
                 embed.set_image(url=image_url)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = StartTicTacToeView(interaction, self.bot)
@@ -224,7 +219,7 @@ class DMGamesView(discord.ui.View):
         )
         
         async def callback(interaction: discord.Interaction):
-            can_play, game_id, error = await check_dm_game_requirements(interaction, 'memory', self.config)
+            can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(interaction, 'memory', self.config)
             if not can_play:
                 await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
                 return
@@ -247,8 +242,7 @@ class DMGamesView(discord.ui.View):
                 value=f"The memory game is well... a game of memory. You have a hidden board of emojis that you must match. You have __{tries}__ fails to match all of the hidden emojis. Begin by clicking on any two spots. If they match, congrats; you get to keep those emojis shown, and XP is granted. If they do not match, then they will be flipped back over, and you lose a \"try\". Try to remember what those emojis were, because you'll need them later!\n \n**Let the best memory win!**"
             )
             embed.set_image(url=image_url)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = StartMemoryView(interaction, self.bot)
@@ -268,7 +262,7 @@ class DMGamesView(discord.ui.View):
         )
         
         async def callback(interaction: discord.Interaction):
-            can_play, game_id, error = await check_dm_game_requirements(interaction, 'connect four', self.config)
+            can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(interaction, 'connect four', self.config)
             if not can_play:
                 await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
                 return
@@ -290,8 +284,7 @@ class DMGamesView(discord.ui.View):
                 connect_four_config = games.get('Connect Four', {})
             image_url = connect_four_config.get('IMAGE') or connect_four_config.get('image_url')
             embed.set_image(url=image_url)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = StartConnectFourView(interaction, self.bot)
@@ -311,7 +304,7 @@ class DMGamesView(discord.ui.View):
         )
         
         async def callback(interaction: discord.Interaction):
-            can_play, game_id, error = await check_dm_game_requirements(interaction, '2048', self.config)
+            can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(interaction, '2048', self.config)
             if not can_play:
                 await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
                 return
@@ -325,8 +318,7 @@ class DMGamesView(discord.ui.View):
                 name="How do I play?",
                 value="2048 is a puzzle game where you combine numbered tiles on a 4x4 grid. Use the direction buttons (⬆️⬇️⬅️➡️) to move all tiles in that direction. When two tiles with the same number touch, they merge into one with double the value! Your goal is to reach the **2048** tile. The game ends when the board is full and no moves are possible. Try to get the highest score possible!\n\n**Good luck!**"
             )
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = Start2048View(interaction, self.bot)
@@ -346,7 +338,7 @@ class DMGamesView(discord.ui.View):
         )
         
         async def callback(interaction: discord.Interaction):
-            can_play, game_id, error = await check_dm_game_requirements(interaction, 'minesweeper', self.config)
+            can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(interaction, 'minesweeper', self.config)
             if not can_play:
                 await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
                 return
@@ -361,8 +353,7 @@ class DMGamesView(discord.ui.View):
                 value="Minesweeper is a puzzle game where you reveal cells on a 5x5 grid. Some cells contain mines - click on one and you lose! Numbers show how many mines are adjacent to that cell. Use the flag button to mark suspected mines. Reveal all non-mine cells to win!\n\n**Good luck!**",
                 inline=False
             )
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = StartMinesweeperView(interaction, self.bot)
@@ -382,7 +373,7 @@ class DMGamesView(discord.ui.View):
         )
         
         async def callback(interaction: discord.Interaction):
-            can_play, game_id, error = await check_dm_game_requirements(interaction, 'hangman', self.config)
+            can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(interaction, 'hangman', self.config)
             if not can_play:
                 await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
                 return
@@ -404,8 +395,7 @@ class DMGamesView(discord.ui.View):
             )
             if image_url:
                 embed.set_image(url=image_url)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = StartHangmanView(interaction, self.bot)

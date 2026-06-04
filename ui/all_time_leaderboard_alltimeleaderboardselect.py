@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import discord
 
-from utils.paginator import Paginator
 
 if TYPE_CHECKING:
     from ui.all_time_leaderboard_alltimeleaderboardpaginator import AllTimeLeaderboardPaginator

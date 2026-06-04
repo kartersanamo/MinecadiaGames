@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Optional
 import discord
 from aiohttp import web
 
-from utils.chat_game_registry import registry
+from services.chat_game_registry import registry
 
 if TYPE_CHECKING:
     from bot import MinecadiaBot
@@ -183,7 +183,7 @@ async def handle_session_live(request: web.Request, bot: "MinecadiaBot") -> web.
 
 
 async def handle_active_sessions(_request: web.Request, bot: "MinecadiaBot") -> web.Response:
-    from utils.chat_game_registry import registry
+    from services.chat_game_registry import registry
 
     _ = bot
     return web.json_response({"gameIds": registry.active_game_ids()})

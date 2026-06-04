@@ -5,7 +5,6 @@ from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
 from managers.leveling import LevelingManager
-from utils.achievements import check_game_achievements
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
@@ -69,8 +68,7 @@ class Daily(commands.Cog):
                     ),
                     color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
                 )
-                from utils.helpers import get_embed_logo_url
-                logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
@@ -104,7 +102,7 @@ class Daily(commands.Cog):
         )
         await lvl_mng.update()
 
-        await check_game_achievements(
+        await self.bot.app.achievements.check_game_achievements(
             interaction.user,
             "Daily",
             "streak",
@@ -132,8 +130,7 @@ class Daily(commands.Cog):
                 inline=False
             )
         
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+   logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         await interaction.followup.send(embed=embed, ephemeral=False)
     

@@ -73,9 +73,7 @@ class GuessTheNumber(ChatGame):
             )
             
             view = GuessTheNumberButtons(secret_number, min_range, max_range, xp_mult, game_id, self.bot, self.config, self.chat_config, test_mode=test_mode)
-            
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             # Register view for persistence across bot restarts
             self.bot.add_view(view)
@@ -83,7 +81,7 @@ class GuessTheNumber(ChatGame):
             view.message = message  # Store message reference for real-time updates
             
             # Register game in registry for admin commands
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             original_state = {
                 'secret_number': secret_number,
                 'min_range': min_range,
@@ -167,7 +165,7 @@ class GuessTheNumber(ChatGame):
                     await self._update_game_status('Finished')
                     
                     # Unregister game from registry
-                    from utils.chat_game_registry import registry
+                    from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
             except discord.NotFound:
                 # Message was deleted, that's okay
@@ -392,7 +390,7 @@ class GuessTheNumberButtons(discord.ui.View):
 
             # Log activity
             if self.message:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 registry.log_activity(
                     self.message.id,
                     user_id,
@@ -464,7 +462,7 @@ class GuessTheNumberButtons(discord.ui.View):
             
             # Log activity
             if self.message:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 registry.log_activity(
                     self.message.id,
                     user_id,

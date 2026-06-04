@@ -1,3 +1,4 @@
+from services.embed_service import EmbedService
 import discord
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
@@ -44,8 +45,7 @@ class ViewMore(discord.ui.View):
                 '**TIP:** Type </level:1179528065643196557> in any channel to view how many levels you have. :gift:'
             )
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+                logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         help_embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         await interaction.response.send_message(embed=help_embed, ephemeral=True)
     
@@ -119,7 +119,7 @@ class ViewMore(discord.ui.View):
     
     @discord.ui.button(label="Past Winners", emoji="📊", custom_id="past_winners", style=discord.ButtonStyle.grey, row=1)
     async def past_winners(self, interaction: discord.Interaction, button: discord.ui.Button):
-        from utils.paginator import Paginator
+        from ui.paginator import Paginator
         from core.logging.setup import get_logger
         logger = get_logger("UI")
         
@@ -194,11 +194,10 @@ class ViewMore(discord.ui.View):
     
     @discord.ui.button(label="Past Games", emoji="🎮", custom_id="past_games", style=discord.ButtonStyle.grey, row=1)
     async def past_games(self, interaction: discord.Interaction, button: discord.ui.Button):
-        from utils.paginator import Paginator
-        from utils.helpers import get_recent_games
-        from core.database.pool import DatabasePool
+        from ui.paginator import Paginator
+                from core.database.pool import DatabasePool
         
-        games_str, games_list = await get_recent_games()
+        games_str, games_list = await bot.app.games.get_recent_games()
         
         # Get game_ids for dropdown
         db = await DatabasePool.get_instance()

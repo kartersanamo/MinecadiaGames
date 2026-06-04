@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-import discord
 from discord.ext import commands
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool

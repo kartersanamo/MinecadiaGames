@@ -1,8 +1,5 @@
 import discord
-from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
-from ui.dm_games_view import DMGamesView
-from pathlib import Path
 
 
 class SendGamesView(discord.ui.View):

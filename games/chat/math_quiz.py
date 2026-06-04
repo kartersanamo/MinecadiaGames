@@ -1,7 +1,7 @@
 import asyncio
 import random
 from datetime import datetime, timezone
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Dict
 import discord
 import mathgenerator
 from pylatexenc.latex2text import LatexNodes2Text
@@ -321,9 +321,7 @@ class MathQuiz(ChatGame):
             embed.add_field(name=f"{question_type}", value=problem, inline=False)
             
             view = MathQuizButtons(solution, answers, xp_mult, game_id, self.bot, self.config, self.chat_config, test_mode=test_mode)
-            
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             # Register view for persistence across bot restarts
             self.bot.add_view(view)
@@ -331,7 +329,7 @@ class MathQuiz(ChatGame):
             view.message = message  # Store message reference for real-time updates
             
             # Register game in registry for admin commands
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             original_state = {
                 'correct_answer': solution,
                 'problem': problem,
@@ -387,7 +385,7 @@ class MathQuiz(ChatGame):
                     await self._update_game_status('Finished')
                     
                     # Unregister game from registry
-                    from utils.chat_game_registry import registry
+                    from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
             except discord.NotFound:
                 # Message was deleted, that's okay
@@ -481,7 +479,7 @@ class MathQuizButtons(discord.ui.View):
             guesses = self.user_guesses[user_id]
             
             # Log activity
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             if self.message:
                 registry.log_activity(
                     self.message.id,

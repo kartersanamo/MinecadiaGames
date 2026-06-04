@@ -3,8 +3,7 @@ from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
-from typing import Optional, Dict, List
-import random
+from typing import Optional, Dict
 import os
 import asyncio
 from datetime import datetime, timezone
@@ -540,8 +539,7 @@ class Practice(commands.Cog):
             timestamp=datetime.now(timezone.utc)
         )
         embed.add_field(name="Problem", value=problem, inline=False)
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         # Set button labels
@@ -598,8 +596,7 @@ class Practice(commands.Cog):
         embed, file = await game._build_embed(country_code, 1.0, current_unix, test_mode=True)
         embed.title = "🧪 Practice Flag Guesser"
         embed.description = "Click an answer below!"
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         # Create practice view
@@ -708,8 +705,7 @@ class Practice(commands.Cog):
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR')),
             timestamp=datetime.now(timezone.utc)
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         file = discord.File(image_path, filename="unscramble.png")
@@ -804,8 +800,7 @@ class Practice(commands.Cog):
             timestamp=datetime.now(timezone.utc)
         )
         embed.add_field(name="What do these emojis represent?", value=emojis, inline=False)
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         message = await dm_channel.send(embed=embed, view=view)
@@ -883,8 +878,7 @@ class Practice(commands.Cog):
             value=f"**{min_range} - {max_range}**",
             inline=False
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         message = await dm_channel.send(embed=embed, view=view)
@@ -926,8 +920,7 @@ class Practice(commands.Cog):
                     f"**Total XP Would Have Earned:** {total_xp}"
                 )
             )
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             if dm_channel:

@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Optional
 
 import discord
 from discord import app_commands
@@ -8,7 +7,7 @@ from discord.ext import commands
 from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
 from ui.views.chat_game_admin_view import ChatGameAdminView
-from utils.chat_game_registry import registry
+from services.chat_game_registry import registry
 
 
 def _check_admin(interaction: discord.Interaction) -> bool:
@@ -160,9 +159,8 @@ async def manage_chat_game(interaction: discord.Interaction, message: discord.Me
         inline=False,
     )
 
-    from utils.helpers import get_embed_logo_url
-
-    logo_url = get_embed_logo_url(config.get("config", "LOGO"))
+    
+    logo_url = self.bot.app.embeds.get_logo_url(config.get("config", "LOGO"))
     panel_embed.set_footer(text=config.get("config", "FOOTER"), icon_url=logo_url)
 
     await interaction.response.send_message(

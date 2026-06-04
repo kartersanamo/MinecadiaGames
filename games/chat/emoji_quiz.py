@@ -90,9 +90,7 @@ class EmojiQuiz(ChatGame):
             
             # Get correct answer
             correct_answer = question_data.get('answer', '').strip()
-            
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = EmojiQuizButtons(correct_answer, question_data, xp_mult, game_id, self.bot, self.config, self.chat_config, test_mode=test_mode)
@@ -103,7 +101,7 @@ class EmojiQuiz(ChatGame):
             view.message = message  # Store message reference for real-time updates
             
             # Register game in registry for admin commands
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             original_state = {
                 'correct_answer': correct_answer,
                 'question': question_data,
@@ -182,7 +180,7 @@ class EmojiQuiz(ChatGame):
                     await self._update_game_status('Finished')
                     
                     # Unregister game from registry
-                    from utils.chat_game_registry import registry
+                    from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
             except discord.NotFound:
                 # Message was deleted, that's okay
@@ -339,7 +337,7 @@ class EmojiQuizButtons(discord.ui.View):
             await lvl_mng.update()
 
             if self.message:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 registry.log_activity(
                     self.message.id,
                     user_id,
@@ -390,7 +388,7 @@ class EmojiQuizButtons(discord.ui.View):
                     logger.error(traceback.format_exc())
         else:
             if self.message:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 registry.log_activity(
                     self.message.id,
                     user_id,

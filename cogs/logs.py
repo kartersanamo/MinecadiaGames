@@ -6,7 +6,7 @@ from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
-from utils.paginator import Paginator
+from ui.paginator import Paginator
 from ui.views.logs_view import LogsView
 from ui.views.logs_filter_select_view import LogsFilterSelect
 from ui.views.logs_paginator_view import LogsPaginator
@@ -252,8 +252,7 @@ class Logs(commands.Cog):
             except Exception as e:
                 self.logger.error(f"Error fetching game data from {table_name}: {e}")
         
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+   logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         await interaction.followup.send(embed=embed, ephemeral=True)
@@ -350,8 +349,7 @@ class Logs(commands.Cog):
                 inline=False
             )
         
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+   logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         await interaction.followup.send(embed=embed, ephemeral=True)

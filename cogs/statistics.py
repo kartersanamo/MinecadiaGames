@@ -1,5 +1,4 @@
 
-from utils.helpers import get_embed_logo_url
 from discord.ext import commands
 from discord import app_commands
 import discord
@@ -7,8 +6,7 @@ from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
 from core.config.manager import ConfigManager
 from datetime import datetime, timezone
-from typing import Optional, Dict, List
-from utils.paginator import Paginator
+from typing import Optional
 from ui.views.statistics_view import StatisticsView
 
 class Statistics(commands.Cog):
@@ -132,8 +130,7 @@ class Statistics(commands.Cog):
             )
         
         embed.set_thumbnail(url=user.display_avatar.url)
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         return embed

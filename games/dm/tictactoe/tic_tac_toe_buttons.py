@@ -1,79 +1,12 @@
 import random
 import os
-import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Optional, List, Tuple
+from typing import Optional
 from PIL import Image, ImageDraw, ImageFont
 import discord
-from games.base.dm_game import DMGame
 from managers.leveling import LevelingManager
-from utils.helpers import get_last_game_id
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
-
-
-class TicTacToe(DMGame):
-    def __init__(self, bot):
-        super().__init__(bot)
-        # Support both old and new config structure
-        games = self.dm_config.get('GAMES', {})
-        if not games:
-            games = self.dm_config.get('games', {})
-        self.game_config = games.get('TicTacToe', {})
-        self.logger = get_logger("DMGames")
-    
-    async def _run_game(self, user: discord.User, game_name: str, test_mode: bool = False) -> bool:
-        try:
-            if test_mode:
-                last_game_id = -999999  # Fake game_id for test mode
-            else:
-                last_game_id = await get_last_game_id('tictactoe')
-                if not last_game_id:
-                    return False
-            
-            test_label = " 🧪 TEST GAME 🧪" if test_mode else ""
-            
-            view = TicTacToeButtons(last_game_id, self.bot, self.config, self.game_config, test_mode=test_mode)
-            # Register view for persistence across bot restarts
-            self.bot.add_view(view)
-            
-            # Generate initial empty board image
-            initial_image_path = await view.generate_board_image()
-            initial_image_file = discord.File(initial_image_path, filename="tictactoe.png")
-            
-            embed = discord.Embed(
-                title=f"TicTacToe #{last_game_id}{test_label}",
-                description="Welcome to TicTacToe! Begin by clicking on any of the center 9 buttons below!",
-                color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
-            )
-            embed.set_image(url="attachment://tictactoe.png")
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
-            embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
-            
-            await user.send(embed=embed, view=view, file=initial_image_file)
-            
-            # Clean up initial image after sending
-            try:
-                os.remove(initial_image_path)
-            except:
-                pass
-            
-            if not test_mode:
-                db = await self._get_db()
-                current_unix = int(datetime.now(timezone.utc).timestamp())
-                await db.execute_insert(
-                    "INSERT INTO users_tictactoe (game_id, user_id, won, ended_at, started_at) VALUES (%s, %s, %s, %s, %s)",
-                    (last_game_id, user.id, 'Started', 0, current_unix)
-                )
-            
-            self.logger.info(f"TicTacToe ({user.name}#{user.discriminator})")
-            return True
-        except Exception as e:
-            self.logger.error(f"TicTacToe error: {e}")
-            return False
-
-
 class TicTacToeButtons(discord.ui.View):
     def __init__(self, game_id: int, bot, config, game_config, test_mode: bool = False, saved_state: dict = None):
         super().__init__(timeout=None)
@@ -141,11 +74,9 @@ class TicTacToeButtons(discord.ui.View):
             return
         
         try:
-            from utils.game_state_manager import save_game_state
             state = self._get_state()
-            await save_game_state('tictactoe', self.game_id, self.player_id, state, self.test_mode)
+            await self.bot.app.game_state.save('tictactoe', self.game_id, self.player_id, state, self.test_mode)
         except Exception as e:
-            from core.logging.setup import get_logger
             self.logger.error(f"Error saving TicTacToe game state: {e}")
     
     def create_callback(self, index: int, row: int, col: int):
@@ -213,7 +144,7 @@ class TicTacToeButtons(discord.ui.View):
         if self.test_mode:
             return True
         
-        last_game_id = await get_last_game_id('tictactoe')
+        last_game_id = await self.bot.app.games.get_last_game_id('tictactoe')
         if self.game_id != last_game_id:
             await interaction.response.send_message(
                 "`❌` Sorry, but this game has already ended. Please go to the leveling channel to begin another one!",
@@ -337,9 +268,8 @@ class TicTacToeButtons(discord.ui.View):
                         )
             
             # Save image
-            from utils.paths import generated_image_path
 
-            output_path = generated_image_path("tictactoe", self.game_id)
+            output_path = self.bot.app.paths.generated_image_path("tictactoe", self.game_id)
             base_image.save(output_path)
         
         return str(output_path)
@@ -400,8 +330,7 @@ class TicTacToeButtons(discord.ui.View):
                 await lvl_mng.update()
                 
                 # Check for achievements
-                from utils.achievements import check_dm_game_win
-                await check_dm_game_win(interaction.user, "TicTacToe", interaction.channel, self.bot)
+                await self.bot.app.achievements.check_dm_game_win(interaction.user, "TicTacToe", interaction.channel, self.bot)
         elif result == "O":
             await interaction.channel.send(
                 f"`❌` Sorry {interaction.user.mention}, the bot has beat you in TicTacToe! Come back later to try again!"
@@ -420,4 +349,3 @@ class TicTacToeButtons(discord.ui.View):
                     "UPDATE users_tictactoe SET won = 'Tied', ended_at = %s WHERE user_id = %s AND game_id = %s",
                     (current_unix, interaction.user.id, self.game_id)
                 )
-

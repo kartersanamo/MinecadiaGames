@@ -1,15 +1,6 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
-from core.config.manager import ConfigManager
 from managers.game_manager import GameManager
-from utils.paginator import Paginator
-from utils.helpers import get_recent_games
 from core.logging.setup import get_logger
-from datetime import datetime, timezone
-from typing import Optional
-import asyncio
-import random
 
 
 class ForceChatGameModal(discord.ui.Modal, title="Force Send Chat Game"):

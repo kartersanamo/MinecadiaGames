@@ -3,8 +3,7 @@ from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
 from managers.game_manager import GameManager
-from utils.paginator import Paginator
-from utils.helpers import get_recent_games
+from ui.paginator import Paginator
 from core.logging.setup import get_logger
 from datetime import datetime, timezone
 from typing import Optional
@@ -160,8 +159,7 @@ class ChatGamesView(discord.ui.View):
             description="Select a game to enable/disable it from rotation.",
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         interaction.client.add_view(view)
         await interaction.followup.send(embed=embed, view=view, ephemeral=True)
@@ -169,10 +167,9 @@ class ChatGamesView(discord.ui.View):
     async def recent_games_callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         try:
-            from utils.helpers import get_recent_games
-            from core.database.pool import DatabasePool
+                        from core.database.pool import DatabasePool
             
-            games_str, games_list = await get_recent_games()
+            games_str, games_list = await self.bot.app.games.get_recent_games()
             db = await DatabasePool.get_instance()
             game_ids = await db.execute(
                 "SELECT game_id, game_name, refreshed_at, dm_game FROM games ORDER BY refreshed_at DESC LIMIT 100"

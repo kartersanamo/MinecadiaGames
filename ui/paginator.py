@@ -4,9 +4,9 @@ from typing import List, Optional
 from core.config.manager import ConfigManager
 
 
-from utils.paths import LOGO_PATH
+from services.asset_path_service import AssetPathService
 
-LOGO = LOGO_PATH
+LOGO = AssetPathService.LOGO_PATH
 
 
 class Paginator(discord.ui.View):
@@ -73,8 +73,8 @@ class Paginator(discord.ui.View):
                     embed.description += f"{item}\n"
         
         if footer_text:
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(LOGO)
+            
+            logo_url = self.bot.app.embeds.get_logo_url(LOGO)
             embed.set_footer(icon_url=logo_url, text=footer_text)
         
         return embed
@@ -334,7 +334,6 @@ class GameIdSelect(discord.ui.Select):
         )
     
     async def callback(self, interaction: discord.Interaction):
-        from managers.game_manager import GameManager
         from core.config.manager import ConfigManager
         from datetime import datetime
         
@@ -545,8 +544,8 @@ class GameIdSelect(discord.ui.Select):
                 inline=False
             )
         
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(config.get('config', 'LOGO'))
+        
+        logo_url = self.bot.app.embeds.get_logo_url(config.get('config', 'LOGO'))
         embed.set_footer(text=config.get('config', 'FOOTER'), icon_url=logo_url)
         
         # Try to get game_manager from paginator first, then from client

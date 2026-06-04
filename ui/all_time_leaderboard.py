@@ -2,8 +2,6 @@ import discord
 from core.database.pool import DatabasePool
 from core.config.manager import ConfigManager
 from managers.milestones import MilestonesManager
-from utils.paginator import Paginator
-from typing import Optional
 
 class AllTimeLeaderboardView(discord.ui.View):
     def __init__(self, bot, guild: discord.Guild):
@@ -23,8 +21,7 @@ class AllTimeLeaderboardView(discord.ui.View):
             description="⏳ Loading leaderboard data... Please wait.",
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         loading_embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         loading_msg = await interaction.followup.send(embed=loading_embed, ephemeral=True, wait=True)
         
@@ -37,8 +34,7 @@ class AllTimeLeaderboardView(discord.ui.View):
                 description="No leaderboard data available.",
                 color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
             )
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             error_embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             await loading_msg.edit(embed=error_embed)
             return

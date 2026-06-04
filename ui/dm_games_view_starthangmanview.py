@@ -1,14 +1,5 @@
-import json
-import re
 import discord
-from core.config.manager import ConfigManager
-from games.dm.wordle import Wordle
-from games.dm.tictactoe import TicTacToe
-from games.dm.connect_four import ConnectFour
-from games.dm.memory import Memory
-from games.dm.twenty_forty_eight import TwentyFortyEight
 from games.dm.hangman import Hangman
-from utils.helpers import check_dm_game_requirements
 
 
 class StartHangmanView(discord.ui.View):

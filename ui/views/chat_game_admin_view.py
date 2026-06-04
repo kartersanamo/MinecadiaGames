@@ -3,7 +3,7 @@ from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
-from utils.chat_game_registry import registry
+from services.chat_game_registry import registry
 from datetime import datetime, timezone
 from typing import Optional
 import asyncio
@@ -97,8 +97,7 @@ class ChatGameAdminView(discord.ui.View):
             description=f"**Answer:** {answer}",
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         # Log activity (will silently fail if game not in registry, which is fine)
@@ -157,9 +156,7 @@ class ChatGameAdminView(discord.ui.View):
                         value=field.get('value', ''),
                         inline=field.get('inline', False)
                     )
-                
-                from utils.helpers import get_embed_logo_url
-                logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 
                 # Check if view is a real Discord view (not DummyView)
@@ -370,8 +367,7 @@ class ChatGameAdminView(discord.ui.View):
                 from datetime import datetime, timezone
                 current_unix = int(datetime.now(timezone.utc).timestamp())
                 embed, file = await game._build_embed(country_code, xp_mult, current_unix, test_mode)
-                from utils.helpers import get_embed_logo_url
-                logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
                 embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
                 
                 # Update view
@@ -683,8 +679,7 @@ class ChatGameAdminView(discord.ui.View):
             description="\n".join(log_lines) if log_lines else "No activity",
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
         )
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=f"Total entries: {len(activity_log)}", icon_url=logo_url)
         
         await interaction.followup.send(embed=embed, ephemeral=True)

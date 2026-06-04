@@ -1,10 +1,8 @@
 import logging
 import logging.config
 import logging.handlers
-from pathlib import Path
 from datetime import datetime
 import pytz
-from typing import Optional
 
 
 EST = pytz.timezone('US/Eastern')

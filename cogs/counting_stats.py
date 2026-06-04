@@ -77,8 +77,7 @@ class CountingStats(commands.Cog):
             embed.add_field(name="Total Counts", value=str(stats["total_counts"]), inline=False)
             embed.add_field(name="Highest Count", value=str(stats["highest_count"]), inline=False)
             embed.add_field(name="Mistakes", value=str(stats["mistakes"]), inline=False)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -95,8 +94,7 @@ class CountingStats(commands.Cog):
         embed.add_field(name="Last Count", value=str(server_stats["last_number"]), inline=False)
         embed.add_field(name="Total Counts", value=str(server_stats["total_counts"]), inline=False)
         embed.add_field(name="Highest Count", value=str(server_stats["highest_count"]), inline=False)
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         
         if top_users:

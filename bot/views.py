@@ -28,7 +28,7 @@ async def register_persistent_views(client) -> None:
     from ui.views.main_game_manager_view import MainGameManagerView
     from ui.views.milestones_view import MilestonesView
     from ui.views.statistics_view import StatisticsView
-    from utils.paginator import Paginator
+    from ui.paginator import Paginator
 
     class DummyInteraction:
         def __init__(self):

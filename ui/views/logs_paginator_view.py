@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-from utils.paginator import Paginator
+from ui.paginator import Paginator
 
 if TYPE_CHECKING:
     from ui.views.logs_view import LogsView

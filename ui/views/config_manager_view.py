@@ -1,11 +1,6 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
-from core.logging.setup import get_logger
-from pathlib import Path
-import json
-from typing import Any, Dict, List
+from typing import List
 
 
 class ConfigManagerView(discord.ui.View):

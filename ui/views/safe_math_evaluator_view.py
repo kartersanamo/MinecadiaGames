@@ -1,17 +1,5 @@
 import ast
 import operator
-import random
-import time
-from datetime import timedelta
-from typing import Optional
-import asyncio
-import aiohttp
-import discord
-from discord.ext import commands
-from core.config.manager import ConfigManager
-from core.database.pool import DatabasePool
-from managers.leveling import LevelingManager
-from core.logging.setup import get_logger
 
 
 class SafeMathEvaluator:

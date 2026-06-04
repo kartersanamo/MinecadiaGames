@@ -1,3 +1,4 @@
+from services.embed_service import EmbedService
 from discord.ext import commands
 from discord import app_commands
 import discord
@@ -179,8 +180,7 @@ class ConfigViewer(discord.ui.View):
             
             view = ConfigViewer(self.config_manager, self.config_name, config_data, self.path)
             embed = await view.create_embed()
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config_manager.get('config', 'LOGO'))
+                        logo_url = self.bot.app.embeds.get_logo_url(self.config_manager.get('config', 'LOGO'))
             embed.set_footer(text=self.config_manager.get('config', 'FOOTER'), icon_url=logo_url)
             await interaction.response.edit_message(embed=embed, view=view)
         except Exception as e:

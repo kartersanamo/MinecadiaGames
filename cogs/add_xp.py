@@ -85,13 +85,11 @@ class AddXP(commands.Cog):
             
             # Check level achievements if level changed
             if current_level != new_level and channel:
-                from utils.achievements import check_level_achievement
-                await check_level_achievement(member, new_level, channel, self.bot)
+                                await self.bot.app.achievements.check_level_achievement(member, new_level, channel, self.bot)
             
             # Check total XP achievements
             if channel:
-                from utils.achievements import check_xp_achievement
-                await check_xp_achievement(member, new_xp, channel, self.bot)
+                                await self.bot.app.achievements.check_xp_achievement(member, new_xp, channel, self.bot)
         
         # Build response message
         response = f"`✅` Successfully added `{xp_value}` XP to {member.mention}\n`XP:` `{current_xp}` → `{new_xp}`"

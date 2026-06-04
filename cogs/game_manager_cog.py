@@ -3,8 +3,7 @@ from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
 from managers.game_manager import GameManager
-from utils.paginator import Paginator
-from utils.helpers import get_recent_games
+from ui.paginator import Paginator
 from core.logging.setup import get_logger
 from datetime import datetime, timezone
 from typing import Optional
@@ -81,8 +80,7 @@ class GameManagerCog(commands.Cog):
             inline=True
         )
         
-        from utils.helpers import get_embed_logo_url
-        logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+   logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         return embed
 

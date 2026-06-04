@@ -1,13 +1,6 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
-from core.database.pool import DatabasePool
-from core.logging.setup import get_logger
-from core.config.manager import ConfigManager
 from managers.milestones import MilestonesManager
-from datetime import datetime, timezone
-from typing import Optional
-from utils.paginator import Paginator
+from ui.paginator import Paginator
 
 
 class MilestonesView(discord.ui.View):

@@ -1,6 +1,6 @@
+from services.asset_path_service import AssetPathService
 import random
 import os
-import uuid
 import asyncio
 from datetime import datetime, timezone
 from typing import Optional, List, Dict
@@ -26,9 +26,8 @@ class Unscramble(ChatGame):
         from pathlib import Path
         project_root = Path(__file__).resolve().parents[2]
         bg_path = project_root / "assets" / "Images" / "Unscramble_BG_2.png"
-        from utils.paths import generated_image_path
-
-        output_path = generated_image_path("unscramble", self._game_id)
+        
+        output_path = AssetPathService.generated_image_path("unscramble", self._game_id)
         
         with Image.open(bg_path) as image:
             draw = ImageDraw.Draw(image)
@@ -127,8 +126,7 @@ class Unscramble(ChatGame):
                 value="Click the 'Submit Guess' button to enter your answer!",
                 inline=False
             )
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
             view = UnscrambleButtons(word, scrambled, xp_mult, game_id, self.bot, self.config, self.chat_config, test_mode=test_mode, image_path=image_path)
@@ -142,7 +140,7 @@ class Unscramble(ChatGame):
             # (Discord requires re-sending the attachment during edits to keep it embedded).
             
             # Register game in registry for admin commands
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             original_state = {
                 'word': word,
                 'scrambled': scrambled,
@@ -229,7 +227,7 @@ class Unscramble(ChatGame):
                     await self._update_game_status('Finished')
                     
                     # Unregister game from registry
-                    from utils.chat_game_registry import registry
+                    from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
 
                     # Delete the temp image file now that the game has finished and no more edits will be made
@@ -400,7 +398,7 @@ class UnscrambleButtons(discord.ui.View):
             
             # Log activity
             if self.message:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 registry.log_activity(
                     self.message.id,
                     user_id,
@@ -471,7 +469,7 @@ class UnscrambleButtons(discord.ui.View):
             # Guess is wrong
             # Log activity
             if self.message:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 registry.log_activity(
                     self.message.id,
                     user_id,

@@ -1,7 +1,17 @@
-from .tictactoe import TicTacToe
-from .wordle import Wordle
 from .connect_four import ConnectFour
+from .hangman import Hangman
 from .memory import Memory
+from .minesweeper import Minesweeper
+from .tictactoe import TicTacToe
+from .twenty_forty_eight import TwentyFortyEight
+from .wordle import Wordle
 
-__all__ = ['TicTacToe', 'Wordle', 'ConnectFour', 'Memory']
-
+__all__ = [
+    "ConnectFour",
+    "Hangman",
+    "Memory",
+    "Minesweeper",
+    "TicTacToe",
+    "TwentyFortyEight",
+    "Wordle",
+]

@@ -5,7 +5,6 @@ import discord
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
-from utils.helpers import get_embed_logo_url
 
 
 class _LevelingManagerCore:
@@ -269,8 +268,7 @@ class _LevelingManagerCore:
         """Handle level up announcements and achievements"""
         # Check for level achievements
         if channel:
-            from utils.achievements import check_level_achievement
-            await check_level_achievement(user, new_level, channel, bot)
+            await bot.app.achievements.check_level_achievement(user, new_level, channel, bot)
         
         # Send level up announcement
         if bot:
@@ -307,13 +305,11 @@ class _LevelingManagerCore:
         if not channel:
             return
         
-        from utils.achievements import check_chat_game_play, check_xp_achievement
-        
         # Check chat game achievements
-        await check_chat_game_play(user, source, channel, bot)
+        await bot.app.achievements.check_chat_game_play(user, source, channel, bot)
         
         # Check total XP achievements
-        await check_xp_achievement(user, new_xp, channel, bot)
+        await bot.app.achievements.check_xp_achievement(user, new_xp, channel, bot)
     
     async def _log_to_admin_channel(
         self,
@@ -346,7 +342,7 @@ class _LevelingManagerCore:
         )
         embed.set_footer(
             text=self.config.get('config', 'FOOTER'),
-            icon_url=get_embed_logo_url(self.config.get('config', 'LOGO'))
+            icon_url=bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         )
         
         try:

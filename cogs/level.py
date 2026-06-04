@@ -6,7 +6,6 @@ from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from pathlib import Path
 import requests
 import os
 import uuid

@@ -7,7 +7,7 @@ import discord
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
 from ui.dm_games_view import DMGamesView
-from ui.sendgames_view import SendGamesView, ViewMore
+from ui.sendgames_view import SendGamesView
 from core.logging.setup import get_logger
 
 
@@ -69,8 +69,7 @@ class SendGames(commands.Cog):
                 )
             
             # Only set thumbnail if logo is a valid URL (not a local file path)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url("assets/Images/Logo.png")
+            logo_url = self.bot.app.embeds.get_logo_url("assets/Images/Logo.png")
             if logo_url:
                 embed.set_thumbnail(url=logo_url)
             embed.set_image(url="https://i.imgur.com/z3bbBSA.png")
@@ -180,12 +179,11 @@ class SendGames(commands.Cog):
                 )
             )
             # Only set thumbnail if logo is a valid URL (not a local file path)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url("assets/Images/Logo.png")
+            logo_url = self.bot.app.embeds.get_logo_url("assets/Images/Logo.png")
             if logo_url:
                 embed2.set_thumbnail(url=logo_url)
             embed2.set_image(url="https://i.imgur.com/z3bbBSA.png")
-            footer_logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            footer_logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed2.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=footer_logo_url)
             
             channel = interaction.channel

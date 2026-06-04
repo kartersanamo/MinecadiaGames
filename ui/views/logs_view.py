@@ -1,12 +1,7 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
 from core.database.pool import DatabasePool
-from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
-from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
-from utils.paginator import Paginator
 
 
 class LogsView(discord.ui.View):

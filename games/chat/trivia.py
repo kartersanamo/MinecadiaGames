@@ -99,9 +99,7 @@ class Trivia(ChatGame):
             random.shuffle(items)
             for item in items:
                 view.add_item(item)
-            
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
+            logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             # Register view for persistence across bot restarts
             self.bot.add_view(view)
@@ -109,7 +107,7 @@ class Trivia(ChatGame):
             view.message = message  # Store message reference for real-time updates
             
             # Register game in registry for admin commands
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             original_state = {
                 'correct_answer': trivia['answers'][0],
                 'question': trivia['question'],
@@ -164,7 +162,7 @@ class Trivia(ChatGame):
                     await self._update_game_status('Finished')
                     
                     # Unregister game from registry
-                    from utils.chat_game_registry import registry
+                    from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
             except discord.NotFound:
                 # Message was deleted, that's okay
@@ -250,7 +248,7 @@ class TriviaButtons(discord.ui.View):
         async def callback(interaction: discord.Interaction):
             # Check if user has already answered incorrectly
             if interaction.user.id in self.failed_users:
-                from utils.chat_game_registry import registry
+                from services.chat_game_registry import registry
                 if self.message:
                     registry.log_activity(
                         self.message.id,
@@ -263,7 +261,7 @@ class TriviaButtons(discord.ui.View):
                 return
             
             # Log activity
-            from utils.chat_game_registry import registry
+            from services.chat_game_registry import registry
             if self.message:
                 registry.log_activity(
                     self.message.id,

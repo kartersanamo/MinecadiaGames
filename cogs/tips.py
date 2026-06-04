@@ -2,8 +2,6 @@ from discord.ext import commands
 import discord
 from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
-from utils.helpers import get_embed_logo_url
-import random
 
 
 class Tips(commands.Cog):
@@ -265,7 +263,7 @@ class Tips(commands.Cog):
             )
             embed.set_footer(
                 text=self.config.get('config', 'FOOTER'),
-                icon_url=get_embed_logo_url(self.config.get('config', 'LOGO'))
+                icon_url=self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             )
             
             await channel.send(embed=embed)
@@ -286,7 +284,7 @@ class Tips(commands.Cog):
             )
             embed.set_footer(
                 text=self.config.get('config', 'FOOTER'),
-                icon_url=get_embed_logo_url(self.config.get('config', 'LOGO'))
+                icon_url=self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             )
             
             await channel.send(embed=embed)

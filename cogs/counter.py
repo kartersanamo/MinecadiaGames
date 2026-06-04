@@ -1,8 +1,5 @@
-import ast
-import operator
 import random
 import time
-from datetime import timedelta
 from typing import Optional
 import asyncio
 import aiohttp

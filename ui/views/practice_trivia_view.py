@@ -1,13 +1,5 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
-from core.config.manager import ConfigManager
-from core.logging.setup import get_logger
 from typing import Optional, Dict, List
-import random
-import os
-import asyncio
-from datetime import datetime, timezone
 
 
 class PracticeTriviaView(discord.ui.View):

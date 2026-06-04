@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 import discord
 
-from utils.paginator import Paginator
+from ui.paginator import Paginator
 
 if TYPE_CHECKING:
     from ui.all_time_leaderboard import AllTimeLeaderboardView

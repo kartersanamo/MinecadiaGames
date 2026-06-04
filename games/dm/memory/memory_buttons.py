@@ -3,78 +3,8 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict
 import discord
-from games.base.dm_game import DMGame
 from managers.leveling import LevelingManager
-from utils.helpers import get_last_game_id
 from core.database.pool import DatabasePool
-from core.logging.setup import get_logger
-
-
-class Memory(DMGame):
-    def __init__(self, bot):
-        super().__init__(bot)
-        # Support both old and new config structure
-        games = self.dm_config.get('GAMES', {})
-        if not games:
-            games = self.dm_config.get('games', {})
-        self.game_config = games.get('Memory', {})
-        self.logger = get_logger("DMGames")
-    
-    async def _run_game(self, user: discord.User, game_name: str, test_mode: bool = False) -> bool:
-        try:
-            if test_mode:
-                last_game_id = -999999  # Fake game_id for test mode
-            else:
-                last_game_id = await get_last_game_id('memory')
-                if not last_game_id:
-                    return False
-            
-            # Support both old and new structure
-            tries = self.game_config.get('TRIES') or self.game_config.get('max_tries', 7)
-            image_url = self.game_config.get('IMAGE') or self.game_config.get('image_url')
-            
-            test_label = " 🧪 TEST GAME 🧪" if test_mode else ""
-            
-            embed = discord.Embed(
-                title=f"Memory #{last_game_id}{test_label}",
-                description="Welcome to Memory! Begin by clicking on any two buttons below to try to match!",
-                color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
-            )
-            embed.add_field(name="Tries Remaining", value=str(tries))
-            embed.add_field(name="Matches Found", value="0/10", inline=True)
-            if image_url:
-                embed.set_image(url=image_url)
-            from utils.helpers import get_embed_logo_url
-            logo_url = get_embed_logo_url(self.config.get('config', 'LOGO'))
-            embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
-            
-            view = MemoryButtons(last_game_id, self.bot, self.config, self.game_config, self.dm_config, test_mode=test_mode)
-            view.player_id = user.id  # Store player_id for state saving
-            # Register view for persistence across bot restarts
-            self.bot.add_view(view)
-            await user.send(embed=embed, view=view)
-            
-            # Save initial state
-            if not test_mode:
-                await view._save_state()
-            
-            if not test_mode:
-                db = await self._get_db()
-                current_unix = int(datetime.now(timezone.utc).timestamp())
-                await db.execute_insert(
-                    "INSERT INTO users_memory (game_id, user_id, won, attempts, matches, started_at, ended_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                    (last_game_id, user.id, 'Started', 0, 0, current_unix, 0)
-                )
-            
-            self.logger.info(f"Memory ({user.name}#{user.discriminator}){' [TEST MODE]' if test_mode else ''}")
-            return True
-        except Exception as e:
-            self.logger.error(f"Memory error: {e}")
-            import traceback
-            self.logger.error(f"Traceback: {traceback.format_exc()}")
-            return False
-
-
 class MemoryButtons(discord.ui.View):
     def __init__(self, game_id: int, bot, config, game_config, dm_config, test_mode: bool = False, saved_state: dict = None):
         super().__init__(timeout=None)
@@ -164,9 +94,8 @@ class MemoryButtons(discord.ui.View):
             return
         
         try:
-            from utils.game_state_manager import save_game_state
             state = self._get_state()
-            await save_game_state('memory', self.game_id, self.player_id, state, self.test_mode)
+            await self.bot.app.game_state.save('memory', self.game_id, self.player_id, state, self.test_mode)
         except Exception as e:
             from core.logging.setup import get_logger
             logger = get_logger("DMGames")
@@ -409,8 +338,7 @@ class MemoryButtons(discord.ui.View):
             )
             
             # Check for achievements
-            from utils.achievements import check_dm_game_win
-            await check_dm_game_win(interaction.user, "Memory", interaction.channel, self.bot)
+            await self.bot.app.achievements.check_dm_game_win(interaction.user, "Memory", interaction.channel, self.bot)
     
     async def _handle_loss(self, interaction: discord.Interaction, embed: discord.Embed):
         """Handle game loss."""
@@ -528,7 +456,7 @@ class MemoryButtons(discord.ui.View):
         if self.test_mode:
             return True
         
-        last_game_id = await get_last_game_id('memory')
+        last_game_id = await self.bot.app.games.get_last_game_id('memory')
         if self.game_id != last_game_id:
             await interaction.response.send_message(
                 "`❌` Sorry, but this game has already ended. Please go to the leveling channel to begin another one!",
