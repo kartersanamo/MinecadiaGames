@@ -7,6 +7,7 @@ import discord
 from managers.leveling import LevelingManager
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+from services.asset_path_service import AssetPathService
 class TicTacToeButtons(discord.ui.View):
     def __init__(self, game_id: int, bot, config, game_config, test_mode: bool = False, saved_state: dict = None):
         super().__init__(timeout=None)
@@ -189,8 +190,7 @@ class TicTacToeButtons(discord.ui.View):
     
     async def generate_board_image(self) -> str:
         """Generate TicTacToe board image with X's and O's"""
-        from pathlib import Path
-        project_root = Path(__file__).resolve().parents[2]
+        project_root = AssetPathService.PROJECT_ROOT
         
         # Try .jpg first, then .png
         board_path = project_root / "assets" / "Images" / "TicTacToeBoard.jpg"
