@@ -6,6 +6,23 @@ from threading import Lock
 class ConfigManager:
     _instance: Optional['ConfigManager'] = None
     _lock = Lock()
+
+    _CONFIG_MAPPING = {
+        'config': 'bot',
+        'chat_games': 'games/chat',
+        'dm_games': 'games/dm',
+        'levels': 'leveling',
+        'winners': 'rewards',
+        'tictactoe': 'games/dm',
+        'memory': 'games/dm',
+        'wordle': 'games/dm',
+        'connect_four': 'games/dm',
+        'flag_guesser': 'games/flag_guesser',
+        'math_quiz': 'games/math_quiz',
+        'trivia': 'games/trivia',
+        'unscramble': 'games/unscramble',
+        'emoji_quiz': 'games/emoji_quiz',
+    }
     
     def __init__(self, config_dir: str = None):
         if config_dir is None:
@@ -23,6 +40,9 @@ class ConfigManager:
         if filename not in self._file_locks:
             self._file_locks[filename] = Lock()
         return self._file_locks[filename]
+
+    def _resolve_config_name(self, config_name: str) -> str:
+        return self._CONFIG_MAPPING.get(config_name, config_name)
     
     def get(self, config_name: str, key: Optional[str] = None, default: Any = None) -> Any:
         # Validate inputs
@@ -39,26 +59,7 @@ class ConfigManager:
         if key is not None and not isinstance(key, str):
             raise TypeError(f"key must be a string or None, got {type(key).__name__}: {key}")
         
-        # Map old config names to new structure for backward compatibility
-        config_mapping = {
-            'config': 'bot',  # Main config -> bot.json + discord.json
-            'chat_games': 'games/chat',  # Chat games -> games/chat.json
-            'dm_games': 'games/dm',  # DM games -> games/dm.json
-            'levels': 'leveling',  # Levels -> leveling.json
-            'winners': 'rewards',  # Winners -> rewards.json
-            'tictactoe': 'games/dm',  # Individual game configs are in games/dm.json
-            'memory': 'games/dm',
-            'wordle': 'games/dm',
-            'connect_four': 'games/dm',
-            'flag_guesser': 'games/flag_guesser',
-            'math_quiz': 'games/math_quiz',
-            'trivia': 'games/trivia',
-            'unscramble': 'games/unscramble',
-            'emoji_quiz': 'games/emoji_quiz'
-        }
-        
-        # Use mapped name if exists, otherwise use original
-        mapped_name = config_mapping.get(config_name, config_name)
+        mapped_name = self._resolve_config_name(config_name)
         
         if mapped_name in self._cache:
             config = self._cache[mapped_name]
@@ -211,6 +212,7 @@ class ConfigManager:
         return value if value is not None else default
     
     def set(self, config_name: str, key: str, value: Any) -> bool:
+        mapped_name = self._resolve_config_name(config_name)
         config = self.get(config_name)
         keys = key.split('.')
         
@@ -220,7 +222,9 @@ class ConfigManager:
             config = config[k]
         
         config[keys[-1]] = value
-        return self._save_config(config_name, self._cache[config_name])
+        if config_name == 'config':
+            return True
+        return self._save_config(mapped_name, self._cache[mapped_name])
     
     def _load_config(self, config_name: str) -> Dict[str, Any]:
         # Handle subdirectory paths (e.g., "games/chat")
@@ -262,10 +266,16 @@ class ConfigManager:
     
     def reload(self, config_name: Optional[str] = None):
         if config_name:
-            if config_name in self._cache:
+            mapped_name = self._resolve_config_name(config_name)
+            if mapped_name in self._cache:
+                del self._cache[mapped_name]
+            if config_name in self._cache and config_name != mapped_name:
                 del self._cache[config_name]
         else:
             self._cache.clear()
+
+    def reload_all(self):
+        self.reload()
     
     @classmethod
     def get_instance(cls) -> 'ConfigManager':

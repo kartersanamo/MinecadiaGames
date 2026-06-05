@@ -160,7 +160,7 @@ async def manage_chat_game(interaction: discord.Interaction, message: discord.Me
     )
 
     
-    logo_url = self.bot.app.embeds.get_logo_url(config.get("config", "LOGO"))
+    logo_url = bot.app.embeds.get_logo_url(config.get("config", "LOGO"))
     panel_embed.set_footer(text=config.get("config", "FOOTER"), icon_url=logo_url)
 
     await interaction.response.send_message(

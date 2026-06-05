@@ -22,6 +22,11 @@ from games.dm.twenty_forty_eight import TwentyFortyEight
 from games.dm.minesweeper import Minesweeper
 from games.dm.hangman import Hangman
 from games.dm.filler import Filler
+from services.dm_rotation_service import (
+    build_dm_rotation_embed_section,
+    get_games_dict,
+    get_next_rotation_game,
+)
 
 
 def format_wait_time(seconds: int) -> str:
@@ -235,6 +240,13 @@ class GameManager:
                 last_game = await self._get_last_dm_game()
                 last_game_name = last_game.get('game_name', 'Unknown') if last_game else 'Unknown'
                 next_game = self._get_next_dm_game(last_game_name if last_game else None)
+                if not next_game:
+                    self.logger.warning(
+                        "[GameManager] All DM games are vaulted — skipping rotation refresh"
+                    )
+                    await asyncio.sleep(60)
+                    continue
+
                 formatted_time = format_wait_time(wait_time)
                 
                 self.logger.info(
@@ -354,23 +366,20 @@ class GameManager:
             self.logger.error(f"[GameManager] Database error in _get_last_dm_game: {e}")
             return None
     
-    def _get_next_dm_game(self, last_game_name: Optional[str]) -> str:
-        # Support both old (GAMES) and new (games) structure
-        games_dict = self.dm_config.get('GAMES', {}) or self.dm_config.get('games', {})
-        games = list(games_dict.keys())
-        if not games:
-            return "TicTacToe"
-        
-        if not last_game_name:
-            return games[0]
-        
-        try:
-            index = [name.lower() for name in games].index(last_game_name.lower())
-            next_index = (index + 1) % len(games)
-        except ValueError:
-            next_index = 0
-        
-        return games[next_index]
+    def _get_next_dm_game(self, last_game_name: Optional[str]) -> Optional[str]:
+        next_game = get_next_rotation_game(self.dm_config, last_game_name)
+        if next_game:
+            return next_game
+
+        games_dict = get_games_dict(self.dm_config)
+        all_games = list(games_dict.keys())
+        if all_games:
+            self.logger.warning(
+                "[GameManager] No games in rotation (all vaulted); using fallback %s",
+                all_games[0],
+            )
+            return all_games[0]
+        return None
 
     _DM_REFRESH_ALERT_SUFFIX = " has been refreshed!"
 
@@ -450,13 +459,9 @@ class GameManager:
         try:
             from ui.dm_games_view import DMGamesView
             from ui.sendgames_view import SendGamesView
-            
-            game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler"]
-            new_dm_game = refreshed_at + 7200  # 2 hours from now
-            
-            rotation_display = " → ".join(
-                f"**{g}**" if g.lower().replace(" ", "") == active_game.lower().replace(" ", "") else g
-                for g in game_sequence
+
+            dm_section = build_dm_rotation_embed_section(
+                active_game, refreshed_at, self.dm_config
             )
             
             # Find the leaderboard message (second message, has "Leaderboard" in title)
@@ -481,9 +486,7 @@ class GameManager:
                     description=(
                         leaderboard_text +
                         f'\n\n**Last Updated** <t:{current_time}:R>\n\n'
-                        f'✅ **Active DM Game**: {active_game}\n'
-                        f'🚨 **Next DM Game**: <t:{new_dm_game}:R>\n'
-                        f"-# {rotation_display}"
+                        f'{dm_section}'
                     )
                 )
                 # Only set thumbnail if logo is a valid URL (not a local file path)
@@ -502,6 +505,26 @@ class GameManager:
             self.logger.error(f"Error updating leveling channel message: {e}")
             import traceback
             self.logger.error(f"Traceback: {traceback.format_exc()}")
+
+    async def refresh_leveling_rotation_display(self) -> None:
+        """Refresh the #Leveling leaderboard embed without cycling games."""
+        last_game = await self._get_last_dm_game()
+        if not last_game:
+            return
+
+        guild = self.bot.get_guild(self.config.get('config', 'GUILD_ID'))
+        if not guild:
+            return
+
+        leveling_channel = guild.get_channel(self.config.get('config', 'LEVELING_CHANNEL'))
+        if not leveling_channel:
+            return
+
+        await self._update_leveling_channel_message(
+            leveling_channel,
+            last_game['game_name'],
+            int(last_game['refreshed_at']),
+        )
     
     def stop_chat_games(self):
         self.chat_game_running = False
@@ -561,6 +584,9 @@ class GameManager:
         try:
             last_game = await self._get_last_dm_game()
             next_game = self._get_next_dm_game(last_game['game_name'] if last_game else None)
+            if not next_game:
+                self.logger.warning("[GameManager] Cannot force cycle — all DM games are vaulted")
+                return None
             await self._refresh_dm_game(next_game)
             return next_game
         except Exception as e:

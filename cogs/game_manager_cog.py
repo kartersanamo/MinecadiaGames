@@ -5,6 +5,7 @@ from core.config.manager import ConfigManager
 from managers.game_manager import GameManager
 from core.logging.setup import get_logger
 from ui.views.main_game_manager_view import MainGameManagerView
+from services.dm_rotation_service import get_rotation_games, get_vaulted_games
 
 class GameManagerCog(commands.Cog):
     def __init__(self, bot):
@@ -68,6 +69,48 @@ class GameManagerCog(commands.Cog):
             inline=True
         )
         
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+        embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
+        return embed
+
+    async def create_chat_games_embed(self, game_manager: GameManager) -> discord.Embed:
+        status = "✅ **Enabled**" if game_manager.chat_game_running else "❌ **Disabled**"
+        embed = discord.Embed(
+            title="💬 Chat Games Manager",
+            description=f"Status: {status}\n\nUse the buttons below to manage chat games.",
+            color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR')),
+        )
+        embed.add_field(
+            name="Games",
+            value="Unscramble, Math Quiz, Flag Guesser, Trivia, Emoji Quiz, Guess The Number",
+            inline=False,
+        )
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
+        embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
+        return embed
+
+    async def create_dm_games_embed(self, game_manager: GameManager) -> discord.Embed:
+        dm_config = game_manager.dm_config or self.config.get('dm_games')
+        rotation = get_rotation_games(dm_config)
+        vaulted = get_vaulted_games(dm_config)
+        status = "✅ **Enabled**" if game_manager.dm_game_running else "❌ **Disabled**"
+
+        embed = discord.Embed(
+            title="📱 DM Games Manager",
+            description=f"Status: {status}\n\nUse the buttons below to manage DM games and vaulting.",
+            color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR')),
+        )
+        embed.add_field(
+            name="Rotation",
+            value=" → ".join(rotation) if rotation else "(no games in rotation)",
+            inline=False,
+        )
+        if vaulted:
+            embed.add_field(
+                name="Vaulted",
+                value=", ".join(vaulted),
+                inline=False,
+            )
         logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         return embed

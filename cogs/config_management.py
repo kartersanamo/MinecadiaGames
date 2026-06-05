@@ -33,8 +33,7 @@ class ConfigManagement(commands.Cog):
         
         # Main config files
         for file in config_dir.glob("*.json"):
-            if file.stem not in ['winners_history']:  # Exclude data files
-                configs.append(file.stem)
+            configs.append(file.stem)
         
         # Game configs
         games_dir = config_dir / "games"

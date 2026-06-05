@@ -2,7 +2,7 @@
     "_comment": "Unscramble game configuration - words organized by channel",
     "assets": {
         "background_image": "assets/Images/Unscramble_BG_2.png",
-        "font": "assets/Fonts/ArcadeRounded.ttf",
+        "font": "assets/fonts/ArcadeRounded.ttf",
         "font_size": 130
     },
     "words": {
@@ -1194,5 +1194,5 @@
             "dinosaurs"
         ]
     },
-    "_note": "For full word lists, refer to the original chat_games.json file. This is a simplified structure."
+    "_note": "Word lists for Unscramble. Add words under the channel keys below."
 }

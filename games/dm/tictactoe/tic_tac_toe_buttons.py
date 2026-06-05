@@ -218,7 +218,7 @@ class TicTacToeButtons(discord.ui.View):
             grid_start_y = margin + (board_height - grid_dimension) / 2
             
             # Load font for X and O - scale font size based on cell_size
-            font_path = project_root / "assets" / "Fonts" / "ArcadeRounded.ttf"
+            font_path = project_root / "assets" / "fonts" / "ArcadeRounded.ttf"
             font_size = int(cell_size * 0.58)  # Slightly smaller so edge cells stay visually centered
             try:
                 symbol_font = ImageFont.truetype(str(font_path), font_size)

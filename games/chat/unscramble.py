@@ -32,7 +32,7 @@ class Unscramble(ChatGame):
         with Image.open(bg_path) as image:
             draw = ImageDraw.Draw(image)
             from pathlib import Path
-            font_path = project_root / "assets" / "Fonts" / "ArcadeRounded.ttf"
+            font_path = project_root / "assets" / "fonts" / "ArcadeRounded.ttf"
             word_font = ImageFont.truetype(str(font_path), 130)
             word_bbox = draw.textbbox((0, 0), scrambled, font=word_font, anchor="lt")
             word_middle_x = (image.width - (word_bbox[2] - word_bbox[0])) // 2

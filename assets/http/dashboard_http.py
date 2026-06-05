@@ -159,8 +159,62 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
 
     async def reload_config(_request: web.Request) -> web.Response:
         from core.config.manager import ConfigManager
-        ConfigManager.get_instance().reload_all()
+
+        config = ConfigManager.get_instance()
+        config.reload_all()
+        if bot.game_manager:
+            bot.game_manager.dm_config = config.get("dm_games")
         return web.json_response({"ok": True})
+
+    async def dm_games_rotation(_request: web.Request) -> web.Response:
+        from core.config.manager import ConfigManager
+        from services.dm_rotation_service import get_rotation_games, get_vaulted_games
+
+        gm = bot.game_manager
+        if not gm:
+            return web.json_response({"error": "Game manager not ready"}, status=503)
+
+        dm_config = gm.dm_config or ConfigManager.get_instance().get("dm_games")
+        last_game = await gm._get_last_dm_game()
+        return web.json_response(
+            {
+                "rotation": get_rotation_games(dm_config),
+                "vaulted": get_vaulted_games(dm_config),
+                "activeGame": last_game.get("game_name") if last_game else None,
+            }
+        )
+
+    async def dm_games_vault(request: web.Request) -> web.Response:
+        from core.config.manager import ConfigManager
+        from services.dm_rotation_service import get_games_dict, set_game_vaulted
+
+        gm = bot.game_manager
+        if not gm:
+            return web.json_response({"error": "Game manager not ready"}, status=503)
+
+        body = await request.json()
+        game = str(body.get("game", "")).strip()
+        if not game:
+            return web.json_response({"error": "game required"}, status=400)
+        if "vaulted" not in body:
+            return web.json_response({"error": "vaulted required"}, status=400)
+
+        config = ConfigManager.get_instance()
+        dm_config = config.get("dm_games")
+        games_dict = get_games_dict(dm_config)
+        if game not in games_dict:
+            return web.json_response({"error": f"Unknown game: {game}"}, status=400)
+
+        vaulted = bool(body["vaulted"])
+        set_game_vaulted(config, game, vaulted)
+        gm.dm_config = config.get("dm_games")
+
+        try:
+            await gm.refresh_leveling_rotation_display()
+        except Exception:
+            log.exception("Failed to refresh leveling embed after vault toggle")
+
+        return web.json_response({"ok": True, "game": game, "vaulted": vaulted})
 
     async def wipe_levels(request: web.Request) -> web.Response:
         body = await request.json()
@@ -217,6 +271,8 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
     app.router.add_post("/force-dm-refresh", wrap(force_dm_refresh))
     app.router.add_post("/add-trivia", wrap(add_trivia))
     app.router.add_post("/reload-config", wrap(reload_config))
+    app.router.add_get("/dm-games/rotation", wrap(dm_games_rotation))
+    app.router.add_post("/dm-games/vault", wrap(dm_games_vault))
     app.router.add_post("/wipe-levels", wrap(wipe_levels))
 
     from assets.http.session_http import (

@@ -900,5 +900,5 @@
             }
         ]
     },
-    "_note": "Full question lists are in the original chat_games.json. This structure makes it easier to manage per-channel questions."
+    "_note": "Trivia questions organized by channel. Add questions under each channel key below."
 }

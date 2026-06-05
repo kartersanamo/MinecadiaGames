@@ -137,7 +137,7 @@ class DMGamesManagerView(discord.ui.View):
         view = DMGamesManageView(self.game_manager, self.config, self.bot)
         embed = discord.Embed(
             title="⚙️ Manage DM Games",
-            description="Select a game to enable/disable it from rotation.",
+            description="Select a game to vault or unvault it from the public rotation.",
             color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR'))
         )
         logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))

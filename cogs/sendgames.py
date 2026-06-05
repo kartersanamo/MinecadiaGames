@@ -9,6 +9,7 @@ from core.database.pool import DatabasePool
 from ui.dm_games_view import DMGamesView
 from ui.sendgames_view import SendGamesView
 from core.logging.setup import get_logger
+from services.dm_rotation_service import build_dm_rotation_embed_section
 
 
 class SendGames(commands.Cog):
@@ -39,26 +40,21 @@ class SendGames(commands.Cog):
             if info_last_game and isinstance(info_last_game, dict):
                 active = info_last_game.get('game_name') or info_last_game.get('game_name', 'Unknown')
                 refreshed_at = info_last_game.get('refreshed_at')
+                dm_config = self.config.get('dm_games')
                 if refreshed_at:
-                    last = int(refreshed_at)
-                    new_dm_game = last + 7200
+                    dm_section = build_dm_rotation_embed_section(
+                        active, int(refreshed_at), dm_config
+                    )
                 else:
-                    new_dm_game = 0
-                game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler"]
-                rotation_display = " → ".join(
-                    f"**{g}**" if g.lower().replace(" ", "") == active.lower().replace(" ", "") else g
-                    for g in game_sequence
-                )
+                    dm_section = f'✅ **Active DM Game**: {active}'
                 
                 embed = discord.Embed(
                     color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR')),
                     title="Leaderboard <:minecadia_2:1444800686372950117>",
                     description=(
                         await SendGamesView.get_leaderboard(guild, self.bot) +
-                        '\n\n'
-                        f'✅ **Active DM Game**: {active}\n'
-                        f'🚨 **Next DM Game**: <t:{new_dm_game}:R>\n'
-                        f"-# {rotation_display}"
+                        '\n\n' +
+                        dm_section
                     )
                 )
             else:
@@ -140,12 +136,8 @@ class SendGames(commands.Cog):
         
         active = info_last_game['game_name']
         last = int(info_last_game['refreshed_at'])
-        new_dm_game = last + 7200
-        game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler"]
-        rotation_display = " → ".join(
-            f"**{g}**" if g.lower().replace(" ", "") == active.lower().replace(" ", "") else g
-            for g in game_sequence
-        )
+        dm_config = self.config.get('dm_games')
+        dm_section = build_dm_rotation_embed_section(active, last, dm_config)
         
         if option == "Leveling":
             embed1 = discord.Embed(
@@ -173,9 +165,7 @@ class SendGames(commands.Cog):
                 description=(
                     await SendGamesView.get_leaderboard(interaction.guild, self.bot) +
                     f'\n\n**Last Updated** <t:{current_time}:R>\n\n'
-                    f'✅ **Active DM Game**: {active}\n'
-                    f'🚨 **Next DM Game**: <t:{new_dm_game}:R>\n'
-                    f"-# {rotation_display}"
+                    f'{dm_section}'
                 )
             )
             # Only set thumbnail if logo is a valid URL (not a local file path)

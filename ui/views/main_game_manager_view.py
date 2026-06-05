@@ -31,6 +31,9 @@ class MainGameManagerView(discord.ui.View):
     
     async def chat_games_callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
+        from cogs.game_manager_cog import GameManagerCog
+        from ui.views.chat_games_view import ChatGamesView
+
         cog = GameManagerCog(interaction.client)
         embed = await cog.create_chat_games_embed(self.game_manager)
         view = ChatGamesView(self.game_manager, self.config, interaction.client)
@@ -39,6 +42,9 @@ class MainGameManagerView(discord.ui.View):
     
     async def dm_games_callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
+        from cogs.game_manager_cog import GameManagerCog
+        from ui.views.d_m_games_manager_view import DMGamesManagerView
+
         cog = GameManagerCog(interaction.client)
         embed = await cog.create_dm_games_embed(self.game_manager)
         view = DMGamesManagerView(self.game_manager, self.config, interaction.client)

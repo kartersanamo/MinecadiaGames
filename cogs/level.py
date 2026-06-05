@@ -139,7 +139,7 @@ class Level(commands.Cog):
         # Get paths
         assets_path = Path(__file__).parent.parent / "assets"
         base_image_path = assets_path / "Images" / "RankCard.png"
-        font_path = assets_path / "Fonts" / "BarlowCondensed-Black.ttf"
+        font_path = assets_path / "fonts" / "BarlowCondensed-Black.ttf"
         default_avatar_path = assets_path / "Images" / "Default.png"
         
         # Create output filename

@@ -193,7 +193,7 @@ class Wordle(DMGame):
             draw = ImageDraw.Draw(base_image)
             
             # Load font - smaller for the new board size
-            font_path = project_root / "assets" / "Fonts" / "ArcadeRounded.ttf"
+            font_path = project_root / "assets" / "fonts" / "ArcadeRounded.ttf"
             try:
                 letter_font = ImageFont.truetype(str(font_path), 36)
             except Exception:
