@@ -4,6 +4,7 @@ import discord
 
 from core.logging.setup import get_logger
 from games.base.dm_game import DMGame
+from repositories.game_session_repository import GameSessionRepository
 from games.dm.filler.filler_buttons import FillerButtons
 
 
@@ -37,21 +38,17 @@ class Filler(DMGame):
 
             if not test_mode:
                 await view._save_state()
-                db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                await db.execute_insert(
-                    "INSERT INTO users_filler (game_id, user_id, won, player_cells, bot_cells, "
-                    "turns, ended_at, started_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                    (
-                        last_game_id,
-                        user.id,
-                        "Started",
-                        view.state.player_cells,
-                        view.state.bot_cells,
-                        0,
-                        0,
-                        current_unix,
-                    ),
+                await GameSessionRepository().start_session(
+                    last_game_id,
+                    user.id,
+                    "filler",
+                    stats={
+                        "player_cells": view.state.player_cells,
+                        "bot_cells": view.state.bot_cells,
+                        "turns": 0,
+                    },
+                    started_at=current_unix,
                 )
 
             self.logger.info(f"Filler ({user.name}#{user.discriminator})")

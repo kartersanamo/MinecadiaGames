@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import discord
 from games.base.dm_game import DMGame
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 class Hangman(DMGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -49,30 +50,26 @@ class Hangman(DMGame):
                 # Fallback to any word if no reasonable length words found
                 word = random.choice(words)
             
-            # Check if user already has an active game for this game_id (prevent duplicates)
-            saved_state = None
             if not test_mode and last_game_id != -999999:
                 try:
-                    db = await self._get_db()
-                    # Check if game already exists (user already started this game)
-                    rows = await db.execute(
-                        "SELECT word, wrong_guesses, correct_guesses FROM users_hangman WHERE game_id = %s AND user_id = %s AND won = 'Started'",
-                        (last_game_id, user.id)
-                    )
-                    if rows and len(rows) > 0:
-                        # Game already exists - return False to prevent duplicate
-                        self.logger.warning(f"User {user.id} already has an active Hangman game {last_game_id}")
+                    repo = GameSessionRepository()
+                    session = await repo.get_session(last_game_id, user.id, "hangman")
+                    if session and session.get("status") == "started":
+                        self.logger.warning(
+                            f"User {user.id} already has an active Hangman game {last_game_id}"
+                        )
                         return False
                 except Exception as e:
                     self.logger.debug(f"Could not check existing Hangman game: {e}")
             
             if not test_mode:
-                db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8)
-                await db.execute_insert(
-                    "INSERT INTO users_hangman (game_id, user_id, word, won, wrong_guesses, correct_guesses, started_at, ended_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                    (last_game_id, user.id, word, 'Started', 0, 0, current_unix, 0)
+                await GameSessionRepository().start_session(
+                    last_game_id,
+                    user.id,
+                    "hangman",
+                    stats={"word": word, "wrong_guesses": 0, "correct_guesses": 0},
+                    started_at=current_unix,
                 )
             
             max_wrong = self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8)
@@ -89,7 +86,7 @@ class Hangman(DMGame):
                 word,
                 user.id,
                 test_mode=test_mode,
-                saved_state=saved_state
+                saved_state=None
             )
             # Register view for persistence across bot restarts
             self.bot.add_view(view)

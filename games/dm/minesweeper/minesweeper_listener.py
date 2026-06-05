@@ -1,7 +1,7 @@
 from typing import Dict
 import discord
 from discord.ext import commands
-from core.database.pool import DatabasePool
+from repositories.game_session_repository import GameSessionRepository
 from core.logging.setup import get_logger
 from games.dm.minesweeper.minesweeper_buttons import MinesweeperButtons
 from games.dm.minesweeper.minesweeper_state import MinesweeperState
@@ -40,14 +40,11 @@ class MinesweeperListener(commands.Cog):
                         except (discord.NotFound, discord.Forbidden):
                             pass
                         pos = (row, col)
-                        db = await DatabasePool.get_instance()
-                        rows_db = await db.execute(
-                            "SELECT game_id FROM users_minesweeper WHERE user_id = %s AND won = 'Started' ORDER BY started_at DESC LIMIT 1",
-                            (message.author.id,)
-                        )
+                        repo = GameSessionRepository()
+                        started = await repo.get_started_sessions(message.author.id, "minesweeper")
                         
-                        if rows_db:
-                            game_id = rows_db[0]['game_id']
+                        if started:
+                            game_id = started[0]["game_id"]
                             try:
                                 game_state = await self.bot.app.game_state.load('minesweeper', game_id, message.author.id)
                                 if not game_state:

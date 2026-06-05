@@ -198,7 +198,7 @@ class ViewMore(discord.ui.View):
         
         # Get game_ids for dropdown
         db = await DatabasePool.get_instance()
-        game_ids = await db.execute("SELECT game_id, game_name, refreshed_at, dm_game FROM games ORDER BY refreshed_at DESC LIMIT 100")
+        game_ids = await db.execute("SELECT id AS game_id, name AS game_name, refreshed_at, is_dm AS dm_game FROM games ORDER BY refreshed_at DESC LIMIT 100")
         
         paginator = Paginator(bot=interaction.client)
         paginator.title = "Recent Games"

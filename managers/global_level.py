@@ -17,9 +17,9 @@ logger = get_logger("GlobalLevel")
 
 CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS leveling_global (
-  user_id VARCHAR(32) NOT NULL PRIMARY KEY,
+  user_id      BIGINT UNSIGNED NOT NULL PRIMARY KEY,
   global_level INT UNSIGNED NOT NULL DEFAULT 0,
-  updated_at INT UNSIGNED NOT NULL DEFAULT 0
+  updated_at   INT UNSIGNED NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 """
 
@@ -54,7 +54,7 @@ async def archive_monthly_levels_to_global(
     now = int(time.time())
     archived = 0
     for row in rows:
-        uid = str(row["user_id"])
+        uid = int(row["user_id"])
         month_level = max(1, int(row.get("level") or 1))
         await db.execute(
             """
@@ -102,7 +102,7 @@ async def backfill_global_levels_from_winners(db: "DatabasePool") -> int:
         if not isinstance(users, dict):
             continue
         for user_id, level in users.items():
-            uid = str(user_id)
+            uid = int(user_id)
             month_level = max(1, int(level or 1))
             await db.execute(
                 """

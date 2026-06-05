@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Optional, List, Tuple, Dict
 import discord
 from managers.leveling import LevelingManager
-from core.database.pool import DatabasePool
+from repositories.game_session_repository import GameSessionRepository
 from core.logging.setup import get_logger
 ROWS, COLS = 10, 5
 TOTAL_CELLS = ROWS * COLS  # 50
@@ -146,10 +146,14 @@ class MinesweeperState:
         await self.message1.edit(embed=emb, view=self.view_top)
         await self.message2.edit(view=self.view_bottom)
         if not self.test_mode:
-            db = await DatabasePool.get_instance()
-            await db.execute(
-                "UPDATE users_minesweeper SET won = 'Lost', cells_revealed = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
-                (len(self.revealed), int(datetime.now(timezone.utc).timestamp()), interaction.user.id, self.game_id)
+            repo = GameSessionRepository()
+            await repo.finish_session(
+                self.game_id,
+                interaction.user.id,
+                "minesweeper",
+                "lost",
+                stats={"cells_revealed": len(self.revealed)},
+                ended_at=int(datetime.now(timezone.utc).timestamp()),
             )
         if self.test_mode:
             TEST_MINESWEEPER_GAMES.pop(interaction.user.id, None)
@@ -185,10 +189,14 @@ class MinesweeperState:
             ephemeral=False
         )
         if not self.test_mode:
-            db = await DatabasePool.get_instance()
-            await db.execute(
-                "UPDATE users_minesweeper SET won = 'Won', cells_revealed = %s, mines_found = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
-                (cells_revealed, mines_found, int(datetime.now(timezone.utc).timestamp()), interaction.user.id, self.game_id)
+            repo = GameSessionRepository()
+            await repo.finish_session(
+                self.game_id,
+                interaction.user.id,
+                "minesweeper",
+                "won",
+                stats={"cells_revealed": cells_revealed, "mines_found": mines_found},
+                ended_at=int(datetime.now(timezone.utc).timestamp()),
             )
             lvl_mng = LevelingManager(user=interaction.user, channel=interaction.channel, client=self.bot, xp=xp, source="Minesweeper", game_id=self.game_id, test_mode=self.test_mode)
             await lvl_mng.update()

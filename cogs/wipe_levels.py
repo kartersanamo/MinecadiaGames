@@ -122,8 +122,8 @@ class WipeLevels(commands.Cog):
                 
                 number = await self.get_number()
                 await db.execute_insert(
-                    "INSERT INTO tickets (channelID, ownerID, type, opened_at, number, active, closed_by, closed_at, reason, name, transcript, privated) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                    (str(channel.id), str(user.id), 'Discord Leveling Rewards', int(time.time()), number, 'True', ' ', ' ', ' ', ' ', ' ', 'Admin')
+                    "INSERT INTO tickets (channel_id, owner_id, type, opened_at, number, is_active, closed_by_id, closed_at, reason, name, transcript, privated) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (channel.id, user.id, 'Discord Leveling Rewards', int(time.time()), number, 1, None, None, None, None, None, 'Admin')
                 )
                 
                 embed = discord.Embed(
@@ -192,9 +192,9 @@ class WipeLevels(commands.Cog):
             )
 
         try:
-            # Reset monthly XP and level, and clear the per-month `active` flag.
+            # Reset monthly XP and level, and clear the per-month `is_active` flag.
             # Keep `ever_played` so we can count total historical participants.
-            await db.execute("UPDATE leveling SET xp = 0, level = 1, active = 0")
+            await db.execute("UPDATE leveling SET xp = 0, level = 1, is_active = 0")
         except Exception as e:
             return await interaction.edit_original_response(content=f"❌ Failed to reset the leveling data! {e}")
         

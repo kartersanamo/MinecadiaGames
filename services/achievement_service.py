@@ -109,48 +109,15 @@ class AchievementService:
         bot=None,
     ):
         db = await DatabasePool.get_instance()
-        user_id_str = str(user.id)
 
-        win_queries = {
-            "TicTacToe": (
-                "SELECT COUNT(*) as count FROM users_tictactoe WHERE user_id = %s AND won = 'Won'",
-                (user_id_str,),
-            ),
-            "Wordle": (
-                "SELECT COUNT(*) as count FROM users_wordle WHERE user_id = %s AND won = 'Won'",
-                (user_id_str,),
-            ),
-            "Connect Four": (
-                "SELECT COUNT(*) as count FROM users_connectfour WHERE user_id = %s AND status = 'Won'",
-                (user_id_str,),
-            ),
-            "Memory": (
-                "SELECT COUNT(*) as count FROM users_memory WHERE user_id = %s AND won = 'Won'",
-                (user_id_str,),
-            ),
-            "2048": (
-                "SELECT COUNT(*) as count FROM users_2048 WHERE user_id = %s AND status IN ('Won', 'Cashed Out')",
-                (user_id_str,),
-            ),
-            "Minesweeper": (
-                "SELECT COUNT(*) as count FROM users_minesweeper WHERE user_id = %s AND won = 'Won'",
-                (user_id_str,),
-            ),
-            "Hangman": (
-                "SELECT COUNT(*) as count FROM users_hangman WHERE user_id = %s AND won = 'Won'",
-                (user_id_str,),
-            ),
-            "Filler": (
-                "SELECT COUNT(*) as count FROM users_filler WHERE user_id = %s AND won = 'Won'",
-                (user_id_str,),
-            ),
-        }
+        from repositories.game_session_repository import normalize_game_type
 
-        query = win_queries.get(game_type)
-        if not query:
-            return []
-
-        result = await db.execute(query[0], query[1])
+        game_type_key = normalize_game_type(game_type)
+        result = await db.execute(
+            """SELECT COUNT(*) AS count FROM game_sessions
+               WHERE user_id = %s AND game_type = %s AND status = 'won'""",
+            (user.id, game_type_key),
+        )
         win_count = result[0]["count"] if result else 0
         return await cls.check_game_achievements(
             user, game_type, "wins", win_count, channel, bot

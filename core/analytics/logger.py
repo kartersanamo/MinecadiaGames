@@ -337,7 +337,7 @@ def patch_blacklist_created_at(user_id: str, created_at: Optional[int] = None) -
     """#7 — Set created_at on new blacklist rows."""
     ts = created_at or _now()
     _execute(
-        "UPDATE blacklists SET created_at = %s WHERE userID = %s AND (created_at IS NULL OR created_at = 0)",
+        "UPDATE blacklists SET created_at = %s WHERE user_id = %s AND (created_at IS NULL OR created_at = 0)",
         (ts, str(user_id)),
     )
 
@@ -345,6 +345,6 @@ def patch_blacklist_created_at(user_id: str, created_at: Optional[int] = None) -
 def patch_poll_created_at(message_id: str, created_at: Optional[int] = None) -> None:
     ts = created_at or _now()
     _execute(
-        "UPDATE polls SET created_at = %s WHERE messageID = %s AND (created_at IS NULL OR created_at = 0)",
+        "UPDATE polls SET created_at = %s WHERE message_id = %s AND (created_at IS NULL OR created_at = 0)",
         (ts, str(message_id)),
     )

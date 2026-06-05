@@ -273,52 +273,28 @@ class MilestonesManager:
         """Get the current value for a specific metric"""
         user_id_str = str(user_id)
         
+        from repositories.game_session_repository import normalize_game_type
+
+        dm_game_types = {
+            "TicTacToe", "Wordle", "Connect Four", "Memory", "2048",
+            "Minesweeper", "Hangman", "Filler",
+        }
+
         if metric == "wins":
-            if game_type == "TicTacToe":
-                result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_tictactoe WHERE user_id = %s AND won = 'Won'",
-                    (user_id_str,)
-                )
-            elif game_type == "Wordle":
-                result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_wordle WHERE user_id = %s AND won = 'Won'",
-                    (user_id_str,)
-                )
-            elif game_type == "Connect Four":
-                result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_connectfour WHERE user_id = %s AND status = 'Won'",
-                    (user_id_str,)
-                )
-            elif game_type == "Memory":
-                result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_memory WHERE user_id = %s AND won = 'Won'",
-                    (user_id_str,)
-                )
-            elif game_type == "2048":
-                result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_2048 WHERE user_id = %s AND status IN ('Won', 'Cashed Out')",
-                    (user_id_str,)
-                )
-            elif game_type == "Minesweeper":
-                result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_minesweeper WHERE user_id = %s AND won = 'Won'",
-                    (user_id_str,)
-                )
-            elif game_type == "Filler":
-                result = await db.execute(
-                    "SELECT COUNT(*) as count FROM users_filler WHERE user_id = %s AND won = 'Won'",
-                    (user_id_str,)
-                )
-            else:
+            if game_type not in dm_game_types:
                 return 0
-            return result[0]['count'] if result else 0
-        
+            result = await db.execute(
+                """SELECT COUNT(*) AS count FROM game_sessions
+                   WHERE user_id = %s AND game_type = %s AND status = 'won'""",
+                (user_id, normalize_game_type(game_type)),
+            )
+            return result[0]["count"] if result else 0
+
         elif metric == "total_games":
-            if game_type in ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper"]:
-                table_name = f"users_{game_type.lower().replace(' ', '')}"
+            if game_type in dm_game_types:
                 result = await db.execute(
-                    f"SELECT COUNT(*) as count FROM {table_name} WHERE user_id = %s",
-                    (user_id_str,)
+                    "SELECT COUNT(*) AS count FROM game_sessions WHERE user_id = %s AND game_type = %s",
+                    (user_id, normalize_game_type(game_type)),
                 )
             else:
                 # Chat games - use xp_logs
@@ -338,10 +314,11 @@ class MilestonesManager:
         elif metric == "best_score":
             if game_type == "2048":
                 result = await db.execute(
-                    "SELECT MAX(score) as max_score FROM users_2048 WHERE user_id = %s",
-                    (user_id_str,)
+                    """SELECT MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.score')) AS UNSIGNED)) AS max_score
+                       FROM game_sessions WHERE user_id = %s AND game_type = '2048'""",
+                    (user_id,),
                 )
-                return int(result[0]['max_score'] or 0) if result else 0
+                return int(result[0]["max_score"] or 0) if result else 0
             return 0
         
         elif metric == "level":

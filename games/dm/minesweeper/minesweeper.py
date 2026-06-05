@@ -4,6 +4,7 @@ from typing import List, Tuple, Dict
 import discord
 from games.base.dm_game import DMGame
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 ROWS, COLS = 10, 5
 TOTAL_CELLS = ROWS * COLS  # 50
 TEST_MINESWEEPER_GAMES: Dict[int, dict] = {}  # user_id -> {'state': {...}, 'message1_id': int, 'message2_id': int}
@@ -86,11 +87,13 @@ class Minesweeper(DMGame):
                 }
             
             if not test_mode:
-                db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                await db.execute_insert(
-                    "INSERT INTO users_minesweeper (game_id, user_id, won, cells_revealed, mines_found, started_at, ended_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                    (last_game_id, user.id, 'Started', 0, 0, current_unix, 0)
+                await GameSessionRepository().start_session(
+                    last_game_id,
+                    user.id,
+                    "minesweeper",
+                    stats={"cells_revealed": 0, "mines_found": 0},
+                    started_at=current_unix,
                 )
                 await state._save_state()
             

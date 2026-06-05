@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from core.database.pool import DatabasePool
+from repositories.game_session_repository import normalize_game_type
 
 
 class GameRepository:
@@ -13,30 +14,32 @@ class GameRepository:
     async def get_last_game_id(self, game_name: str) -> Optional[int]:
         db = await self._pool()
         rows = await db.execute(
-            "SELECT game_id FROM games WHERE game_name = %s ORDER BY game_id DESC LIMIT 1",
+            "SELECT id AS game_id FROM games WHERE name = %s ORDER BY id DESC LIMIT 1",
             (game_name,),
         )
         return rows[0]["game_id"] if rows else None
 
     async def has_played_game(self, game_name: str, user_id: int, game_id: int) -> bool:
         db = await self._pool()
-        safe_game_name = game_name.lower().replace(" ", "")
+        game_type = normalize_game_type(game_name)
         rows = await db.execute(
-            f"SELECT user_id FROM users_{safe_game_name} WHERE game_id = %s AND user_id = %s",
-            (game_id, user_id),
+            "SELECT user_id FROM game_sessions WHERE game_id = %s AND user_id = %s AND game_type = %s",
+            (game_id, user_id, game_type),
         )
         return len(rows) > 0
 
     async def get_last_dm_game_info(self) -> Optional[Dict[str, Any]]:
         db = await self._pool()
         rows = await db.execute(
-            "SELECT game_name, game_id FROM games WHERE dm_game = TRUE ORDER BY game_id DESC LIMIT 1"
+            "SELECT name AS game_name, id AS game_id FROM games WHERE is_dm = 1 ORDER BY id DESC LIMIT 1"
         )
         return rows[0] if rows else None
 
     async def get_recent_games(self) -> tuple[List[str], List[str]]:
         db = await self._pool()
-        rows = await db.execute("SELECT * FROM games ORDER BY refreshed_at DESC")
+        rows = await db.execute(
+            "SELECT id AS game_id, name AS game_name, refreshed_at FROM games ORDER BY refreshed_at DESC"
+        )
         game_list: List[str] = []
         game_str: List[str] = []
         for row in rows:

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict
 import discord
 from managers.leveling import LevelingManager
-from core.database.pool import DatabasePool
+from repositories.game_session_repository import GameSessionRepository
 class MemoryButtons(discord.ui.View):
     def __init__(self, game_id: int, bot, config, game_config, dm_config, test_mode: bool = False, saved_state: dict = None):
         super().__init__(timeout=None)
@@ -212,10 +212,9 @@ class MemoryButtons(discord.ui.View):
             self.total_xp += xp
             
             # Update database
-            db = await DatabasePool.get_instance()
-            await db.execute(
-                "UPDATE users_memory SET matches = matches + 1 WHERE user_id = %s AND game_id = %s",
-                (interaction.user.id, self.game_id)
+            repo = GameSessionRepository()
+            await repo.merge_stats(
+                self.game_id, interaction.user.id, "memory", {"matches": self.matches_found}
             )
             
             # Update embed
@@ -240,10 +239,13 @@ class MemoryButtons(discord.ui.View):
             self.tries_remaining -= 1
             
             # Update database
-            db = await DatabasePool.get_instance()
-            await db.execute(
-                "UPDATE users_memory SET attempts = attempts + 1 WHERE user_id = %s AND game_id = %s",
-                (interaction.user.id, self.game_id)
+            max_tries = self.game_config.get("TRIES") or self.game_config.get("max_tries", 7)
+            repo = GameSessionRepository()
+            await repo.merge_stats(
+                self.game_id,
+                interaction.user.id,
+                "memory",
+                {"attempts": max_tries - self.tries_remaining},
             )
             
             # Update embed
@@ -330,11 +332,15 @@ class MemoryButtons(discord.ui.View):
             )
             
             # Update database
-            db = await DatabasePool.get_instance()
+            repo = GameSessionRepository()
             current_unix = int(datetime.now(timezone.utc).timestamp())
-            await db.execute(
-                "UPDATE users_memory SET won = 'Won', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                (current_unix, interaction.user.id, self.game_id)
+            await repo.finish_session(
+                self.game_id,
+                interaction.user.id,
+                "memory",
+                "won",
+                stats={"matches": self.matches_found},
+                ended_at=current_unix,
             )
             
             # Check for achievements
@@ -389,11 +395,19 @@ class MemoryButtons(discord.ui.View):
         
         # Update database
         if not self.test_mode:
-            db = await DatabasePool.get_instance()
+            repo = GameSessionRepository()
             current_unix = int(datetime.now(timezone.utc).timestamp())
-            await db.execute(
-                "UPDATE users_memory SET won = 'Lost', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                (current_unix, interaction.user.id, self.game_id)
+            max_tries = self.game_config.get("TRIES") or self.game_config.get("max_tries", 7)
+            await repo.finish_session(
+                self.game_id,
+                interaction.user.id,
+                "memory",
+                "lost",
+                stats={
+                    "attempts": max_tries - self.tries_remaining,
+                    "matches": self.matches_found,
+                },
+                ended_at=current_unix,
             )
     
     @staticmethod

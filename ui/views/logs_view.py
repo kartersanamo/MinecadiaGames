@@ -1,6 +1,9 @@
+import json
+
 import discord
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+from repositories.game_session_repository import normalize_game_type
 from typing import Optional, List, Dict, Any
 
 
@@ -133,10 +136,10 @@ class LogsView(discord.ui.View):
                 xl.channel_id,
                 xl.source,
                 COALESCE(xl.timestamp, g.refreshed_at) as timestamp,
-                g.game_name,
-                g.dm_game
+                g.name AS game_name,
+                g.is_dm AS dm_game
             FROM xp_logs xl
-            LEFT JOIN games g ON xl.game_id = g.game_id
+            LEFT JOIN games g ON xl.game_id = g.id
             WHERE 1=1
         """
         params = []
@@ -178,196 +181,94 @@ class LogsView(discord.ui.View):
         return logs
     
     async def _get_game_logs(self, db: DatabasePool, time_filter: Optional[int]) -> List[Dict[str, Any]]:
-        """Get game logs from DM game tables"""
-        dm_game_tables = {
-            'tictactoe': 'users_tictactoe',
-            'wordle': 'users_wordle',
-            'connectfour': 'users_connectfour',
-            'memory': 'users_memory',
-            '2048': 'users_2048',
-            'minesweeper': 'users_minesweeper',
-            'hangman': 'users_hangman',
-            'filler': 'users_filler'
-        }
-        
+        """Get game logs from game_sessions"""
+        query = """
+            SELECT
+                gs.game_id,
+                gs.user_id,
+                gs.game_type,
+                gs.status,
+                gs.stats,
+                gs.started_at,
+                gs.ended_at,
+                g.name AS game_name,
+                g.refreshed_at,
+                g.is_dm AS dm_game
+            FROM game_sessions gs
+            INNER JOIN games g ON gs.game_id = g.id
+            WHERE 1=1
+        """
+        params = []
+
+        if self.user_id:
+            query += " AND gs.user_id = %s"
+            params.append(self.user_id)
+
+        if self.game_id:
+            query += " AND gs.game_id = %s"
+            params.append(self.game_id)
+
+        if self.game_type:
+            query += " AND gs.game_type = %s"
+            params.append(normalize_game_type(self.game_type))
+
+        if time_filter:
+            query += " AND gs.started_at >= %s"
+            params.append(time_filter)
+
+        query += " ORDER BY gs.started_at DESC LIMIT 500"
+
         all_logs = []
-        
-        # Limit to 100 per table to avoid timeout
-        limit_per_table = 100
-        
-        for game_name, table_name in dm_game_tables.items():
-            # Skip if filtering by game type and it doesn't match
-            if self.game_type and game_name.lower() != self.game_type.lower():
-                continue
-            
-            # Build query with proper field selection based on table structure
-            # Each table has different columns, so we need to handle them separately
-            if game_name == 'connectfour':
-                query = f"""
-                    SELECT 
-                        u.game_id,
-                        u.user_id,
-                        u.status,
-                        NULL as score,
-                        u.started_at,
-                        u.ended_at,
-                        u.moves,
-                        NULL as highest_tile,
-                        g.game_name,
-                        g.refreshed_at,
-                        g.dm_game
-                """
-            elif game_name == 'memory':
-                query = f"""
-                    SELECT 
-                        u.game_id,
-                        u.user_id,
-                        u.won as status,
-                        NULL as score,
-                        u.started_at,
-                        u.ended_at,
-                        u.attempts as moves,
-                        NULL as highest_tile,
-                        g.game_name,
-                        g.refreshed_at,
-                        g.dm_game
-                """
-            elif game_name == '2048':
-                query = f"""
-                    SELECT 
-                        u.game_id,
-                        u.user_id,
-                        u.status,
-                        u.score,
-                        u.started_at,
-                        u.ended_at,
-                        u.moves,
-                        u.highest_tile,
-                        g.game_name,
-                        g.refreshed_at,
-                        g.dm_game
-                """
-            elif game_name == 'wordle':
-                query = f"""
-                    SELECT 
-                        u.game_id,
-                        u.user_id,
-                        u.won as status,
-                        NULL as score,
-                        u.started_at,
-                        u.ended_at,
-                        u.attempts as moves,
-                        NULL as highest_tile,
-                        g.game_name,
-                        g.refreshed_at,
-                        g.dm_game
-                """
-            elif game_name == 'minesweeper':
-                query = f"""
-                    SELECT 
-                        u.game_id,
-                        u.user_id,
-                        u.won as status,
-                        NULL as score,
-                        u.started_at,
-                        u.ended_at,
-                        u.cells_revealed as moves,
-                        NULL as highest_tile,
-                        g.game_name,
-                        g.refreshed_at,
-                        g.dm_game
-                """
-            elif game_name == 'filler':
-                query = f"""
-                    SELECT 
-                        u.game_id,
-                        u.user_id,
-                        u.won as status,
-                        u.player_cells as score,
-                        u.started_at,
-                        u.ended_at,
-                        u.turns as moves,
-                        u.bot_cells as highest_tile,
-                        g.game_name,
-                        g.refreshed_at,
-                        g.dm_game
-                """
-            else:  # tictactoe, hangman
-                query = f"""
-                    SELECT 
-                        u.game_id,
-                        u.user_id,
-                        u.won as status,
-                        NULL as score,
-                        u.started_at,
-                        u.ended_at,
-                        NULL as moves,
-                        NULL as highest_tile,
-                        g.game_name,
-                        g.refreshed_at,
-                        g.dm_game
-                """
-            
-            # Complete the query
-            query += f"""
-                FROM {table_name} u
-                INNER JOIN games g ON u.game_id = g.game_id
-                WHERE 1=1
-            """
-            params = []
-            
-            if self.user_id:
-                query += " AND u.user_id = %s"
-                params.append(str(self.user_id))
-            
-            if self.game_id:
-                query += " AND u.game_id = %s"
-                params.append(self.game_id)
-            
-            if time_filter:
-                query += " AND u.started_at >= %s"
-                params.append(time_filter)
-            
-            query += f" ORDER BY u.started_at DESC LIMIT {limit_per_table}"
-            
-            try:
-                rows = await db.execute(query, tuple(params) if params else None)
-                
-                for row in rows:
-                    # Get additional game-specific fields
-                    moves = row.get('moves')
-                    highest_tile = row.get('highest_tile')
-                    
-                    all_logs.append({
-                        'type': 'game',
-                        'game_id': row['game_id'],
-                        'user_id': int(row['user_id']),
-                        'game_name': game_name.title(),
-                        'status': row['status'],
-                        'score': row.get('score'),
-                        'moves': moves,
-                        'highest_tile': highest_tile,
-                        'started_at': row['started_at'],
-                        'ended_at': row.get('ended_at', 0),
-                        'timestamp': row['started_at'],
-                        'dm_game': True
-                    })
-            except Exception as e:
-                self.logger.error(f"Error fetching logs from {table_name}: {e}")
-                import traceback
-                self.logger.error(traceback.format_exc())
-                continue
-        
+        try:
+            rows = await db.execute(query, tuple(params) if params else None)
+            for row in rows:
+                stats = row.get("stats")
+                if isinstance(stats, str):
+                    stats = json.loads(stats) if stats else {}
+                elif not stats:
+                    stats = {}
+
+                game_type = row["game_type"]
+                score = stats.get("score") or stats.get("player_cells")
+                moves = (
+                    stats.get("moves")
+                    or stats.get("attempts")
+                    or stats.get("turns")
+                    or stats.get("cells_revealed")
+                )
+                highest_tile = stats.get("highest_tile") or stats.get("bot_cells")
+
+                display_name = row.get("game_name") or game_type.replace("_", " ").title()
+
+                all_logs.append({
+                    "type": "game",
+                    "game_id": row["game_id"],
+                    "user_id": int(row["user_id"]),
+                    "game_name": display_name,
+                    "status": row["status"],
+                    "score": score,
+                    "moves": moves,
+                    "highest_tile": highest_tile,
+                    "started_at": row["started_at"],
+                    "ended_at": row.get("ended_at") or 0,
+                    "timestamp": row["started_at"],
+                    "dm_game": True,
+                })
+        except Exception as e:
+            self.logger.error(f"Error fetching game session logs: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+
         return all_logs
     
     async def _get_game_events(self, db: DatabasePool, time_filter: Optional[int]) -> List[Dict[str, Any]]:
         """Get game creation/refresh events from games table"""
         query = """
-            SELECT 
-                game_id,
-                game_name,
+            SELECT
+                id AS game_id,
+                name AS game_name,
                 refreshed_at,
-                dm_game
+                is_dm AS dm_game
             FROM games
             WHERE 1=1
         """
@@ -398,13 +299,13 @@ class LogsView(discord.ui.View):
     async def _get_chat_game_events(self, db: DatabasePool, time_filter: Optional[int]) -> List[Dict[str, Any]]:
         """Get chat game creation events for Game Logs Only"""
         query = """
-            SELECT 
-                game_id,
-                game_name,
+            SELECT
+                id AS game_id,
+                name AS game_name,
                 refreshed_at,
-                dm_game
+                is_dm AS dm_game
             FROM games
-            WHERE dm_game = FALSE
+            WHERE is_dm = 0
         """
         params = []
         
@@ -450,7 +351,7 @@ class LogsView(discord.ui.View):
                 MAX(COALESCE(xl.timestamp, g.refreshed_at)) as last_time,
                 MAX(COALESCE(xl.timestamp, g.refreshed_at)) - MIN(COALESCE(xl.timestamp, g.refreshed_at)) as time_span
             FROM xp_logs xl
-            LEFT JOIN games g ON xl.game_id = g.game_id
+            LEFT JOIN games g ON xl.game_id = g.id
             WHERE 1=1
         """
         params = []
@@ -487,9 +388,9 @@ class LogsView(discord.ui.View):
                 xl.xp,
                 xl.source,
                 COALESCE(xl.timestamp, g.refreshed_at) as timestamp,
-                g.game_name
+                g.name AS game_name
             FROM xp_logs xl
-            LEFT JOIN games g ON xl.game_id = g.game_id
+            LEFT JOIN games g ON xl.game_id = g.id
             WHERE xl.xp > 100
         """
         params2 = []
@@ -523,7 +424,7 @@ class LogsView(discord.ui.View):
                 SUM(xl.xp) as total_xp,
                 MAX(COALESCE(xl.timestamp, g.refreshed_at)) as last_time
             FROM xp_logs xl
-            LEFT JOIN games g ON xl.game_id = g.game_id
+            LEFT JOIN games g ON xl.game_id = g.id
             WHERE 1=1
         """
         params3 = []

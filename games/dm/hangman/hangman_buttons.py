@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Set
 import discord
 from managers.leveling import LevelingManager
-from core.database.pool import DatabasePool
+from repositories.game_session_repository import GameSessionRepository
 from core.logging.setup import get_logger
 class HangmanButtons(discord.ui.View):
     def __init__(self, game_id: int, bot, config, game_config, dm_config, word: str, user_id: int, test_mode: bool = False, saved_state: dict = None, main_message: discord.Message = None):
@@ -200,11 +200,17 @@ class HangmanButtons(discord.ui.View):
             # Update database for non-test games
             if not self.test_mode and self.game_id != -999999:
                 try:
-                    db = await DatabasePool.get_instance()
-                    correct_count = len([c for c in word_display if c != '_' and c != ' '])
-                    await db.execute(
-                        "UPDATE users_hangman SET wrong_guesses = %s, correct_guesses = %s WHERE user_id = %s AND game_id = %s",
-                        (self.wrong_guesses, correct_count, self.player_id, self.game_id)
+                    repo = GameSessionRepository()
+                    correct_count = len([c for c in word_display if c != "_" and c != " "])
+                    await repo.merge_stats(
+                        self.game_id,
+                        self.player_id,
+                        "hangman",
+                        {
+                            "word": self.word,
+                            "wrong_guesses": self.wrong_guesses,
+                            "correct_guesses": correct_count,
+                        },
                     )
                 except Exception as e:
                     self.logger.error(f"Error updating Hangman game state in database: {e}")
@@ -252,10 +258,18 @@ class HangmanButtons(discord.ui.View):
                 # Update database and award XP for non-test games
                 if not self.test_mode and self.game_id != -999999:
                     try:
-                        db = await DatabasePool.get_instance()
-                        await db.execute(
-                            "UPDATE users_hangman SET won = 'Won', ended_at = %s, correct_guesses = %s WHERE user_id = %s AND game_id = %s",
-                            (current_unix, correct_count, self.player_id, self.game_id)
+                        repo = GameSessionRepository()
+                        await repo.finish_session(
+                            self.game_id,
+                            self.player_id,
+                            "hangman",
+                            "won",
+                            stats={
+                                "word": self.word,
+                                "wrong_guesses": self.wrong_guesses,
+                                "correct_guesses": correct_count,
+                            },
+                            ended_at=current_unix,
                         )
                         
                         # Check for achievements
@@ -322,10 +336,17 @@ class HangmanButtons(discord.ui.View):
                 # Update database for non-test games
                 if not self.test_mode and self.game_id != -999999:
                     try:
-                        db = await DatabasePool.get_instance()
-                        await db.execute(
-                            "UPDATE users_hangman SET won = 'Lost', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                            (current_unix, self.player_id, self.game_id)
+                        repo = GameSessionRepository()
+                        await repo.finish_session(
+                            self.game_id,
+                            self.player_id,
+                            "hangman",
+                            "lost",
+                            stats={
+                                "word": self.word,
+                                "wrong_guesses": self.wrong_guesses,
+                            },
+                            ended_at=current_unix,
                         )
                     except Exception as e:
                         self.logger.error(f"Error updating Hangman loss: {e}")

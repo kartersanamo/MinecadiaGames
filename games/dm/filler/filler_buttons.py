@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 
 import discord
 
-from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 from games.dm.filler.filler_engine import (
     DEFAULT_COLORS,
     FillerState,
@@ -280,7 +280,12 @@ class FillerButtons(discord.ui.View):
         winner = self.state.winner()
         total = self.state.grid_size * self.state.grid_size
         current_unix = int(datetime.now(timezone.utc).timestamp())
-        db = await DatabasePool.get_instance()
+        repo = GameSessionRepository()
+        filler_stats = {
+            "player_cells": self.state.player_cells,
+            "bot_cells": self.state.bot_cells,
+            "turns": self.state.turns,
+        }
 
         if winner == OWNER_PLAYER:
             xp = calculate_xp(self.state.player_cells, total, self.win_min, self.win_max)
@@ -304,17 +309,13 @@ class FillerButtons(discord.ui.View):
                 await self.bot.app.achievements.check_dm_game_win(
                     interaction.user, "Filler", interaction.channel, self.bot
                 )
-                await db.execute(
-                    "UPDATE users_filler SET won = 'Won', player_cells = %s, bot_cells = %s, "
-                    "turns = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (
-                        self.state.player_cells,
-                        self.state.bot_cells,
-                        self.state.turns,
-                        current_unix,
-                        interaction.user.id,
-                        self.game_id,
-                    ),
+                await repo.finish_session(
+                    self.game_id,
+                    interaction.user.id,
+                    "filler",
+                    "won",
+                    stats=filler_stats,
+                    ended_at=current_unix,
                 )
         elif winner == OWNER_BOT:
             result_msg = (
@@ -322,17 +323,13 @@ class FillerButtons(discord.ui.View):
                 f"and you had **{self.state.player_cells}**."
             )
             if not self.test_mode:
-                await db.execute(
-                    "UPDATE users_filler SET won = 'Lost', player_cells = %s, bot_cells = %s, "
-                    "turns = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (
-                        self.state.player_cells,
-                        self.state.bot_cells,
-                        self.state.turns,
-                        current_unix,
-                        interaction.user.id,
-                        self.game_id,
-                    ),
+                await repo.finish_session(
+                    self.game_id,
+                    interaction.user.id,
+                    "filler",
+                    "lost",
+                    stats=filler_stats,
+                    ended_at=current_unix,
                 )
         else:
             win_xp = calculate_xp(self.state.player_cells, total, self.win_min, self.win_max)
@@ -353,17 +350,13 @@ class FillerButtons(discord.ui.View):
                     game_id=self.game_id,
                 )
                 await lvl_mng.update()
-                await db.execute(
-                    "UPDATE users_filler SET won = 'Tied', player_cells = %s, bot_cells = %s, "
-                    "turns = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (
-                        self.state.player_cells,
-                        self.state.bot_cells,
-                        self.state.turns,
-                        current_unix,
-                        interaction.user.id,
-                        self.game_id,
-                    ),
+                await repo.finish_session(
+                    self.game_id,
+                    interaction.user.id,
+                    "filler",
+                    "tied",
+                    stats=filler_stats,
+                    ended_at=current_unix,
                 )
 
         embed = self.build_embed()

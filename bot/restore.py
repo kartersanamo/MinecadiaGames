@@ -7,6 +7,18 @@ from typing import Optional, Tuple
 
 from core.loggers import log_tasks
 from core.database.pool import DatabasePool
+from repositories.game_session_repository import normalize_game_type
+
+# game_sessions game_type → restore_dm_game_view key
+_RESTORE_GAME_TYPE_MAP = {
+    "connect_four": "connectfour",
+    "2048": "2048",
+    "tictactoe": "tictactoe",
+    "memory": "memory",
+    "minesweeper": "minesweeper",
+    "hangman": "hangman",
+    "filler": "filler",
+}
 
 
 async def restore_active_chat_games(client) -> None:
@@ -16,12 +28,11 @@ async def restore_active_chat_games(client) -> None:
         chat_config = client.config.get("chat_games")
         game_length = chat_config.get("GAME_LENGTH") or chat_config.get("game_duration", 600)
 
-        # Production schema: game_id, game_name, refreshed_at, dm_game (no status/end_time)
         active_games = await db.execute(
             """
-            SELECT game_id, game_name, refreshed_at
+            SELECT id AS game_id, name AS game_name, refreshed_at
             FROM games
-            WHERE dm_game = FALSE
+            WHERE is_dm = 0
             AND refreshed_at + %s > %s
             ORDER BY refreshed_at DESC
             LIMIT 20
@@ -109,21 +120,11 @@ async def end_dm_game_in_db(game_type: str, game_id: int, user_id: int) -> None:
     try:
         db = await DatabasePool.get_instance()
         now = int(datetime.now(timezone.utc).timestamp())
-        table_map = {
-            "2048": ("users_2048", "status = 'Lost'"),
-            "tictactoe": ("users_tictactoe", "won = 'Lost'"),
-            "connectfour": ("users_connectfour", "status = 'Lost'"),
-            "memory": ("users_memory", "won = 'Lost'"),
-            "minesweeper": ("users_minesweeper", "won = 'Lost'"),
-            "hangman": ("users_hangman", "won = 'Lost'"),
-            "filler": ("users_filler", "won = 'Lost'"),
-        }
-        table, set_clause = table_map.get(game_type, (None, None))
-        if not table:
-            return
+        session_type = normalize_game_type(game_type)
         await db.execute(
-            f"UPDATE {table} SET {set_clause}, ended_at = %s WHERE user_id = %s AND game_id = %s",
-            (now, user_id, game_id),
+            """UPDATE game_sessions SET status = 'lost', ended_at = %s
+               WHERE user_id = %s AND game_id = %s AND game_type = %s""",
+            (now, user_id, game_id, session_type),
         )
         log_tasks.debug(f"Ended non-most-recent DM game {game_type} #{game_id} for user {user_id}")
     except Exception as e:
@@ -133,109 +134,94 @@ async def end_dm_game_in_db(game_type: str, game_id: int, user_id: int) -> None:
 async def restore_active_dm_games(client) -> None:
     try:
         db = await DatabasePool.get_instance()
-        game_tables = {
-            "users_2048": "2048",
-            "users_tictactoe": "tictactoe",
-            "users_connectfour": "connectfour",
-            "users_memory": "memory",
-            "users_minesweeper": "minesweeper",
-            "users_hangman": "hangman",
-            "users_filler": "filler",
-        }
 
         restored_count = 0
         ended_count = 0
 
-        for table_name, game_type in game_tables.items():
+        active_games = await db.execute(
+            """
+            SELECT game_id, user_id, game_type, state
+            FROM game_sessions
+            WHERE status = 'started'
+            AND ended_at IS NULL
+            AND state IS NOT NULL
+            AND game_id != -999999
+            ORDER BY started_at DESC
+            LIMIT 100
+            """
+        )
+
+        if not active_games:
+            log_tasks.info("No active DM games to restore")
+            return
+
+        game_type_counts: dict[str, dict[str, int]] = {}
+
+        for game in active_games:
             try:
-                if table_name in ["users_2048", "users_connectfour"]:
-                    status_condition = "status = 'Started'"
-                else:
-                    status_condition = "won = 'Started'"
+                game_id = game["game_id"]
+                user_id = game["user_id"]
+                session_type = game["game_type"]
+                game_type = _RESTORE_GAME_TYPE_MAP.get(session_type, session_type)
+                game_state_json = game.get("state")
 
-                active_games = await db.execute(
-                    f"""
-                    SELECT game_id, user_id, game_state
-                    FROM {table_name}
-                    WHERE {status_condition}
-                    AND (ended_at = 0 OR ended_at IS NULL)
-                    AND game_state IS NOT NULL
-                    ORDER BY started_at DESC
-                    LIMIT 100
-                    """
-                )
-
-                if not active_games:
+                if not game_state_json:
                     continue
 
-                game_type_restored = 0
-                game_type_ended = 0
+                most_recent = await get_most_recent_dm_game_for_user(client, user_id)
+                if most_recent is None or most_recent != (game_type, game_id):
+                    log_tasks.debug(
+                        f"Ending non-most-recent {game_type} game #{game_id} for user {user_id} (most recent: {most_recent})"
+                    )
+                    await end_dm_game_in_db(game_type, game_id, user_id)
+                    ended_count += 1
+                    counts = game_type_counts.setdefault(game_type, {"restored": 0, "ended": 0})
+                    counts["ended"] += 1
+                    continue
 
-                for game in active_games:
-                    try:
-                        game_id = game["game_id"]
-                        user_id = game["user_id"]
-                        game_state_json = game.get("game_state")
+                try:
+                    if isinstance(game_state_json, str):
+                        game_state = json.loads(game_state_json)
+                    else:
+                        game_state = game_state_json
+                except Exception as e:
+                    log_tasks.error(
+                        f"Error parsing game state for {game_type} game {game_id}: {e}"
+                    )
+                    continue
 
-                        if not game_state_json:
-                            continue
+                if game_type == "wordle":
+                    continue
 
-                        most_recent = await get_most_recent_dm_game_for_user(client, user_id)
-                        if most_recent is None or most_recent != (game_type, game_id):
-                            log_tasks.debug(
-                                f"Ending non-most-recent {game_type} game #{game_id} for user {user_id} (most recent: {most_recent})"
-                            )
-                            await end_dm_game_in_db(game_type, game_id, user_id)
-                            game_type_ended += 1
-                            ended_count += 1
-                            continue
+                restored_views = await restore_dm_game_view(
+                    client, game_type, game_id, user_id, game_state
+                )
 
-                        try:
-                            if isinstance(game_state_json, str):
-                                game_state = json.loads(game_state_json)
-                            else:
-                                game_state = game_state_json
-                        except Exception as e:
-                            log_tasks.error(
-                                f"Error parsing game_state for {game_type} game {game_id}: {e}"
-                            )
-                            continue
-
-                        if game_type == "wordle":
-                            continue
-
-                        restored_views = await restore_dm_game_view(
-                            client, game_type, game_id, user_id, game_state
-                        )
-
-                        if restored_views:
-                            if isinstance(restored_views, list):
-                                for view in restored_views:
-                                    client.add_view(view)
-                                    game_type_restored += 1
-                                    restored_count += 1
-                            else:
-                                client.add_view(restored_views)
-                                game_type_restored += 1
-                                restored_count += 1
-                            log_tasks.debug(
-                                f"Restored {game_type} game #{game_id} for user {user_id}"
-                            )
-
-                    except Exception as e:
-                        log_tasks.error(
-                            f"Error restoring {game_type} game {game.get('game_id')}: {e}"
-                        )
-                        log_tasks.error(traceback.format_exc())
-
-                if game_type_restored > 0 or game_type_ended > 0:
-                    log_tasks.info(
-                        f"{game_type}: Restored {game_type_restored} most recent game(s), ended {game_type_ended} old game(s)"
+                if restored_views:
+                    if isinstance(restored_views, list):
+                        for view in restored_views:
+                            client.add_view(view)
+                            restored_count += 1
+                    else:
+                        client.add_view(restored_views)
+                        restored_count += 1
+                    counts = game_type_counts.setdefault(game_type, {"restored": 0, "ended": 0})
+                    counts["restored"] += 1
+                    log_tasks.debug(
+                        f"Restored {game_type} game #{game_id} for user {user_id}"
                     )
 
             except Exception as e:
-                log_tasks.error(f"Error querying {table_name} for active games: {e}")
+                log_tasks.error(
+                    f"Error restoring {game.get('game_type')} game {game.get('game_id')}: {e}"
+                )
                 log_tasks.error(traceback.format_exc())
+
+        for game_type, counts in game_type_counts.items():
+            if counts["restored"] > 0 or counts["ended"] > 0:
+                log_tasks.info(
+                    f"{game_type}: Restored {counts['restored']} most recent game(s), ended {counts['ended']} old game(s)"
+                )
 
         if restored_count > 0 or ended_count > 0:
             log_tasks.info(
@@ -355,7 +341,9 @@ async def restore_dm_game_view(client, game_type: str, game_id: int, user_id: in
             if not word:
                 db = await DatabasePool.get_instance()
                 rows = await db.execute(
-                    "SELECT word FROM users_hangman WHERE game_id = %s AND user_id = %s",
+                    """SELECT JSON_UNQUOTE(JSON_EXTRACT(stats, '$.word')) AS word
+                       FROM game_sessions
+                       WHERE game_id = %s AND user_id = %s AND game_type = 'hangman'""",
                     (game_id, user_id),
                 )
                 if rows and len(rows) > 0:

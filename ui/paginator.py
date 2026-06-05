@@ -353,8 +353,8 @@ class GameIdSelect(discord.ui.Select):
         db = await DatabasePool.get_instance()
         
         game_info = await db.execute(
-            "SELECT game_name, refreshed_at, dm_game FROM games WHERE game_id = %s",
-            (game_id,)
+            "SELECT name AS game_name, refreshed_at, is_dm AS dm_game FROM games WHERE id = %s",
+            (game_id,),
         )
         
         if not game_info:
@@ -370,7 +370,7 @@ class GameIdSelect(discord.ui.Select):
             """
             SELECT user_id, xp, source, COALESCE(xl.timestamp, g.refreshed_at) as timestamp
             FROM xp_logs xl
-            LEFT JOIN games g ON xl.game_id = g.game_id
+            LEFT JOIN games g ON xl.game_id = g.id
             WHERE xl.game_id = %s
             ORDER BY COALESCE(xl.timestamp, g.refreshed_at) DESC
             LIMIT 500
@@ -378,81 +378,44 @@ class GameIdSelect(discord.ui.Select):
             (game_id,)
         )
         
-        # Get game-specific data
+        # Get game-specific data from game_sessions
         game_data = []
         if is_dm_game:
-            game_name_lower = game_name.lower().replace(" ", "")
-            table_name = f"users_{game_name_lower}"
-            
             try:
-                # Different games have different column structures
-                if game_name_lower == 'wordle':
-                    game_data = await db.execute(
-                        f"""
-                        SELECT user_id, won as status, NULL as score, started_at, ended_at, attempts as moves
-                        FROM {table_name}
-                        WHERE game_id = %s
-                        ORDER BY started_at DESC
-                        """,
-                        (game_id,)
-                    )
-                elif game_name_lower in ['tictactoe', 'connectfour', 'minesweeper']:
-                    if game_name_lower == 'minesweeper':
-                        game_data = await db.execute(
-                            f"""
-                            SELECT user_id, won as status, NULL as score, started_at, ended_at, cells_revealed as moves
-                            FROM {table_name}
-                            WHERE game_id = %s
-                            ORDER BY started_at DESC
-                            """,
-                            (game_id,)
-                        )
-                    else:
-                        game_data = await db.execute(
-                            f"""
-                            SELECT user_id, won as status, NULL as score, started_at, ended_at, NULL as moves
-                            FROM {table_name}
-                            WHERE game_id = %s
-                            ORDER BY started_at DESC
-                            """,
-                            (game_id,)
-                        )
-                elif game_name_lower == 'memory':
-                    game_data = await db.execute(
-                        f"""
-                        SELECT user_id, won as status, NULL as score, started_at, ended_at, attempts as moves
-                        FROM {table_name}
-                        WHERE game_id = %s
-                        ORDER BY started_at DESC
-                        """,
-                        (game_id,)
-                    )
-                elif game_name_lower == '2048':
-                    game_data = await db.execute(
-                        f"""
-                        SELECT user_id, status, score, started_at, ended_at, moves
-                        FROM {table_name}
-                        WHERE game_id = %s
-                        ORDER BY started_at DESC
-                        """,
-                        (game_id,)
-                    )
-                else:
-                    # Fallback: try generic query
-                    game_data = await db.execute(
-                        f"""
-                        SELECT user_id, status, score, started_at, ended_at, moves
-                        FROM {table_name}
-                        WHERE game_id = %s
-                        ORDER BY started_at DESC
-                        """,
-                        (game_id,)
-                    )
+                import json
+
+                rows = await db.execute(
+                    """
+                    SELECT user_id, status, stats, started_at, ended_at
+                    FROM game_sessions
+                    WHERE game_id = %s
+                    ORDER BY started_at DESC
+                    """,
+                    (game_id,),
+                )
+                for row in rows:
+                    stats = row.get("stats")
+                    if isinstance(stats, str):
+                        stats = json.loads(stats) if stats else {}
+                    elif not stats:
+                        stats = {}
+                    game_data.append({
+                        "user_id": row["user_id"],
+                        "status": row["status"],
+                        "score": stats.get("score") or stats.get("player_cells"),
+                        "started_at": row["started_at"],
+                        "ended_at": row.get("ended_at"),
+                        "moves": (
+                            stats.get("moves")
+                            or stats.get("attempts")
+                            or stats.get("turns")
+                            or stats.get("cells_revealed")
+                        ),
+                    })
             except Exception as e:
                 from core.logging.setup import get_logger
                 logger = get_logger("Commands")
-                logger.error(f"Error fetching game data from {table_name}: {e}")
-                pass
+                logger.error(f"Error fetching game session data for game {game_id}: {e}")
         
         # Create comprehensive embed
         config = ConfigManager.get_instance()

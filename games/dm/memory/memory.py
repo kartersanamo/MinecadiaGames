@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 import discord
 from games.base.dm_game import DMGame
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 class Memory(DMGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -51,11 +52,13 @@ class Memory(DMGame):
                 await view._save_state()
             
             if not test_mode:
-                db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                await db.execute_insert(
-                    "INSERT INTO users_memory (game_id, user_id, won, attempts, matches, started_at, ended_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                    (last_game_id, user.id, 'Started', 0, 0, current_unix, 0)
+                await GameSessionRepository().start_session(
+                    last_game_id,
+                    user.id,
+                    "memory",
+                    stats={"attempts": 0, "matches": 0},
+                    started_at=current_unix,
                 )
             
             self.logger.info(f"Memory ({user.name}#{user.discriminator}){' [TEST MODE]' if test_mode else ''}")

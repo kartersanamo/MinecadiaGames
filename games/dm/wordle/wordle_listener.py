@@ -5,8 +5,19 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 from managers.leveling import LevelingManager
-from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
+
+
+def _wordle_row_from_session(row: dict) -> dict:
+    stats = GameSessionRepository.parse_stats(row)
+    return {
+        "game_id": row["game_id"],
+        "user_id": row["user_id"],
+        "word": stats.get("word", ""),
+        "attempts": stats.get("attempts", 0),
+        "started_at": row.get("started_at"),
+    }
 
 
 class WordleListener(commands.Cog):
@@ -71,29 +82,26 @@ class WordleListener(commands.Cog):
     async def _cleanup_stale_games(self):
         """Clean up Wordle games that have been 'Started' for too long (likely stale)"""
         try:
-            db = await DatabasePool.get_instance()
+            repo = GameSessionRepository()
             current_unix = int(datetime.now(timezone.utc).timestamp())
-            
-            # Mark games as 'Lost' if they've been 'Started' for more than 24 hours (86400 seconds)
-            # This handles cases where messages were deleted or bot restarted
             stale_time = current_unix - 86400  # 24 hours ago
-            
-            rows = await db.execute(
-                "SELECT game_id, user_id, started_at FROM users_wordle WHERE won = 'Started' AND started_at < %s AND game_id != -999999",
-                (stale_time,)
-            )
+
+            active = await repo.get_active_dm_games()
+            rows = [
+                g for g in active
+                if g.get("game_type") == "wordle" and g.get("started_at", 0) < stale_time
+            ]
             
             if rows:
                 self.logger.info(f"WordleListener: Found {len(rows)} stale Wordle games to clean up")
                 
                 for row in rows:
-                    game_id = row['game_id']
-                    user_id = row['user_id']
+                    game_id = row["game_id"]
+                    user_id = row["user_id"]
                     
                     try:
-                        await db.execute(
-                            "UPDATE users_wordle SET won = 'Lost', ended_at = %s WHERE game_id = %s AND user_id = %s AND won = 'Started'",
-                            (current_unix, game_id, user_id)
+                        await repo.finish_session(
+                            game_id, user_id, "wordle", "lost", ended_at=current_unix
                         )
                         
                         # Clean up from active_games if present
@@ -162,28 +170,20 @@ class WordleListener(commands.Cog):
                 attempts = len(self.wordle_game.guesses.get(message.author.id, []))
                 #self.logger.debug(f"WordleListener: Test game detected, using attempts from guesses: {attempts}")
             else:
-                # For real games, get attempts from database
-                db = await DatabasePool.get_instance()
-                rows = await db.execute(
-                    "SELECT attempts FROM users_wordle WHERE user_id = %s AND game_id = %s",
-                    (message.author.id, game_id)
-                )
-                if rows:
-                    attempts = rows[0].get('attempts', 0)
+                repo = GameSessionRepository()
+                session = await repo.get_session(game_id, message.author.id, "wordle")
+                if session:
+                    stats = GameSessionRepository.parse_stats(session)
+                    attempts = stats.get("attempts", 0)
                 else:
                     attempts = len(self.wordle_game.guesses.get(message.author.id, []))
         else:
-            # Not in active_games, check database (bot restart scenario)
-            # BUT: Test games are NOT in database, so if user has a test game, it MUST be in active_games
-            # If not in active_games, query database but exclude test games
-            #self.logger.debug(f"WordleListener: User {message.author.id} not in active_games, checking database (excluding test games)")
-            db = await DatabasePool.get_instance()
+            repo = GameSessionRepository()
             
-            # First, find all active games for this user
-            all_active_games = await db.execute(
-                "SELECT game_id, user_id, word, won, attempts, started_at FROM users_wordle WHERE user_id = %s AND won = 'Started' AND game_id != -999999 ORDER BY started_at DESC",
-                (message.author.id,)
-            )
+            all_active_games = [
+                _wordle_row_from_session(s)
+                for s in await repo.get_started_sessions(message.author.id, "wordle")
+            ]
             
             #self.logger.debug(f"WordleListener: Database query returned {len(all_active_games) if all_active_games else 0} active games")
             
@@ -240,12 +240,15 @@ class WordleListener(commands.Cog):
                         if cleanup_key not in self._cleanup_in_progress:
                             self._cleanup_in_progress.add(cleanup_key)
                             try:
-                                async with db.acquire() as conn:
-                                    async with conn.cursor() as cursor:
-                                        await cursor.execute(
-                                            "UPDATE users_wordle SET won = 'Lost', ended_at = %s WHERE game_id = %s AND user_id = %s AND won = 'Started'",
-                                            (current_unix, message.author.id, game_id)
-                                        )
+                                session = await repo.get_session(game_id, message.author.id, "wordle")
+                                if session and session.get("status") == "started":
+                                    await repo.finish_session(
+                                        game_id,
+                                        message.author.id,
+                                        "wordle",
+                                        "lost",
+                                        ended_at=current_unix,
+                                    )
                                 #self.logger.debug(f"WordleListener: Marked stale game {game_id} as Lost (no message found)")
                             except Exception as e:
                                 self.logger.error(f"WordleListener: Error marking stale game {game_id} as Lost: {e}")
@@ -266,10 +269,9 @@ class WordleListener(commands.Cog):
                             break
                 
                 if not found_game:
-                    # No games with messages found - check if any active games remain
-                    remaining_games = await db.execute(
-                        "SELECT game_id, user_id, word, won, attempts FROM users_wordle WHERE user_id = %s AND won = 'Started' AND game_id != -999999 ORDER BY started_at DESC LIMIT 1",
-                        (message.author.id,)
+                    remaining_sessions = await repo.get_started_sessions(message.author.id, "wordle")
+                    remaining_games = (
+                        [_wordle_row_from_session(remaining_sessions[0])] if remaining_sessions else []
                     )
                     
                     if not remaining_games:
@@ -312,15 +314,16 @@ class WordleListener(commands.Cog):
                     current_unix = int(datetime.now(timezone.utc).timestamp())
                     
                     try:
-                        # Use execute with direct connection to check rowcount
-                        async with db.acquire() as conn:
-                            async with conn.cursor() as cursor:
-                                await cursor.execute(
-                                    "UPDATE users_wordle SET won = 'Lost', ended_at = %s WHERE game_id = %s AND user_id = %s AND won = 'Started'",
-                                    (current_unix, message.author.id, game_id)
-                                )
-                                rows_affected = cursor.rowcount
-                                
+                        session = await repo.get_session(game_id, message.author.id, "wordle")
+                        rows_affected = 1 if session and session.get("status") == "started" else 0
+                        if rows_affected > 0:
+                            await repo.finish_session(
+                                game_id,
+                                message.author.id,
+                                "wordle",
+                                "lost",
+                                ended_at=current_unix,
+                            )
                         if rows_affected > 0:
                             # Successfully updated - log warning only once
                             self.logger.warning(f"WordleListener: Game {game_id} found in database but message not found - marked as Lost ({rows_affected} row(s) updated)")
@@ -454,20 +457,23 @@ class WordleListener(commands.Cog):
                 # Only update database for non-test games
                 if not test_mode and game_id != -999999:
                     try:
-                        db = await DatabasePool.get_instance()
-                        # Use direct cursor to check rowcount
-                        async with db.acquire() as conn:
-                            async with conn.cursor() as cursor:
-                                await cursor.execute(
-                                    "UPDATE users_wordle SET won = 'Lost', ended_at = %s WHERE user_id = %s AND game_id = %s AND won = 'Started'",
-                                    (current_unix, message.author.id, game_id)
-                                )
-                                rows_affected = cursor.rowcount
-                        
-                        if rows_affected > 0:
-                            self.logger.info(f"WordleListener: Marked stale game {game_id} as Lost for user {message.author.id} ({rows_affected} row(s) updated)")
+                        repo = GameSessionRepository()
+                        session = await repo.get_session(game_id, message.author.id, "wordle")
+                        if session and session.get("status") == "started":
+                            await repo.finish_session(
+                                game_id,
+                                message.author.id,
+                                "wordle",
+                                "lost",
+                                ended_at=current_unix,
+                            )
+                            self.logger.info(
+                                f"WordleListener: Marked stale game {game_id} as Lost for user {message.author.id}"
+                            )
                         else:
-                            self.logger.debug(f"WordleListener: Game {game_id} was already cleaned up by another handler (no rows affected)")
+                            self.logger.debug(
+                                f"WordleListener: Game {game_id} was already cleaned up by another handler"
+                            )
                     except Exception as e:
                         self.logger.error(f"WordleListener: Error cleaning up stale game {game_id}: {e}")
                         import traceback
@@ -530,10 +536,9 @@ class WordleListener(commands.Cog):
         
         # Update database only for non-test games
         if not test_mode and game_id != -999999:
-            db = await DatabasePool.get_instance()
-            await db.execute(
-                "UPDATE users_wordle SET attempts = %s WHERE user_id = %s AND game_id = %s",
-                (attempts + 1, message.author.id, game_id)
+            repo = GameSessionRepository()
+            await repo.merge_stats(
+                game_id, message.author.id, "wordle", {"attempts": attempts + 1}
             )
         
         if guess == word:
@@ -552,19 +557,21 @@ class WordleListener(commands.Cog):
                     f"`✅` Congratulations {message.author.mention}! You won! You would have earned `{xp}xp`!"
                 )
             else:
-                db = await DatabasePool.get_instance()
-                async with db.acquire() as conn:
-                    async with conn.cursor() as cursor:
-                        await cursor.execute(
-                            "UPDATE users_wordle SET won = 'Won', ended_at = %s, attempts = %s "
-                            "WHERE user_id = %s AND game_id = %s AND won = 'Started'",
-                            (current_unix, final_attempts, message.author.id, game_id),
-                        )
-                        won_rows = cursor.rowcount
-
-                if won_rows == 0:
+                repo = GameSessionRepository()
+                session = await repo.get_session(game_id, message.author.id, "wordle")
+                if not session or session.get("status") != "started":
                     self._clear_guess_state(message.author.id)
                     return
+
+                stats = GameSessionRepository.parse_stats(session)
+                await repo.finish_session(
+                    game_id,
+                    message.author.id,
+                    "wordle",
+                    "won",
+                    stats={**stats, "attempts": final_attempts, "word": word},
+                    ended_at=current_unix,
+                )
 
                 await message.channel.send(
                     f"`✅` Congratulations {message.author.mention}! You won `{xp}xp`!"
@@ -593,11 +600,9 @@ class WordleListener(commands.Cog):
                 
                 # Update database only for non-test games
                 if not test_mode and game_id != -999999:
-                    db = await DatabasePool.get_instance()
                     current_unix = int(datetime.now(timezone.utc).timestamp())
-                    await db.execute(
-                        "UPDATE users_wordle SET won = 'Lost', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                        (current_unix, message.author.id, game_id)
+                    await GameSessionRepository().finish_session(
+                        game_id, message.author.id, "wordle", "lost", ended_at=current_unix
                     )
                 
                 # Clean up guesses and letter states

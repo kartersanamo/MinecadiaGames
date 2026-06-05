@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import discord
 from managers.leveling import LevelingManager
 from core.database.pool import DatabasePool
+from repositories.game_session_repository import GameSessionRepository
 from core.logging.setup import get_logger
 import asyncio
 class TwentyFortyEightButtons(discord.ui.View):
@@ -114,10 +115,16 @@ class TwentyFortyEightButtons(discord.ui.View):
                 # Only update if game hasn't ended
                 if not self.game_ended:
                     try:
-                        db = await DatabasePool.get_instance()
-                        await db.execute(
-                            "UPDATE users_2048 SET score = %s, moves = %s, highest_tile = %s WHERE user_id = %s AND game_id = %s AND status = 'Started'",
-                            (self.score, self.moves, self.highest_tile, self.player_id, self.game_id)
+                        repo = GameSessionRepository()
+                        await repo.merge_stats(
+                            self.game_id,
+                            self.player_id,
+                            "2048",
+                            {
+                                "score": self.score,
+                                "moves": self.moves,
+                                "highest_tile": self.highest_tile,
+                            },
                         )
                     except Exception as e:
                         self.logger.error(f"Error in periodic 2048 database update: {e}")
@@ -426,10 +433,17 @@ class TwentyFortyEightButtons(discord.ui.View):
     async def _handle_win_async(self, interaction: discord.Interaction):
         """Handle win checks in background (non-blocking)"""
         try:
+            repo = GameSessionRepository()
+            stats = {
+                "score": self.score,
+                "moves": self.moves,
+                "highest_tile": self.highest_tile,
+            }
+            await repo.merge_stats(self.game_id, self.player_id, "2048", stats)
             db = await DatabasePool.get_instance()
             await db.execute(
-                "UPDATE users_2048 SET status = 'Won', score = %s, moves = %s, highest_tile = %s WHERE user_id = %s AND game_id = %s",
-                (self.score, self.moves, self.highest_tile, self.player_id, self.game_id)
+                "UPDATE game_sessions SET status = 'won' WHERE game_id = %s AND user_id = %s AND game_type = '2048' AND status = 'started'",
+                (self.game_id, self.player_id),
             )
             
             # Check for achievements (non-blocking)
@@ -528,13 +542,21 @@ class TwentyFortyEightButtons(discord.ui.View):
             )
             await lvl_mng.update()
             
-            # Update database - if they won (reached 2048), keep status as 'Won', otherwise 'Lost'
-            db = await DatabasePool.get_instance()
+            # Update database - if they won (reached 2048), keep status as 'won', otherwise 'lost'
+            repo = GameSessionRepository()
             current_unix = int(datetime.now(timezone.utc).timestamp())
-            status = 'Won' if self.game_won else 'Lost'
-            await db.execute(
-                "UPDATE users_2048 SET status = %s, score = %s, moves = %s, highest_tile = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
-                (status, self.score, self.moves, self.highest_tile, current_unix, self.player_id, self.game_id)
+            status = "won" if self.game_won else "lost"
+            await repo.finish_session(
+                self.game_id,
+                self.player_id,
+                "2048",
+                status,
+                stats={
+                    "score": self.score,
+                    "moves": self.moves,
+                    "highest_tile": self.highest_tile,
+                },
+                ended_at=current_unix,
             )
             
             # Check for best score achievement (pass user/channel/client so XP is granted)
@@ -684,12 +706,19 @@ class TwentyFortyEightButtons(discord.ui.View):
             )
             await lvl_mng.update()
             
-            db = await DatabasePool.get_instance()
+            repo = GameSessionRepository()
             current_unix = int(datetime.now(timezone.utc).timestamp())
-            # Record as Won so win leaderboards/milestones count cash-outs (UI still says Cashed Out).
-            await db.execute(
-                "UPDATE users_2048 SET status = 'Won', score = %s, moves = %s, highest_tile = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
-                (self.score, self.moves, self.highest_tile, current_unix, self.player_id, self.game_id)
+            await repo.finish_session(
+                self.game_id,
+                self.player_id,
+                "2048",
+                "won",
+                stats={
+                    "score": self.score,
+                    "moves": self.moves,
+                    "highest_tile": self.highest_tile,
+                },
+                ended_at=current_unix,
             )
 
             await self.bot.app.achievements.check_dm_game_win(interaction.user, "2048", interaction.channel, self.bot)

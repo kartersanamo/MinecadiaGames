@@ -36,7 +36,7 @@ class SendGamesView(discord.ui.View):
         active_count = 0
         total_players = 0
         try:
-            r = await db.execute("SELECT COUNT(*) as count FROM leveling WHERE active = 1")
+            r = await db.execute("SELECT COUNT(*) as count FROM leveling WHERE is_active = 1")
             if r:
                 active_count = int(r[0].get('count', 0))
         except Exception:

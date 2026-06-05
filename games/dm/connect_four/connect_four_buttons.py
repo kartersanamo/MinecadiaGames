@@ -7,7 +7,7 @@ from typing import Optional
 from PIL import Image
 import discord
 from managers.leveling import LevelingManager
-from core.database.pool import DatabasePool
+from repositories.game_session_repository import GameSessionRepository
 class ConnectFourButtons(discord.ui.View):
     def __init__(self, game_id: int, bot, config, game_config, test_mode: bool = False, saved_state: dict = None):
         super().__init__(timeout=None)
@@ -313,7 +313,7 @@ class ConnectFourButtons(discord.ui.View):
         return round(min(xp, max_xp))
     
     async def send_winner(self, interaction: discord.Interaction, won: str):
-        db = await DatabasePool.get_instance()
+        repo = GameSessionRepository()
         current_unix = int(datetime.now(timezone.utc).timestamp())
         
         if won == "R":
@@ -341,16 +341,24 @@ class ConnectFourButtons(discord.ui.View):
                 await self.bot.app.achievements.check_dm_game_win(interaction.user, "Connect Four", interaction.channel, self.bot)
             
             if not self.test_mode:
-                await db.execute(
-                    "UPDATE users_connectfour SET status = 'Won', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (current_unix, interaction.user.id, self.game_id)
+                await repo.finish_session(
+                    self.game_id,
+                    interaction.user.id,
+                    "connect_four",
+                    "won",
+                    stats={"moves": self.moves},
+                    ended_at=current_unix,
                 )
         elif won == "Y":
             await interaction.channel.send(
                 content=f"`❌` Sorry {interaction.user.mention}! You lost against the bot!"
             )
             if not self.test_mode:
-                await db.execute(
-                    "UPDATE users_connectfour SET status = 'Lost', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (current_unix, interaction.user.id, self.game_id)
+                await repo.finish_session(
+                    self.game_id,
+                    interaction.user.id,
+                    "connect_four",
+                    "lost",
+                    stats={"moves": self.moves},
+                    ended_at=current_unix,
                 )

@@ -268,7 +268,7 @@ class GameManager:
         try:
             db = await asyncio.wait_for(self._get_db(), timeout=5.0)
             rows = await asyncio.wait_for(
-                db.execute("SELECT game_name, refreshed_at FROM games WHERE dm_game = FALSE ORDER BY refreshed_at DESC LIMIT 1"),
+                db.execute("SELECT name AS game_name, refreshed_at FROM games WHERE is_dm = 0 ORDER BY refreshed_at DESC LIMIT 1"),
                 timeout=5.0
             )
         except asyncio.TimeoutError:
@@ -328,7 +328,7 @@ class GameManager:
         try:
             db = await asyncio.wait_for(self._get_db(), timeout=3.0)
             rows = await asyncio.wait_for(
-                db.execute("SELECT game_name, refreshed_at FROM games WHERE dm_game = TRUE ORDER BY refreshed_at DESC LIMIT 1"),
+                db.execute("SELECT name AS game_name, refreshed_at FROM games WHERE is_dm = 1 ORDER BY refreshed_at DESC LIMIT 1"),
                 timeout=3.0
             )
         except asyncio.TimeoutError:
@@ -355,7 +355,7 @@ class GameManager:
         try:
             db = await asyncio.wait_for(self._get_db(), timeout=3.0)
             rows = await asyncio.wait_for(
-                db.execute("SELECT game_name, refreshed_at FROM games WHERE dm_game = TRUE ORDER BY refreshed_at DESC LIMIT 1"),
+                db.execute("SELECT name AS game_name, refreshed_at FROM games WHERE is_dm = 1 ORDER BY refreshed_at DESC LIMIT 1"),
                 timeout=3.0
             )
             return rows[0] if rows else None
@@ -422,8 +422,8 @@ class GameManager:
             db_game_name = "2048" if game_name.lower() == "2048" else game_name.title()
             await asyncio.wait_for(
                 db.execute_insert(
-                    "INSERT INTO games (game_name, refreshed_at, dm_game) VALUES (%s, %s, %s)",
-                    (db_game_name, refreshed_at, True)
+                    "INSERT INTO games (name, refreshed_at, is_dm) VALUES (%s, %s, %s)",
+                    (db_game_name, refreshed_at, 1)
                 ),
                 timeout=3.0
             )

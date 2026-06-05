@@ -140,8 +140,8 @@ class Logs(commands.Cog):
         
         # Get game info
         game_info = await db.execute(
-            "SELECT game_name, refreshed_at, dm_game FROM games WHERE game_id = %s",
-            (game_id,)
+            "SELECT name AS game_name, refreshed_at, is_dm AS dm_game FROM games WHERE id = %s",
+            (game_id,),
         )
         
         if not game_info:
@@ -173,7 +173,7 @@ class Logs(commands.Cog):
             """
             SELECT user_id, xp, source, COALESCE(xl.timestamp, g.refreshed_at) as timestamp
             FROM xp_logs xl
-            LEFT JOIN games g ON xl.game_id = g.game_id
+            LEFT JOIN games g ON xl.game_id = g.id
             WHERE xl.game_id = %s
             ORDER BY COALESCE(xl.timestamp, g.refreshed_at) DESC
             LIMIT 50
@@ -215,39 +215,36 @@ class Logs(commands.Cog):
         
         # Get game-specific data for DM games
         if is_dm_game:
-            game_name_lower = game_name.lower().replace(" ", "")
-            table_name = f"users_{game_name_lower}"
-            
             try:
                 game_data = await db.execute(
-                    f"""
-                    SELECT user_id, status, score, started_at, ended_at
-                    FROM {table_name}
+                    """
+                    SELECT user_id, status, started_at, ended_at
+                    FROM game_sessions
                     WHERE game_id = %s
                     ORDER BY started_at DESC
                     LIMIT 20
                     """,
-                    (game_id,)
+                    (game_id,),
                 )
-                
+
                 if game_data:
                     status_counts = {}
                     for data in game_data:
-                        status = data.get('status', 'Unknown')
+                        status = data.get("status", "unknown")
                         status_counts[status] = status_counts.get(status, 0) + 1
-                    
+
                     status_text = "\n".join([
                         f"**{status}:** {count}"
                         for status, count in status_counts.items()
                     ])
-                    
+
                     embed.add_field(
                         name="Game Statuses",
                         value=status_text or "No data",
-                        inline=True
+                        inline=True,
                     )
             except Exception as e:
-                self.logger.error(f"Error fetching game data from {table_name}: {e}")
+                self.logger.error(f"Error fetching game session data for game {game_id}: {e}")
         
         logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
@@ -324,9 +321,9 @@ class Logs(commands.Cog):
         # Get recent game activity
         recent_games = await db.execute(
             """
-            SELECT game_name, COUNT(*) as games_played
+            SELECT g.name AS game_name, COUNT(*) as games_played
             FROM games g
-            INNER JOIN xp_logs xl ON g.game_id = xl.game_id
+            INNER JOIN xp_logs xl ON g.id = xl.game_id
             WHERE xl.user_id = %s
             GROUP BY game_name
             ORDER BY games_played DESC

@@ -124,30 +124,10 @@ class AddXP(commands.Cog):
         """Update user XP and level using LevelingManager"""
         from core.database.pool import DatabasePool
         db = await DatabasePool.get_instance()
-        # Update XP and mark as active / ever_played where possible.
-        try:
-            await db.execute(
-                "UPDATE leveling SET xp = %s, active = %s, ever_played = %s WHERE user_id = %s",
-                (new_xp, '1', '1', str(user_id))
-            )
-        except Exception:
-            # Try to add columns if missing, then fall back to updating xp only
-            try:
-                await db.execute("ALTER TABLE leveling ADD COLUMN IF NOT EXISTS active TINYINT(1) DEFAULT 0")
-                await db.execute("ALTER TABLE leveling ADD COLUMN IF NOT EXISTS ever_played TINYINT(1) DEFAULT 0")
-            except Exception:
-                pass
-
-            try:
-                await db.execute(
-                    "UPDATE leveling SET xp = %s, active = %s, ever_played = %s WHERE user_id = %s",
-                    (new_xp, '1', '1', str(user_id))
-                )
-            except Exception:
-                await db.execute(
-                    "UPDATE leveling SET xp = %s WHERE user_id = %s",
-                    (new_xp, str(user_id))
-                )
+        await db.execute(
+            "UPDATE leveling SET xp = %s, is_active = 1, ever_played = 1 WHERE user_id = %s",
+            (new_xp, user_id),
+        )
         
         # Use LevelingManager to calculate and update level
         manager = LevelingManager()

@@ -98,30 +98,26 @@ class StatisticsView(discord.ui.View):
                     'type': 'chat'
                 })
         
-        # DM games
+        # DM games (from game_sessions)
         dm_games = [
-            ("Wordle", "users_wordle", "won"),
-            ("TicTacToe", "users_tictactoe", "won"),
-            ("Connect Four", "users_connectfour", "status"),
-            ("Memory", "users_memory", "won"),
-            ("2048", "users_2048", "status"),
-            ("Minesweeper", "users_minesweeper", "won"),
-            ("Hangman", "users_hangman", "won"),
-            ("Filler", "users_filler", "won")
+            ("Wordle", "wordle"),
+            ("TicTacToe", "tictactoe"),
+            ("Connect Four", "connect_four"),
+            ("Memory", "memory"),
+            ("2048", "2048"),
+            ("Minesweeper", "minesweeper"),
+            ("Hangman", "hangman"),
+            ("Filler", "filler"),
         ]
-        
-        for game_name, table_name, status_field in dm_games:
+
+        for game_name, game_type in dm_games:
             try:
-                if status_field == "won":
-                    game_stats = await db.execute(
-                        f"SELECT COUNT(*) as games, SUM(CASE WHEN {status_field} = 'Won' THEN 1 ELSE 0 END) as wins FROM {table_name} WHERE user_id = %s",
-                        (str(self.user_id),)
-                    )
-                else:  # status field
-                    game_stats = await db.execute(
-                        f"SELECT COUNT(*) as games, SUM(CASE WHEN {status_field} = 'Won' THEN 1 ELSE 0 END) as wins FROM {table_name} WHERE user_id = %s",
-                        (str(self.user_id),)
-                    )
+                game_stats = await db.execute(
+                    """SELECT COUNT(*) AS games,
+                              SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins
+                       FROM game_sessions WHERE user_id = %s AND game_type = %s""",
+                    (self.user_id, game_type),
+                )
                 
                 if game_stats and game_stats[0]['games']:
                     wins = game_stats[0]['wins'] or 0
@@ -195,7 +191,7 @@ class StatisticsView(discord.ui.View):
                     COUNT(*) as games,
                     SUM(xl.xp) as total_xp
                 FROM xp_logs xl
-                LEFT JOIN games g ON xl.game_id = g.game_id
+                LEFT JOIN games g ON xl.game_id = g.id
                 WHERE xl.user_id = %s 
                     AND COALESCE(xl.timestamp, g.refreshed_at) IS NOT NULL
                 GROUP BY DATE_FORMAT(FROM_UNIXTIME(COALESCE(xl.timestamp, g.refreshed_at)), '%Y-%m')
@@ -251,7 +247,7 @@ class StatisticsView(discord.ui.View):
             """
             SELECT xl.source, xl.xp, FROM_UNIXTIME(g.refreshed_at) as played_at, xl.game_id
             FROM xp_logs xl
-            JOIN games g ON xl.game_id = g.game_id
+            JOIN games g ON xl.game_id = g.id
             WHERE xl.user_id = %s 
             ORDER BY g.refreshed_at DESC 
             LIMIT 50
@@ -369,7 +365,7 @@ class StatisticsView(discord.ui.View):
             """
             SELECT xl.xp, FROM_UNIXTIME(g.refreshed_at) as played_at
             FROM xp_logs xl
-            JOIN games g ON xl.game_id = g.game_id
+            JOIN games g ON xl.game_id = g.id
             WHERE xl.user_id = %s AND xl.source = %s 
             ORDER BY g.refreshed_at DESC 
             LIMIT 10
@@ -395,25 +391,6 @@ class StatisticsView(discord.ui.View):
     
     async def _show_dm_game_stats(self, interaction: discord.Interaction, game_type: str, game_name: str, user):
         """Show statistics for DM games"""
-        db = await DatabasePool.get_instance()
-        
-        table_map = {
-            "wordle": "users_wordle",
-            "tictactoe": "users_tictactoe",
-            "connect_four": "users_connectfour",
-            "memory": "users_memory",
-            "2048": "users_2048",
-            "minesweeper": "users_minesweeper",
-            "hangman": "users_hangman",
-            "filler": "users_filler"
-        }
-        
-        table_name = table_map.get(game_type.lower())
-        if not table_name:
-            await interaction.followup.send("Invalid game type.", ephemeral=False)
-            return
-        
-        # Get game-specific stats
         if game_type == "wordle":
             await self._show_wordle_stats(interaction, user)
         elif game_type == "tictactoe":
@@ -437,16 +414,16 @@ class StatisticsView(discord.ui.View):
         
         stats = await db.execute(
             """
-            SELECT 
-                COUNT(*) as total_games,
-                SUM(CASE WHEN won = 'Won' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN won = 'Lost' THEN 1 ELSE 0 END) as losses,
-                AVG(CASE WHEN won = 'Won' THEN attempts ELSE NULL END) as avg_attempts_won,
-                MIN(CASE WHEN won = 'Won' THEN attempts ELSE NULL END) as best_attempts
-            FROM users_wordle 
-            WHERE user_id = %s
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                AVG(CASE WHEN status = 'won' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.attempts')) AS UNSIGNED) ELSE NULL END) AS avg_attempts_won,
+                MIN(CASE WHEN status = 'won' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.attempts')) AS UNSIGNED) ELSE NULL END) AS best_attempts
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'wordle'
             """,
-            (str(self.user_id),)
+            (self.user_id,),
         )
         
         if not stats or not stats[0]['total_games']:
@@ -497,15 +474,15 @@ class StatisticsView(discord.ui.View):
         
         stats = await db.execute(
             """
-            SELECT 
-                COUNT(*) as total_games,
-                SUM(CASE WHEN won = 'Won' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN won = 'Lost' THEN 1 ELSE 0 END) as losses,
-                SUM(CASE WHEN won = 'Tied' THEN 1 ELSE 0 END) as ties
-            FROM users_tictactoe 
-            WHERE user_id = %s
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                SUM(CASE WHEN status = 'tied' THEN 1 ELSE 0 END) AS ties
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'tictactoe'
             """,
-            (str(self.user_id),)
+            (self.user_id,),
         )
         
         if not stats or not stats[0]['total_games']:
@@ -548,16 +525,16 @@ class StatisticsView(discord.ui.View):
         
         stats = await db.execute(
             """
-            SELECT 
-                COUNT(*) as total_games,
-                SUM(CASE WHEN status = 'Won' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN status = 'Lost' THEN 1 ELSE 0 END) as losses,
-                AVG(moves) as avg_moves,
-                MIN(moves) as best_moves
-            FROM users_connectfour 
-            WHERE user_id = %s
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.turns')) AS UNSIGNED)) AS avg_moves,
+                MIN(CASE WHEN status = 'won' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.turns')) AS UNSIGNED) ELSE NULL END) AS best_moves
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'connect_four'
             """,
-            (str(self.user_id),)
+            (self.user_id,),
         )
         
         if not stats or not stats[0]['total_games']:
@@ -608,17 +585,17 @@ class StatisticsView(discord.ui.View):
         
         stats = await db.execute(
             """
-            SELECT 
-                COUNT(*) as total_games,
-                SUM(CASE WHEN won = 'Won' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN won = 'Lost' THEN 1 ELSE 0 END) as losses,
-                AVG(attempts) as avg_attempts,
-                AVG(matches) as avg_matches,
-                SUM(xp_earned) as total_xp
-            FROM users_memory 
-            WHERE user_id = %s
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.turns')) AS UNSIGNED)) AS avg_attempts,
+                AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.pairs')) AS UNSIGNED)) AS avg_matches,
+                0 AS total_xp
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'memory'
             """,
-            (str(self.user_id),)
+            (self.user_id,),
         )
         
         if not stats or not stats[0]['total_games']:
@@ -670,18 +647,18 @@ class StatisticsView(discord.ui.View):
         
         stats = await db.execute(
             """
-            SELECT 
-                COUNT(*) as total_games,
-                SUM(CASE WHEN status IN ('Won', 'Cashed Out') THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN status = 'Lost' THEN 1 ELSE 0 END) as losses,
-                AVG(score) as avg_score,
-                MAX(score) as best_score,
-                AVG(moves) as avg_moves,
-                MAX(highest_tile) as best_tile
-            FROM users_2048 
-            WHERE user_id = %s
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.score')) AS UNSIGNED)) AS avg_score,
+                MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.score')) AS UNSIGNED)) AS best_score,
+                AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.moves')) AS UNSIGNED)) AS avg_moves,
+                MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.highest_tile')) AS UNSIGNED)) AS best_tile
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = '2048'
             """,
-            (str(self.user_id),)
+            (self.user_id,),
         )
         
         if not stats or not stats[0]['total_games']:
@@ -734,18 +711,18 @@ class StatisticsView(discord.ui.View):
         
         stats = await db.execute(
             """
-            SELECT 
-                COUNT(*) as total_games,
-                SUM(CASE WHEN won = 'Won' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN won = 'Lost' THEN 1 ELSE 0 END) as losses,
-                SUM(CASE WHEN won = 'Started' THEN 1 ELSE 0 END) as in_progress,
-                AVG(cells_revealed) as avg_cells_revealed,
-                MAX(cells_revealed) as best_cells_revealed,
-                SUM(mines_found) as total_mines_found
-            FROM users_minesweeper 
-            WHERE user_id = %s
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                SUM(CASE WHEN status = 'started' THEN 1 ELSE 0 END) AS in_progress,
+                AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.cells_revealed')) AS UNSIGNED)) AS avg_cells_revealed,
+                MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.cells_revealed')) AS UNSIGNED)) AS best_cells_revealed,
+                0 AS total_mines_found
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'minesweeper'
             """,
-            (str(self.user_id),)
+            (self.user_id,),
         )
         
         if not stats or not stats[0] or stats[0]['total_games'] == 0:
@@ -783,16 +760,16 @@ class StatisticsView(discord.ui.View):
         
         stats = await db.execute(
             """
-            SELECT 
-                COUNT(*) as total_games,
-                SUM(CASE WHEN won = 'Won' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN won = 'Lost' THEN 1 ELSE 0 END) as losses,
-                AVG(CASE WHEN won = 'Won' THEN wrong_guesses ELSE NULL END) as avg_wrong_won,
-                AVG(CASE WHEN won = 'Won' THEN correct_guesses ELSE NULL END) as avg_correct_won
-            FROM users_hangman 
-            WHERE user_id = %s
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                AVG(CASE WHEN status = 'won' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.guesses')) AS UNSIGNED) ELSE NULL END) AS avg_wrong_won,
+                NULL AS avg_correct_won
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'hangman'
             """,
-            (str(self.user_id),)
+            (self.user_id,),
         )
         
         if not stats or not stats[0]['total_games']:
@@ -844,17 +821,17 @@ class StatisticsView(discord.ui.View):
         stats = await db.execute(
             """
             SELECT
-                COUNT(*) as total_games,
-                SUM(CASE WHEN won = 'Won' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN won = 'Lost' THEN 1 ELSE 0 END) as losses,
-                SUM(CASE WHEN won = 'Tied' THEN 1 ELSE 0 END) as ties,
-                AVG(CASE WHEN won = 'Won' THEN player_cells ELSE NULL END) as avg_cells_won,
-                AVG(CASE WHEN won = 'Lost' THEN player_cells ELSE NULL END) as avg_cells_lost,
-                AVG(turns) as avg_turns
-            FROM users_filler
-            WHERE user_id = %s
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                SUM(CASE WHEN status = 'tied' THEN 1 ELSE 0 END) AS ties,
+                AVG(CASE WHEN status = 'won' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.player_cells')) AS UNSIGNED) ELSE NULL END) AS avg_cells_won,
+                AVG(CASE WHEN status = 'lost' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.player_cells')) AS UNSIGNED) ELSE NULL END) AS avg_cells_lost,
+                AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.turns')) AS UNSIGNED)) AS avg_turns
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'filler'
             """,
-            (str(self.user_id),),
+            (self.user_id,),
         )
 
         if not stats or not stats[0]["total_games"]:

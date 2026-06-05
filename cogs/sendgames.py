@@ -96,7 +96,7 @@ class SendGames(commands.Cog):
             db = await asyncio.wait_for(DatabasePool.get_instance(), timeout=5.0)
             rows = await asyncio.wait_for(
                 db.execute(
-                    "SELECT game_name, refreshed_at FROM games WHERE dm_game = TRUE ORDER BY refreshed_at DESC LIMIT 1"
+                    "SELECT name AS game_name, refreshed_at FROM games WHERE is_dm = 1 ORDER BY refreshed_at DESC LIMIT 1"
                 ),
                 timeout=5.0
             )

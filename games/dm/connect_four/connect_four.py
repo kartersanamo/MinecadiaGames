@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import discord
 from games.base.dm_game import DMGame
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 class ConnectFour(DMGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -48,12 +49,11 @@ class ConnectFour(DMGame):
             if not test_mode:
                 await view._save_state()
             
-            db = await self._get_db()
-            current_unix = int(datetime.now(timezone.utc).timestamp())
-            await db.execute_insert(
-                "INSERT INTO users_connectfour (game_id, user_id, status, moves, ended_at, started_at) VALUES (%s, %s, %s, %s, %s, %s)",
-                (last_game_id, user.id, 'Started', 0, 0, current_unix)
-            )
+            if not test_mode:
+                current_unix = int(datetime.now(timezone.utc).timestamp())
+                await GameSessionRepository().start_session(
+                    last_game_id, user.id, "connect_four", stats={"moves": 0}, started_at=current_unix
+                )
             
             self.logger.info(f"Connect Four ({user.name}#{user.discriminator})")
             return True

@@ -330,17 +330,18 @@ class AllTimeLeaderboardView(discord.ui.View):
     
     async def _get_game_wins_leaderboard(self, db: DatabasePool, game_name: str) -> list:
         """Get all-time wins leaderboard for a specific game"""
-        # Map game names to table names
-        table_map = {
-            "Tictactoe": ("users_tictactoe", "won", "Won"),
-            "TicTacToe": ("users_tictactoe", "won", "Won"),
-            "Wordle": ("users_wordle", "won", "Won"),
-            "Connect Four": ("users_connectfour", "status", "Won"),
-            "Memory": ("users_memory", "won", "Won"),
-            "2048": ("users_2048", "status", "Won"),
-            "Minesweeper": ("users_minesweeper", "won", "Won"),
-            "Hangman": ("users_hangman", "won", "Won"),
-            "Filler": ("users_filler", "won", "Won")
+        from repositories.game_session_repository import normalize_game_type
+
+        dm_game_types = {
+            "Tictactoe": "tictactoe",
+            "TicTacToe": "tictactoe",
+            "Wordle": "wordle",
+            "Connect Four": "connect_four",
+            "Memory": "memory",
+            "2048": "2048",
+            "Minesweeper": "minesweeper",
+            "Hangman": "hangman",
+            "Filler": "filler",
         }
         
         # Chat games use xp_logs (every entry is a win)
@@ -362,30 +363,20 @@ class AllTimeLeaderboardView(discord.ui.View):
                 """,
                 (game_name,)
             )
-        elif game_name in table_map:
-            table_name, status_field, win_value = table_map[game_name]
+        elif game_name in dm_game_types:
+            game_type = normalize_game_type(dm_game_types[game_name])
             try:
-                if game_name == "2048":
-                    win_clause = f"{status_field} IN ('Won', 'Cashed Out')"
-                    query = f"""
-                        SELECT user_id, COUNT(*) as wins
-                        FROM {table_name}
-                        WHERE {win_clause}
-                        GROUP BY user_id
-                        ORDER BY wins DESC
-                        LIMIT 500
+                rows = await db.execute(
                     """
-                    rows = await db.execute(query)
-                else:
-                    query = f"""
-                        SELECT user_id, COUNT(*) as wins
-                        FROM {table_name}
-                        WHERE {status_field} = %s
-                        GROUP BY user_id
-                        ORDER BY wins DESC
-                        LIMIT 500
-                    """
-                    rows = await db.execute(query, (win_value,))
+                    SELECT user_id, COUNT(*) AS wins
+                    FROM game_sessions
+                    WHERE game_type = %s AND status = 'won'
+                    GROUP BY user_id
+                    ORDER BY wins DESC
+                    LIMIT 500
+                    """,
+                    (game_type,),
+                )
             except Exception as e:
                 from core.logging.setup import get_logger
                 logger = get_logger("UI")
@@ -494,8 +485,10 @@ class AllTimeLeaderboardView(discord.ui.View):
         """Get all-time 2048 best score leaderboard"""
         rows = await db.execute(
             """
-            SELECT user_id, MAX(score) as best_score
-            FROM users_2048
+            SELECT user_id,
+                   MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.score')) AS UNSIGNED)) AS best_score
+            FROM game_sessions
+            WHERE game_type = '2048'
             GROUP BY user_id
             ORDER BY best_score DESC
             LIMIT 500

@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from .game import BaseGame
 from core.logging.setup import get_logger
+from repositories.game_session_repository import normalize_game_type
 
 
 class DMGame(BaseGame):
@@ -16,7 +17,7 @@ class DMGame(BaseGame):
         db = await self._get_db()
         
         last_game_info = await db.execute(
-            "SELECT game_name, game_id FROM games WHERE dm_game = TRUE ORDER BY game_id DESC LIMIT 1"
+            "SELECT name AS game_name, id AS game_id FROM games WHERE is_dm = 1 ORDER BY id DESC LIMIT 1"
         )
         
         if not last_game_info:
@@ -26,10 +27,10 @@ class DMGame(BaseGame):
         if last_game['game_name'].lower() != game_name.lower():
             return False, f"This is not the most recent game. Only {last_game['game_name']} is available."
         
-        safe_game_name = game_name.lower().replace(" ", "")
+        game_type = normalize_game_type(game_name)
         has_played = await db.execute(
-            f"SELECT user_id FROM users_{safe_game_name} WHERE game_id = %s AND user_id = %s",
-            (last_game['game_id'], user.id)
+            "SELECT user_id FROM game_sessions WHERE game_id = %s AND user_id = %s AND game_type = %s",
+            (last_game['game_id'], user.id, game_type)
         )
         
         if has_played:
@@ -62,4 +63,3 @@ class DMGame(BaseGame):
     
     async def _run_game(self, user: discord.User, game_name: str, test_mode: bool = False) -> bool:
         raise NotImplementedError("Subclasses must implement _run_game")
-

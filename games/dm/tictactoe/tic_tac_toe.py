@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import discord
 from games.base.dm_game import DMGame
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 class TicTacToe(DMGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -51,11 +52,9 @@ class TicTacToe(DMGame):
                 pass
             
             if not test_mode:
-                db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                await db.execute_insert(
-                    "INSERT INTO users_tictactoe (game_id, user_id, won, ended_at, started_at) VALUES (%s, %s, %s, %s, %s)",
-                    (last_game_id, user.id, 'Started', 0, current_unix)
+                await GameSessionRepository().start_session(
+                    last_game_id, user.id, "tictactoe", started_at=current_unix
                 )
             
             self.logger.info(f"TicTacToe ({user.name}#{user.discriminator})")

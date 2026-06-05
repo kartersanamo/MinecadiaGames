@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import discord
 from games.base.dm_game import DMGame
 from core.logging.setup import get_logger
-import pymysql
+from repositories.game_session_repository import GameSessionRepository
 class TwentyFortyEight(DMGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -47,40 +47,16 @@ class TwentyFortyEight(DMGame):
                 await view._save_state()
             
             if not test_mode:
-                db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                # Table name is users_2048 (numbers are allowed in MySQL table names)
-                # Check if user already has a record for this game_id to avoid duplicate key errors
-                existing = await db.execute(
-                    "SELECT game_id FROM users_2048 WHERE game_id = %s AND user_id = %s",
-                    (last_game_id, user.id)
-                )
-                if not existing:
-                    try:
-                        # Use INSERT IGNORE to handle duplicate key errors gracefully
-                        # This allows multiple users to play the same game_id
-                        await db.execute(
-                            "INSERT IGNORE INTO users_2048 (game_id, user_id, status, score, moves, highest_tile, started_at, ended_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                            (last_game_id, user.id, 'Started', 0, 0, 2, current_unix, 0)
-                        )
-                    except pymysql.err.IntegrityError as e:
-                        # Handle duplicate key error gracefully (race condition when multiple users start at same time)
-                        error_code = e.args[0] if e.args else 0
-                        if error_code == 1062:  # Duplicate entry
-                            # Try to update existing record if it exists (in case game_id is primary key)
-                            try:
-                                await db.execute(
-                                    "UPDATE users_2048 SET status = 'Started', score = 0, moves = 0, highest_tile = 2, started_at = %s, ended_at = 0 WHERE game_id = %s AND user_id = %s",
-                                    (current_unix, last_game_id, user.id)
-                                )
-                            except Exception as update_error:
-                                self.logger.warning(f"Could not update users_2048 for game_id {last_game_id}, user {user.id}: {update_error}")
-                        else:
-                            raise
-                    except Exception as e:
-                        # Re-raise other exceptions
-                        self.logger.error(f"Error inserting into users_2048: {e}")
-                        raise
+                repo = GameSessionRepository()
+                if not await repo.has_session(last_game_id, user.id, "2048"):
+                    await repo.start_session(
+                        last_game_id,
+                        user.id,
+                        "2048",
+                        stats={"score": 0, "moves": 0, "highest_tile": 2},
+                        started_at=current_unix,
+                    )
             
             self.logger.info(f"2048 ({user.name}#{user.discriminator}){' [TEST MODE]' if test_mode else ''}")
             return True

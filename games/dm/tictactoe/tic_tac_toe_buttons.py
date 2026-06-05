@@ -5,8 +5,8 @@ from typing import Optional
 from PIL import Image, ImageDraw, ImageFont
 import discord
 from managers.leveling import LevelingManager
-from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 from services.asset_path_service import AssetPathService
 class TicTacToeButtons(discord.ui.View):
     def __init__(self, game_id: int, bot, config, game_config, test_mode: bool = False, saved_state: dict = None):
@@ -298,9 +298,9 @@ class TicTacToeButtons(discord.ui.View):
         except Exception:
             self.logger.error(f"Failed to delete the TicTacToe image at {image_path}")
         
-        db = await DatabasePool.get_instance()
+        repo = GameSessionRepository()
         current_unix = int(datetime.now(timezone.utc).timestamp())
-        
+
         if result == "X":
             xp = random.randint(
                 self.game_config.get('WIN_XP', {}).get('LOWER', 40),
@@ -315,9 +315,8 @@ class TicTacToeButtons(discord.ui.View):
                 await interaction.channel.send(
                     f"`✅` Congratulations {interaction.user.mention}! You won `{xp}xp`!"
                 )
-                await db.execute(
-                    "UPDATE users_tictactoe SET won = 'Won', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (current_unix, interaction.user.id, self.game_id)
+                await repo.finish_session(
+                    self.game_id, interaction.user.id, "tictactoe", "won", ended_at=current_unix
                 )
                 lvl_mng = LevelingManager(
                     user=interaction.user,
@@ -336,16 +335,14 @@ class TicTacToeButtons(discord.ui.View):
                 f"`❌` Sorry {interaction.user.mention}, the bot has beat you in TicTacToe! Come back later to try again!"
             )
             if not self.test_mode:
-                await db.execute(
-                    "UPDATE users_tictactoe SET won = 'Lost', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (current_unix, interaction.user.id, self.game_id)
+                await repo.finish_session(
+                    self.game_id, interaction.user.id, "tictactoe", "lost", ended_at=current_unix
                 )
         elif result == "Full":
             await interaction.channel.send(
                 f"`🟰` Uh oh {interaction.user.mention}, you and the bot have tied in TicTacToe! Come back later to try again!"
             )
             if not self.test_mode:
-                await db.execute(
-                    "UPDATE users_tictactoe SET won = 'Tied', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (current_unix, interaction.user.id, self.game_id)
+                await repo.finish_session(
+                    self.game_id, interaction.user.id, "tictactoe", "tied", ended_at=current_unix
                 )

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict
 import discord
 from managers.leveling import LevelingManager
-from core.database.pool import DatabasePool
+from repositories.game_session_repository import GameSessionRepository
 from core.logging.setup import get_logger
 class HangmanZButton(discord.ui.View):
     """Separate view for Z button that coordinates with main HangmanButtons view"""
@@ -55,32 +55,22 @@ class HangmanZButton(discord.ui.View):
         # Fallback: try to get from database
         try:
             if not self.test_mode and self.game_id != -999999:
-                db = await DatabasePool.get_instance()
-                rows = await db.execute(
-                    "SELECT wrong_guesses, correct_guesses, game_state, won FROM users_hangman WHERE game_id = %s AND user_id = %s",
-                    (self.game_id, self.player_id)
-                )
-                if rows and len(rows) > 0:
-                    row = rows[0]
-                    # Try to get game_state first (most complete)
-                    if row.get('game_state'):
-                        import json
-                        try:
-                            state = json.loads(row['game_state'])
-                            return state
-                        except Exception as e:
-                            self.logger.debug(f"Could not parse game_state JSON: {e}")
-                    
-                    # Fallback: reconstruct from database fields
-                    # This happens when game_state is NULL (game just started)
+                repo = GameSessionRepository()
+                session = await repo.get_session(self.game_id, self.player_id, "hangman")
+                if session:
+                    state = GameSessionRepository.parse_state(session)
+                    if state:
+                        return state
+                    stats = GameSessionRepository.parse_stats(session)
                     return {
-                        'word': self.word,
-                        'guessed_letters': [],  # Can't reconstruct from wrong_guesses/correct_guesses alone
-                        'wrong_guesses': row.get('wrong_guesses', 0),
-                        'correct_guesses': row.get('correct_guesses', 0),
-                        'max_wrong': self.game_config.get('MAX_WRONG') or self.game_config.get('max_wrong_guesses', 8),
-                        'game_ended': row.get('won', 'Started') != 'Started',
-                        'game_won': row.get('won', '') == 'Won'
+                        "word": stats.get("word", self.word),
+                        "guessed_letters": [],
+                        "wrong_guesses": stats.get("wrong_guesses", 0),
+                        "correct_guesses": stats.get("correct_guesses", 0),
+                        "max_wrong": self.game_config.get("MAX_WRONG")
+                        or self.game_config.get("max_wrong_guesses", 8),
+                        "game_ended": session.get("status") != "started",
+                        "game_won": session.get("status") == "won",
                     }
         except Exception as e:
             self.logger.error(f"Error getting game state from database: {e}")
@@ -185,26 +175,30 @@ class HangmanZButton(discord.ui.View):
             # Update database
             if not self.test_mode and self.game_id != -999999:
                 try:
-                    db = await DatabasePool.get_instance()
-                    # Update game state
+                    repo = GameSessionRepository()
                     new_state = {
-                        'word': self.word,
-                        'guessed_letters': list(guessed_letters),
-                        'wrong_guesses': wrong_guesses,
-                        'max_wrong': max_wrong,
-                        'game_ended': False,
-                        'game_won': False
+                        "word": self.word,
+                        "guessed_letters": list(guessed_letters),
+                        "wrong_guesses": wrong_guesses,
+                        "max_wrong": max_wrong,
+                        "game_ended": False,
+                        "game_won": False,
                     }
-                    import json
-                    state_json = json.dumps(new_state)
-                    
-                    word_display = ' '.join([char if char in guessed_letters else '_' for char in self.word])
-                    correct_count = len([c for c in word_display if c != '_' and c != ' '])
-                    
-                    await db.execute(
-                        "UPDATE users_hangman SET wrong_guesses = %s, correct_guesses = %s, game_state = %s WHERE user_id = %s AND game_id = %s",
-                        (wrong_guesses, correct_count, state_json, self.player_id, self.game_id)
+                    word_display = " ".join(
+                        [char if char in guessed_letters else "_" for char in self.word]
                     )
+                    correct_count = len([c for c in word_display if c != "_" and c != " "])
+                    await repo.merge_stats(
+                        self.game_id,
+                        self.player_id,
+                        "hangman",
+                        {
+                            "word": self.word,
+                            "wrong_guesses": wrong_guesses,
+                            "correct_guesses": correct_count,
+                        },
+                    )
+                    await repo.update_state(self.game_id, self.player_id, "hangman", new_state)
                 except Exception as e:
                     self.logger.error(f"Error updating Hangman game state in database: {e}")
             
@@ -249,12 +243,20 @@ class HangmanZButton(discord.ui.View):
                         # Update database to mark as won
                         if not self.test_mode and self.game_id != -999999:
                             current_unix = int(datetime.now(timezone.utc).timestamp())
-                            correct_count = len([c for c in word_display if c != '_' and c != ' '])
+                            correct_count = len([c for c in word_display if c != "_" and c != " "])
                             try:
-                                db = await DatabasePool.get_instance()
-                                await db.execute(
-                                    "UPDATE users_hangman SET won = 'Won', ended_at = %s, correct_guesses = %s WHERE user_id = %s AND game_id = %s",
-                                    (current_unix, correct_count, self.player_id, self.game_id)
+                                repo = GameSessionRepository()
+                                await repo.finish_session(
+                                    self.game_id,
+                                    self.player_id,
+                                    "hangman",
+                                    "won",
+                                    stats={
+                                        "word": self.word,
+                                        "wrong_guesses": wrong_guesses,
+                                        "correct_guesses": correct_count,
+                                    },
+                                    ended_at=current_unix,
                                 )
                                 
                                 # Award XP and achievements
@@ -296,10 +298,14 @@ class HangmanZButton(discord.ui.View):
                         if not self.test_mode and self.game_id != -999999:
                             current_unix = int(datetime.now(timezone.utc).timestamp())
                             try:
-                                db = await DatabasePool.get_instance()
-                                await db.execute(
-                                    "UPDATE users_hangman SET won = 'Lost', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                                    (current_unix, self.player_id, self.game_id)
+                                repo = GameSessionRepository()
+                                await repo.finish_session(
+                                    self.game_id,
+                                    self.player_id,
+                                    "hangman",
+                                    "lost",
+                                    stats={"word": self.word, "wrong_guesses": wrong_guesses},
+                                    ended_at=current_unix,
                                 )
                                 await interaction.followup.send(
                                     f"`❌` Sorry, but you ran out of guesses! The correct word was `{self.word}`.",

@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 import discord
 from games.base.dm_game import DMGame
 from core.logging.setup import get_logger
+from repositories.game_session_repository import GameSessionRepository
 class Wordle(DMGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -51,24 +52,18 @@ class Wordle(DMGame):
             word = random.choice(words)
             
             if not test_mode:
-                db = await self._get_db()
                 current_unix = int(datetime.now(timezone.utc).timestamp())
-                
+                repo = GameSessionRepository()
+
                 # Clean up any old active games for this user before creating a new one
-                # This prevents old games from interfering with new ones
-                old_games = await db.execute(
-                    "SELECT game_id FROM users_wordle WHERE user_id = %s AND won = 'Started' AND game_id != -999999",
-                    (user.id,)
-                )
+                old_games = await repo.get_started_sessions(user.id, "wordle")
                 if old_games:
-                    self.logger.info(f"Wordle: Cleaning up {len(old_games)} old active game(s) for user {user.id} before creating new game")
-                    await db.execute(
-                        "UPDATE users_wordle SET won = 'Lost', ended_at = %s WHERE user_id = %s AND won = 'Started' AND game_id != -999999",
-                        (current_unix, user.id)
+                    self.logger.info(
+                        f"Wordle: Cleaning up {len(old_games)} old active game(s) for user {user.id} before creating new game"
                     )
-                    # Also clean up from active_games and guesses if present
+                    await repo.abandon_started_for_user(user.id, "wordle", ended_at=current_unix)
                     if user.id in self.active_games:
-                        old_game_id = self.active_games[user.id].get('game_id')
+                        old_game_id = self.active_games[user.id].get("game_id")
                         if old_game_id and old_game_id != last_game_id:
                             del self.active_games[user.id]
                             self.logger.debug(f"Wordle: Removed old game {old_game_id} from active_games")
@@ -76,10 +71,13 @@ class Wordle(DMGame):
                         del self.guesses[user.id]
                     if user.id in self.letter_states:
                         del self.letter_states[user.id]
-                
-                await db.execute_insert(
-                    "INSERT INTO users_wordle (game_id, user_id, word, won, attempts, started_at, ended_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                    (last_game_id, user.id, word, 'Started', 0, current_unix, 0)
+
+                await repo.start_session(
+                    last_game_id,
+                    user.id,
+                    "wordle",
+                    stats={"word": word, "attempts": 0},
+                    started_at=current_unix,
                 )
             
             self.active_games[user.id] = {

@@ -37,8 +37,8 @@ class BaseGame(ABC):
         db = await self._get_db()
         refreshed_at = int(datetime.now(timezone.utc).timestamp())
         
-        query = "INSERT INTO games (game_name, refreshed_at, dm_game) VALUES (%s, %s, %s)"
-        game_id = await db.execute_insert(query, (game_name, refreshed_at, dm_game))
+        query = "INSERT INTO games (name, refreshed_at, is_dm) VALUES (%s, %s, %s)"
+        game_id = await db.execute_insert(query, (game_name, refreshed_at, int(dm_game)))
         
         self._game_id = game_id
         return game_id
@@ -53,11 +53,12 @@ class BaseGame(ABC):
             duration_seconds = None
             game_name = self.__class__.__name__
             try:
-                row = await db.fetch_one(
-                    "SELECT game_name, refreshed_at FROM games WHERE game_id = %s",
+                rows = await db.execute(
+                    "SELECT name AS game_name, refreshed_at FROM games WHERE id = %s",
                     (self._game_id,),
                 )
-                if row:
+                if rows:
+                    row = rows[0]
                     game_name = row.get("game_name") or game_name
                     refreshed = int(row.get("refreshed_at") or 0)
                     if refreshed:

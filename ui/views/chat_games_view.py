@@ -166,7 +166,7 @@ class ChatGamesView(discord.ui.View):
             games_str, games_list = await self.bot.app.games.get_recent_games()
             db = await DatabasePool.get_instance()
             game_ids = await db.execute(
-                "SELECT game_id, game_name, refreshed_at, dm_game FROM games ORDER BY refreshed_at DESC LIMIT 100"
+                "SELECT id AS game_id, name AS game_name, refreshed_at, is_dm AS dm_game FROM games ORDER BY refreshed_at DESC LIMIT 100"
             )
             
             if not games_str:
