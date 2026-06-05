@@ -1,14 +1,8 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
 from managers.game_manager import GameManager
 from ui.paginator import Paginator
 from core.logging.setup import get_logger
-from datetime import datetime, timezone
-from typing import Optional
-import asyncio
-import random
 
 from ui.views.chat_games_manage_view import ChatGamesManageView
 from ui.views.main_game_manager_view import MainGameManagerView

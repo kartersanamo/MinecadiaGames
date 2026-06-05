@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 import os
 import time
-from datetime import date, datetime, timezone
+from datetime import date
 from typing import Optional
 
 try:

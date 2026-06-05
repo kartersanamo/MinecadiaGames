@@ -1,7 +1,6 @@
 import discord
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
-from ui.dm_games_view import DMGamesView
 from pathlib import Path
 
 class ViewMore(discord.ui.View):
@@ -212,4 +211,3 @@ class ViewMore(discord.ui.View):
         # Send the paginator directly in the ephemeral response
         await paginator.send(interaction)
 
-from ui.sendgames_view_sendgamesview import SendGamesView

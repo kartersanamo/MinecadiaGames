@@ -1,12 +1,9 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
 from services.chat_game_registry import registry
 from datetime import datetime, timezone
 from typing import Optional
-import asyncio
 
 
 def _check_admin(interaction: discord.Interaction) -> bool:

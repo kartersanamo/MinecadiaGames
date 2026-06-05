@@ -3,20 +3,8 @@ from discord import app_commands
 import discord
 from core.config.manager import ConfigManager
 from managers.game_manager import GameManager
-from ui.paginator import Paginator
 from core.logging.setup import get_logger
-from datetime import datetime, timezone
-from typing import Optional
-import asyncio
-import random
 from ui.views.main_game_manager_view import MainGameManagerView
-from ui.views.chat_games_view import ChatGamesView
-from ui.views.chat_games_manage_view import ChatGamesManageView
-from ui.views.d_m_games_manager_view import DMGamesManagerView
-from ui.views.d_m_games_manage_view import DMGamesManageView
-from ui.modals.force_chat_game_modal import ForceChatGameModal
-from ui.modals.add_trivia_modal import AddTriviaModal
-from ui.views.test_d_m_game_selector_view import TestDMGameSelectorView
 
 class GameManagerCog(commands.Cog):
     def __init__(self, bot):

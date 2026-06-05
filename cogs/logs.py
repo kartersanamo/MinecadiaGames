@@ -5,10 +5,7 @@ from core.database.pool import DatabasePool
 from core.config.manager import ConfigManager
 from core.logging.setup import get_logger
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
-from ui.paginator import Paginator
 from ui.views.logs_view import LogsView
-from ui.views.logs_filter_select_view import LogsFilterSelect
 from ui.views.logs_paginator_view import LogsPaginator
 
 class Logs(commands.Cog):

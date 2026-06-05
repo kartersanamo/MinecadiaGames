@@ -1,17 +1,1 @@
-from core.analytics.logger import (
-    ensure_total_statistics_row,
-    increment_total_stat,
-    record_command,
-    record_game_outcome,
-    record_member_event,
-    record_member_message,
-    record_mod_action,
-    record_online_sample,
-    record_poll_vote,
-    record_server_snapshot,
-    record_staff_message,
-    record_ticket_message,
-    record_voice_seconds,
-    patch_blacklist_created_at,
-    patch_poll_created_at,
-)
+"""Analytics package."""

@@ -1,13 +1,5 @@
-import json
-import re
 import discord
 from core.config.manager import ConfigManager
-from games.dm.wordle import Wordle
-from games.dm.tictactoe import TicTacToe
-from games.dm.connect_four import ConnectFour
-from games.dm.memory import Memory
-from games.dm.twenty_forty_eight import TwentyFortyEight
-from games.dm.hangman import Hangman
 
 class DMGamesView(discord.ui.View):
     def __init__(self, bot, active_game: str):

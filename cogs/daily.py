@@ -6,7 +6,6 @@ from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
 from managers.leveling import LevelingManager
 from datetime import datetime, timezone, timedelta
-from typing import Optional
 
 
 class Daily(commands.Cog):
