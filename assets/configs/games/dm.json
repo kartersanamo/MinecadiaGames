@@ -19,7 +19,7 @@
         },
         "Wordle": {
             "enabled": true,
-            "vaulted": true,
+            "vaulted": false,
             "refresh_cooldown": 43200,
             "guess_cooldown": 2.0,
             "image_url": "https://i.imgur.com/cFJkVEl.png",
@@ -72,7 +72,7 @@
         },
         "Minesweeper": {
             "enabled": true,
-            "vaulted": false,
+            "vaulted": true,
             "refresh_cooldown": 43200,
             "button_cooldown": 0.5,
             "image_url": "https://i.imgur.com/example.png",

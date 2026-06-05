@@ -163,7 +163,7 @@ class FillerButtons(discord.ui.View):
 
     async def _run_bot_turn(self, interaction: discord.Interaction):
         """Apply exactly one bot move, then return control to the player."""
-        bot_move = self.state.greedy_move(OWNER_BOT)
+        bot_move = self.state.bot_move(OWNER_BOT)
         if bot_move is not None:
             self.state.apply_move(OWNER_BOT, bot_move)
             await asyncio.sleep(self.bot_delay)

@@ -186,6 +186,23 @@ class FillerState:
             return None
         return max(legal, key=lambda c: self.simulate_capture(side, c))
 
+    def bot_move(self, side: str) -> Optional[int]:
+        """Pick best capture 50% of the time, second-best 50% of the time."""
+        legal = self.legal_moves(side)
+        if not legal:
+            return None
+        if len(legal) == 1:
+            return legal[0]
+
+        ranked = sorted(
+            legal,
+            key=lambda c: self.simulate_capture(side, c),
+            reverse=True,
+        )
+        if random.random() < 0.5:
+            return ranked[0]
+        return ranked[1]
+
     def check_game_over(self) -> bool:
         return all(cell != OWNER_NONE for row in self.owner for cell in row)
 
