@@ -4,16 +4,10 @@ from pathlib import Path
 
 os.chdir(Path(__file__).resolve().parent)
 
-import sys
-
-_minecadia_root = Path(__file__).resolve().parent.parent
-if str(_minecadia_root) not in sys.path:
-    sys.path.insert(0, str(_minecadia_root))
-
 from core.app import BotApp
 from core.decorators import task
 from core.loggers import log_commands, log_tasks
-from _errors.setup import wire_bot
+from core.errors.setup import wire_bot
 from bot import game_tasks, listeners, restore, startup, views
 from core.cache.manager import CacheManager
 from core.config.manager import ConfigManager
@@ -78,7 +72,7 @@ class Client(commands.Bot):
 
     @task("Setup Hook")
     async def setup_hook(self):
-        from _errors.setup import wire_bot_async_setup
+        from core.errors.setup import wire_bot_async_setup
 
         await wire_bot_async_setup(self, bot_name="Games", log_tasks=log_tasks)
         self.app = BotApp.from_bot(self)

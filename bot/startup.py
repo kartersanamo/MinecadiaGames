@@ -1,5 +1,4 @@
 import asyncio
-import sys
 from pathlib import Path
 
 from core.loggers import log_tasks
@@ -43,11 +42,7 @@ async def load_extensions(client) -> None:
 
 
 async def register_analytics(client) -> None:
-    # _analytics lives in Minecadia/ (parent of MinecadiaGames/)
-    _minecadia = Path(__file__).resolve().parent.parent.parent
-    if str(_minecadia) not in sys.path:
-        sys.path.insert(0, str(_minecadia))
-    from _analytics.register import register_command_tracking
+    from core.analytics.register import register_command_tracking
 
     await register_command_tracking(client)
 

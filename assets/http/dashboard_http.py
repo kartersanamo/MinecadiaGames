@@ -7,9 +7,6 @@ import os
 import sys
 from pathlib import Path
 
-_minecadia_root = Path(__file__).resolve().parent.parent.parent.parent
-if str(_minecadia_root) not in sys.path:
-    sys.path.insert(0, str(_minecadia_root))
 from typing import TYPE_CHECKING
 
 import discord
@@ -196,7 +193,7 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
             return web.json_response({"ok": True, "message": result})
         except Exception as exc:
             log.exception("Dashboard wipe failed")
-            from _errors.messages import user_message_for
+            from core.errors.messages import user_message_for
 
             return web.json_response({"error": user_message_for(exc)}, status=500)
 

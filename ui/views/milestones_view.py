@@ -2,7 +2,7 @@ import discord
 from core.logging.setup import get_logger
 from managers.milestones import MilestonesManager
 from ui.paginator import Paginator
-from _errors.decorators import safe_interaction
+from core.errors.decorators import safe_interaction
 
 
 class MilestonesView(discord.ui.View):

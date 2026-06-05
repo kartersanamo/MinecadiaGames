@@ -1,15 +1,8 @@
 import functools
-import sys
 import time
-from pathlib import Path
 
+from core.errors.logging import log_exception
 from core.loggers import log_tasks
-
-
-def _ensure_errors_path() -> None:
-    root = Path(__file__).resolve().parent.parent.parent
-    if str(root) not in sys.path:
-        sys.path.insert(0, str(root))
 
 
 def task(action_name: str, log: bool = None):
@@ -28,9 +21,6 @@ def task(action_name: str, log: bool = None):
                     log_tasks.info(f"{action_name} completed in {time_elapsed}s")
                 return result
             except Exception as error:
-                _ensure_errors_path()
-                from _errors.logging import log_exception
-
                 log_exception(
                     log_tasks,
                     error,

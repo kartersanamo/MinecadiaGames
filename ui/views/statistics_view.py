@@ -4,7 +4,7 @@ from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
 from datetime import datetime, timezone
 from ui.paginator import Paginator
-from _errors.decorators import safe_interaction
+from core.errors.decorators import safe_interaction
 
 
 class StatisticsView(discord.ui.View):

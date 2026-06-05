@@ -69,12 +69,7 @@ class BaseGame(ABC):
                 pass
             if status == "Finished":
                 try:
-                    import sys
-                    from pathlib import Path
-                    _root = Path(__file__).resolve().parents[3]
-                    if str(_root) not in sys.path:
-                        sys.path.insert(0, str(_root))
-                    from _analytics import logger as analytics
+                    from core.analytics import logger as analytics
                     analytics.record_game_outcome(
                         game_name,
                         "finished",

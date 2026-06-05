@@ -166,12 +166,9 @@ class DatabasePool:
                     await cursor.execute(query, params)
                     return await cursor.fetchall()
         except Exception as exc:
-            try:
-                from _errors.db import log_db_failure
+            from core.errors.db import log_db_failure
 
-                log_db_failure(db_log, exc, query_hint=query)
-            except ImportError:
-                db_log.error("Query failed: %s", query[:120], exc_info=exc)
+            log_db_failure(db_log, exc, query_hint=query)
             raise
     
     async def execute_many(self, query: str, params_list: List[tuple]) -> int:
