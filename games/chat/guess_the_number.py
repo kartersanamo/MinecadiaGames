@@ -8,6 +8,20 @@ from managers.leveling import LevelingManager
 from core.logging.setup import get_logger
 
 
+def generate_game_range(
+    min_span: int = 50,
+    max_span: int = 150,
+    min_low: int = 1,
+    max_low: int = 500,
+) -> tuple[int, int, int]:
+    """Return (secret_number, min_range, max_range) with a random sliding window."""
+    span = random.randint(min_span, max_span)
+    min_range = random.randint(min_low, max_low)
+    max_range = min_range + span
+    secret_number = random.randint(min_range, max_range)
+    return secret_number, min_range, max_range
+
+
 class GuessTheNumber(ChatGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -31,10 +45,7 @@ class GuessTheNumber(ChatGame):
                 self.logger.error("Games role not found")
                 return None
             
-            # Generate random number between 1 and 100
-            secret_number = random.randint(1, 100)
-            min_range = 1
-            max_range = 100
+            secret_number, min_range, max_range = generate_game_range()
             self.logger.info(f"Guess The Number '{secret_number}' (Range: {min_range}-{max_range}) #{channel.name}")
             
             # Use custom XP multiplier if provided, otherwise random 15% chance for 2x

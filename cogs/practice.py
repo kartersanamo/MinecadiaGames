@@ -835,17 +835,13 @@ class Practice(commands.Cog):
     
     async def _run_guess_the_number_practice(self, dm_channel: discord.DMChannel, session_data: Dict):
         """Run a Guess The Number practice game in DMs"""
-        from games.chat.guess_the_number import GuessTheNumber
-        import random
+        from games.chat.guess_the_number import GuessTheNumber, generate_game_range
         from datetime import datetime, timezone
         
         game = GuessTheNumber(self.bot)
         user = dm_channel.recipient
         
-        # Generate random number between 1 and 100
-        secret_number = random.randint(1, 100)
-        min_range = 1
-        max_range = 100
+        secret_number, min_range, max_range = generate_game_range()
         
         game_id = -999999  # Fake game_id for practice
         
