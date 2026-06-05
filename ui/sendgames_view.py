@@ -211,3 +211,6 @@ class ViewMore(discord.ui.View):
         # Send the paginator directly in the ephemeral response
         await paginator.send(interaction)
 
+from ui.sendgames_view_sendgamesview import SendGamesView
+
+__all__ = ["ViewMore", "SendGamesView"]

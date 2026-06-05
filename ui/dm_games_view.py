@@ -1,5 +1,6 @@
 import discord
 from core.config.manager import ConfigManager
+from core.logging.setup import get_logger
 
 class DMGamesView(discord.ui.View):
     def __init__(self, bot, active_game: str):
@@ -36,15 +37,13 @@ class DMGamesView(discord.ui.View):
         )
         
         async def callback(interaction: discord.Interaction):
+            logger = get_logger("UI")
             try:
                 await interaction.response.defer(ephemeral=True)
                 
                 from ui.paginator import Paginator
                 from ui.sendgames_view import SendGamesView
-                from core.logging.setup import get_logger
-                from core.config.manager import ConfigManager
                 
-                logger = get_logger("UI")
                 config = ConfigManager.get_instance()
                 
                 # Send loading message first

@@ -39,6 +39,7 @@
         },
         "Wordle": {
             "COOLDOWN": 43200,
+            "GUESS_COOLDOWN": 2.0,
             "IMAGE": "https://i.imgur.com/cFJkVEl.png",
             "WORDS_FILE": "assets/configs/words.txt"
         },

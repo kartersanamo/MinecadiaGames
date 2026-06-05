@@ -7,6 +7,8 @@ from discord.ext import commands
 from managers.leveling import LevelingManager
 from core.database.pool import DatabasePool
 from core.logging.setup import get_logger
+
+
 class WordleListener(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -14,6 +16,40 @@ class WordleListener(commands.Cog):
         self.logger = get_logger("DMGames")
         self._cleanup_done = False
         self._cleanup_in_progress = set()  # Track games currently being cleaned up to prevent race conditions
+        self._guess_locks: dict[int, asyncio.Lock] = {}
+        self._last_guess_at: dict[int, datetime] = {}
+    
+    def _get_guess_lock(self, user_id: int) -> asyncio.Lock:
+        if user_id not in self._guess_locks:
+            self._guess_locks[user_id] = asyncio.Lock()
+        return self._guess_locks[user_id]
+
+    def _get_guess_cooldown(self) -> float:
+        if not self.wordle_game:
+            return 2.0
+        game_config = self.wordle_game.game_config or {}
+        cooldown = game_config.get("GUESS_COOLDOWN") or game_config.get("guess_cooldown")
+        if cooldown is not None:
+            return float(cooldown)
+        dm_config = self.wordle_game.dm_config or {}
+        return float(dm_config.get("BUTTON_COOLDOWN") or dm_config.get("button_cooldown") or 2.0)
+
+    def _is_on_guess_cooldown(self, user_id: int) -> bool:
+        last_guess = self._last_guess_at.get(user_id)
+        if not last_guess:
+            return False
+        return (datetime.now(timezone.utc) - last_guess).total_seconds() < self._get_guess_cooldown()
+
+    def _mark_guess_time(self, user_id: int) -> None:
+        self._last_guess_at[user_id] = datetime.now(timezone.utc)
+
+    def _clear_guess_state(self, user_id: int) -> None:
+        self._last_guess_at.pop(user_id, None)
+        if not self.wordle_game:
+            return
+        self.wordle_game.guesses.pop(user_id, None)
+        self.wordle_game.letter_states.pop(user_id, None)
+        self.wordle_game.active_games.pop(user_id, None)
     
     def set_wordle_game(self, wordle_game):
         self.wordle_game = wordle_game
@@ -98,6 +134,14 @@ class WordleListener(commands.Cog):
         if not self.wordle_game:
             # self.logger.warning("WordleListener: wordle_game is None")
             return
+
+        async with self._get_guess_lock(message.author.id):
+            if self._is_on_guess_cooldown(message.author.id):
+                return
+            await self._handle_wordle_guess(message)
+
+    async def _handle_wordle_guess(self, message: discord.Message):
+        """Process a single Wordle guess (must run under the per-user guess lock)."""
         
         #self.logger.info(f"WordleListener: Processing guess from {message.author.id}: {message.content[:20]}")
         
@@ -350,6 +394,8 @@ class WordleListener(commands.Cog):
                 pass
             return
         
+        self._mark_guess_time(message.author.id)
+        
         # Get colors for this guess
         colors = self.wordle_game.get_letter_colors(guess, word)
         
@@ -491,6 +537,12 @@ class WordleListener(commands.Cog):
             )
         
         if guess == word:
+            active = self.wordle_game.active_games.get(message.author.id)
+            if not active or active.get("game_id") != game_id:
+                return
+
+            self.wordle_game.active_games.pop(message.author.id, None)
+
             current_unix = int(datetime.now(timezone.utc).timestamp())
             final_attempts = attempts + 1
             xp = random.randint((7 - final_attempts) * 30, (7 - final_attempts) * 40)
@@ -500,13 +552,22 @@ class WordleListener(commands.Cog):
                     f"`✅` Congratulations {message.author.mention}! You won! You would have earned `{xp}xp`!"
                 )
             else:
+                db = await DatabasePool.get_instance()
+                async with db.acquire() as conn:
+                    async with conn.cursor() as cursor:
+                        await cursor.execute(
+                            "UPDATE users_wordle SET won = 'Won', ended_at = %s, attempts = %s "
+                            "WHERE user_id = %s AND game_id = %s AND won = 'Started'",
+                            (current_unix, final_attempts, message.author.id, game_id),
+                        )
+                        won_rows = cursor.rowcount
+
+                if won_rows == 0:
+                    self._clear_guess_state(message.author.id)
+                    return
+
                 await message.channel.send(
                     f"`✅` Congratulations {message.author.mention}! You won `{xp}xp`!"
-                )
-                
-                await db.execute(
-                    "UPDATE users_wordle SET won = 'Won', ended_at = %s WHERE user_id = %s AND game_id = %s",
-                    (current_unix, message.author.id, game_id)
                 )
                 
                 # Check for achievements first
@@ -522,14 +583,7 @@ class WordleListener(commands.Cog):
                 )
                 await lvl_mng.update()
             
-            # Clean up guesses and letter states
-            if message.author.id in self.wordle_game.guesses:
-                del self.wordle_game.guesses[message.author.id]
-            if message.author.id in self.wordle_game.letter_states:
-                del self.wordle_game.letter_states[message.author.id]
-            
-            if message.author.id in self.wordle_game.active_games:
-                del self.wordle_game.active_games[message.author.id]
+            self._clear_guess_state(message.author.id)
         else:
             if attempts == 5:
                 # Don't send final image, just send the loss message
@@ -547,10 +601,4 @@ class WordleListener(commands.Cog):
                     )
                 
                 # Clean up guesses and letter states
-                if message.author.id in self.wordle_game.guesses:
-                    del self.wordle_game.guesses[message.author.id]
-                if message.author.id in self.wordle_game.letter_states:
-                    del self.wordle_game.letter_states[message.author.id]
-                
-                if message.author.id in self.wordle_game.active_games:
-                    del self.wordle_game.active_games[message.author.id]
+                self._clear_guess_state(message.author.id)

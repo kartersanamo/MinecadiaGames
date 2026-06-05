@@ -25,9 +25,13 @@ def safe_interaction(
 
     def decorator(func: F) -> F:
         @functools.wraps(func)
-        async def wrapper(self, interaction: discord.Interaction, *args, **kwargs):
+        async def wrapper(*args, **kwargs):
+            interaction = next(
+                (arg for arg in args if isinstance(arg, discord.Interaction)),
+                None,
+            )
             try:
-                return await func(self, interaction, *args, **kwargs)
+                return await func(*args, **kwargs)
             except Exception as exc:
                 msg = user_message or external_service_message(exc)
                 log_exception(
@@ -37,7 +41,8 @@ def safe_interaction(
                     interaction=interaction,
                     component=component or func.__name__,
                 )
-                await safe_reply(interaction, content=f"`❌` {msg}", ephemeral=True)
+                if interaction is not None:
+                    await safe_reply(interaction, content=f"`❌` {msg}", ephemeral=True)
 
         return wrapper  # type: ignore
 

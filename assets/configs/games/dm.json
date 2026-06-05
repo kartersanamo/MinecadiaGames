@@ -19,6 +19,7 @@
     "Wordle": {
       "enabled": true,
       "refresh_cooldown": 43200,
+      "guess_cooldown": 2.0,
       "image_url": "https://i.imgur.com/cFJkVEl.png",
       "words_file": "assets/configs/data/words.txt"
     },
