@@ -371,6 +371,38 @@ class GameManager:
             next_index = 0
         
         return games[next_index]
+
+    _DM_REFRESH_ALERT_SUFFIX = " has been refreshed!"
+
+    async def _cleanup_dm_refresh_alerts(self, channel: discord.TextChannel) -> None:
+        """Delete all bot-sent DM refresh alerts in the leveling channel."""
+        to_delete: list[discord.Message] = []
+
+        async for message in channel.history(limit=100):
+            if message.author.id != self.bot.user.id:
+                continue
+            if not message.content.startswith("🚨"):
+                continue
+            if self._DM_REFRESH_ALERT_SUFFIX not in message.content:
+                continue
+            to_delete.append(message)
+
+        for message in to_delete:
+            try:
+                await message.delete()
+            except discord.NotFound:
+                pass
+            except Exception as e:
+                self.logger.warning(
+                    f"[GameManager] Failed to delete old refresh alert {message.id}: {e}"
+                )
+
+        if to_delete:
+            self.logger.info(
+                f"[GameManager] Deleted {len(to_delete)} stale DM refresh alert(s)"
+            )
+
+        self.last_dm_refresh_msg = None
     
     async def _refresh_dm_game(self, game_name: str):
         try:
@@ -401,14 +433,8 @@ class GameManager:
         games_role = guild.get_role(self.config.get('config', 'GAMES_ROLE'))
         
         if leveling_channel and games_role:
-            # Delete the previous refresh message if it exists
-            if self.last_dm_refresh_msg:
-                try:
-                    await self.last_dm_refresh_msg.delete()
-                except Exception:
-                    pass  # Message might have been deleted already
-            
-            # Send the new refresh message and store it
+            await self._cleanup_dm_refresh_alerts(leveling_channel)
+
             msg = await leveling_channel.send(
                 content=f"🚨 {games_role.mention} {game_name.title()} has been refreshed!"
             )

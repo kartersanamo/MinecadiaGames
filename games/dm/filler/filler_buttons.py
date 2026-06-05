@@ -326,10 +326,24 @@ class FillerButtons(discord.ui.View):
                     ),
                 )
         else:
+            win_xp = calculate_xp(self.state.player_cells, total, self.win_min, self.win_max)
+            xp = max(1, round(win_xp / 2))
             result_msg = (
-                f"`🤝` It's a tie! Both sides had **{self.state.player_cells}** cells. No XP awarded."
+                f"`🤝` It's a tie! Both sides had **{self.state.player_cells}** cells. "
             )
-            if not self.test_mode:
+            if self.test_mode:
+                result_msg += f"You would have earned `{xp}xp` (half of a win)!"
+            else:
+                result_msg += f"You earned `{xp}xp` (half of a win)!"
+                lvl_mng = LevelingManager(
+                    user=interaction.user,
+                    channel=interaction.channel,
+                    client=self.bot,
+                    xp=xp,
+                    source="Filler",
+                    game_id=self.game_id,
+                )
+                await lvl_mng.update()
                 await db.execute(
                     "UPDATE users_filler SET won = 'Tied', player_cells = %s, bot_cells = %s, "
                     "turns = %s, ended_at = %s WHERE user_id = %s AND game_id = %s",
