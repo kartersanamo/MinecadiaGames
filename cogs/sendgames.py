@@ -44,7 +44,7 @@ class SendGames(commands.Cog):
                     new_dm_game = last + 7200
                 else:
                     new_dm_game = 0
-                game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman"]
+                game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler"]
                 rotation_display = " → ".join(
                     f"**{g}**" if g.lower().replace(" ", "") == active.lower().replace(" ", "") else g
                     for g in game_sequence
@@ -141,7 +141,7 @@ class SendGames(commands.Cog):
         active = info_last_game['game_name']
         last = int(info_last_game['refreshed_at'])
         new_dm_game = last + 7200
-        game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman"]
+        game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler"]
         rotation_display = " → ".join(
             f"**{g}**" if g.lower().replace(" ", "") == active.lower().replace(" ", "") else g
             for g in game_sequence

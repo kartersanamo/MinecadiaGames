@@ -1,7 +1,7 @@
 import asyncio
 import random
 from datetime import datetime, timezone
-from typing import Optional, List, Dict
+from typing import Optional, List
 import discord
 import mathgenerator
 from pylatexenc.latex2text import LatexNodes2Text
@@ -423,7 +423,7 @@ class MathQuizButtons(discord.ui.View):
             }
         self.xp_config = xp_config
         self.winner_count = 0
-        self.user_guesses: Dict[int, int] = {}  # Track guesses per user for XP scaling
+        self.answered_user_ids: set = set()  # One attempt per user (right or wrong)
         
         for idx, answer in enumerate(answers):
             button = discord.ui.Button(
@@ -455,15 +455,9 @@ class MathQuizButtons(discord.ui.View):
 
         return random.randint(min_base_xp, max_base_xp)
 
-    def _calculate_xp(self, position: int, guesses: int) -> int:
+    def _calculate_xp(self, position: int) -> int:
         base_xp = self._get_base_xp_for_position(position)
-
-        # Fewer guesses should reward more XP, more guesses should reduce it.
-        guess_bonus = max(0, (6 - guesses) * 2)
-        guess_penalty = max(0, (guesses - 5) * 2)
-
-        xp = base_xp + guess_bonus - guess_penalty
-        xp = int(xp * self.xp_multiplier)
+        xp = int(base_xp * self.xp_multiplier)
 
         if self.winners:
             xp = min(xp, self.winners[-1]['xp'] - 1)
@@ -472,13 +466,26 @@ class MathQuizButtons(discord.ui.View):
     
     def create_callback(self, answer: str):
         async def callback(interaction: discord.Interaction):
-            user_id = interaction.user.id
-            if user_id not in self.user_guesses:
-                self.user_guesses[user_id] = 0
-            self.user_guesses[user_id] += 1
-            guesses = self.user_guesses[user_id]
-            
-            # Log activity
+            if interaction.user.id in self.answered_user_ids:
+                from services.chat_game_registry import registry
+                if self.message:
+                    registry.log_activity(
+                        self.message.id,
+                        interaction.user.id,
+                        'denied',
+                        'Already answered',
+                        False
+                    )
+                if not interaction.response.is_done():
+                    await interaction.response.send_message(
+                        "You've already answered this game!", ephemeral=True
+                    )
+                else:
+                    await interaction.followup.send(
+                        "You've already answered this game!", ephemeral=True
+                    )
+                return
+
             from services.chat_game_registry import registry
             if self.message:
                 registry.log_activity(
@@ -488,6 +495,9 @@ class MathQuizButtons(discord.ui.View):
                     f'Clicked: {answer[:50]}',
                     True
                 )
+
+            self.answered_user_ids.add(interaction.user.id)
+            user_id = interaction.user.id
             
             if answer == self.correct_answer:
                 if user_id in [w['user_id'] for w in self.winners]:
@@ -504,13 +514,12 @@ class MathQuizButtons(discord.ui.View):
                 
                 self.winner_count += 1
                 position = self.winner_count
-                xp = self._calculate_xp(position, guesses)
+                xp = self._calculate_xp(position)
                 
                 self.winners.append({
                     'user': interaction.user.mention,
                     'user_id': user_id,
                     'xp': xp,
-                    'guesses': guesses
                 })
                 
                 lvl_mng = LevelingManager(
@@ -530,7 +539,7 @@ class MathQuizButtons(discord.ui.View):
                         self.message.id,
                         user_id,
                         'correct_answer',
-                        f'Won {xp} XP (position {position}, {guesses} guesses)',
+                        f'Won {xp} XP (position {position})',
                         True
                     )
                 
@@ -547,7 +556,7 @@ class MathQuizButtons(discord.ui.View):
                 xp_display = f"would have been awarded `{xp}xp`" if self.test_mode else f"have been awarded `{xp}xp`"
                 
                 await interaction.response.send_message(
-                    f"`✅` {test_prefix}Correct! You {xp_display}{xp_msg} in {guesses} guess{'es' if guesses != 1 else ''}!",
+                    f"`✅` {test_prefix}Correct! You {xp_display}{xp_msg}!",
                     ephemeral=True
                 )
                 
@@ -556,7 +565,7 @@ class MathQuizButtons(discord.ui.View):
                     try:
                         embed = self.message.embeds[0]
                         winners_text = "\n".join(
-                            f"`+{w['xp']}xp` {w['user']} ({w['guesses']} guess{'es' if w['guesses'] != 1 else ''})"
+                            f"`+{w['xp']}xp` {w['user']}"
                             for w in self.winners
                         )
                         
@@ -578,17 +587,16 @@ class MathQuizButtons(discord.ui.View):
                         logger = get_logger("ChatGames")
                         logger.error(f"Error updating winners in embed: {e}\n{traceback.format_exc()}")
             else:
-                # Log wrong answer
                 if self.message:
                     registry.log_activity(
                         self.message.id,
                         user_id,
                         'wrong_answer',
-                        f"Selected: {answer[:50]} ({guesses} guess{'es' if guesses != 1 else ''})",
+                        f"Selected: {answer[:50]}",
                         False
                     )
                 await interaction.response.send_message(
-                    f"`❌` Incorrect answer! Try again. You have used {guesses} guess{'es' if guesses != 1 else ''}.",
+                    "`❌` Incorrect answer!",
                     ephemeral=True
                 )
         

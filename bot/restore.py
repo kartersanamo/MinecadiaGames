@@ -77,6 +77,7 @@ def parse_dm_game_from_embed_title(title: str) -> Optional[Tuple[str, int]]:
         "Memory": "memory",
         "Minesweeper": "minesweeper",
         "Hangman": "hangman",
+        "Filler": "filler",
     }
     game_type = title_to_type.get(prefix)
     if game_type is None:
@@ -115,6 +116,7 @@ async def end_dm_game_in_db(game_type: str, game_id: int, user_id: int) -> None:
             "memory": ("users_memory", "won = 'Lost'"),
             "minesweeper": ("users_minesweeper", "won = 'Lost'"),
             "hangman": ("users_hangman", "won = 'Lost'"),
+            "filler": ("users_filler", "won = 'Lost'"),
         }
         table, set_clause = table_map.get(game_type, (None, None))
         if not table:
@@ -138,6 +140,7 @@ async def restore_active_dm_games(client) -> None:
             "users_memory": "memory",
             "users_minesweeper": "minesweeper",
             "users_hangman": "hangman",
+            "users_filler": "filler",
         }
 
         restored_count = 0
@@ -367,6 +370,19 @@ async def restore_dm_game_view(client, game_type: str, game_id: int, user_id: in
             game_config = games.get("Hangman", {})
             view = HangmanButtons(
                 game_id, client, config, game_config, dm_config, word, user_id,
+                test_mode=False, saved_state=game_state,
+            )
+            view.player_id = user_id
+            return view
+
+        if game_type == "filler":
+            from games.dm.filler import FillerButtons
+
+            dm_config = config.get("dm_games")
+            games = dm_config.get("GAMES", {}) or dm_config.get("games", {})
+            game_config = games.get("Filler", {})
+            view = FillerButtons(
+                game_id, client, config, game_config,
                 test_mode=False, saved_state=game_state,
             )
             view.player_id = user_id

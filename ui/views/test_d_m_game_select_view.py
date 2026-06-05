@@ -37,6 +37,7 @@ class TestDMGameSelect(discord.ui.Select):
         from games.dm.twenty_forty_eight import TwentyFortyEight
         from games.dm.minesweeper import Minesweeper
         from games.dm.hangman import Hangman
+        from games.dm.filler import Filler
 
         game_map = {
             "wordle": ("Wordle", Wordle),
@@ -46,6 +47,7 @@ class TestDMGameSelect(discord.ui.Select):
             "2048": ("2048", TwentyFortyEight),
             "minesweeper": ("Minesweeper", Minesweeper),
             "hangman": ("Hangman", Hangman),
+            "filler": ("Filler", Filler),
         }
 
         game_display_name, game_class = game_map.get(game_name.lower(), (None, None))

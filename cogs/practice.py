@@ -39,6 +39,7 @@ class Practice(commands.Cog):
         app_commands.Choice(name="2048", value="2048"),
         app_commands.Choice(name="Minesweeper", value="minesweeper"),
         app_commands.Choice(name="Hangman", value="hangman"),
+        app_commands.Choice(name="Filler", value="filler"),
     ])
     async def practice(
         self,
@@ -87,6 +88,7 @@ class Practice(commands.Cog):
             "2048": "2048",
             "minesweeper": "Minesweeper",
             "hangman": "Hangman",
+            "filler": "Filler",
         }
         
         game_display_name = game_name_map.get(game_value, game_value)
@@ -105,7 +107,7 @@ class Practice(commands.Cog):
         
         # Determine if it's a chat game or DM game
         chat_games = ["trivia", "math_quiz", "flag_guesser", "unscramble", "emoji_quiz", "guess_the_number"]
-        dm_games = ["wordle", "tictactoe", "connect four", "memory", "2048", "twenty forty eight", "minesweeper", "hangman"]
+        dm_games = ["wordle", "tictactoe", "connect four", "memory", "2048", "twenty forty eight", "minesweeper", "hangman", "filler"]
         
         if game_value in chat_games:
             await self.start_chat_practice(interaction, game_value)
@@ -193,6 +195,7 @@ class Practice(commands.Cog):
             from games.dm.twenty_forty_eight import TwentyFortyEight
             from games.dm.minesweeper import Minesweeper
             from games.dm.hangman import Hangman
+            from games.dm.filler import Filler
             
             game_map = {
                 "wordle": Wordle,
@@ -202,7 +205,8 @@ class Practice(commands.Cog):
                 "2048": TwentyFortyEight,
                 "twenty forty eight": TwentyFortyEight,
                 "minesweeper": Minesweeper,
-                "hangman": Hangman
+                "hangman": Hangman,
+                "filler": Filler
             }
             
             game_class = game_map.get(game_type.lower())
@@ -222,7 +226,8 @@ class Practice(commands.Cog):
                 "twenty forty eight": "2048",
                 "2048": "2048",
                 "minesweeper": "Minesweeper",
-                "hangman": "Hangman"
+                "hangman": "Hangman",
+                "filler": "Filler"
             }
             
             if self.bot.game_manager and hasattr(self.bot.game_manager, 'dm_games'):

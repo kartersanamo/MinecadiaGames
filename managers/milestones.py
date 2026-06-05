@@ -304,6 +304,11 @@ class MilestonesManager:
                     "SELECT COUNT(*) as count FROM users_minesweeper WHERE user_id = %s AND won = 'Won'",
                     (user_id_str,)
                 )
+            elif game_type == "Filler":
+                result = await db.execute(
+                    "SELECT COUNT(*) as count FROM users_filler WHERE user_id = %s AND won = 'Won'",
+                    (user_id_str,)
+                )
             else:
                 return 0
             return result[0]['count'] if result else 0

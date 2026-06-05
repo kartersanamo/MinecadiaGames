@@ -45,6 +45,7 @@ class TestGame(commands.Cog):
         app_commands.Choice(name="2048", value="2048"),
         app_commands.Choice(name="Minesweeper", value="minesweeper"),
         app_commands.Choice(name="Hangman", value="hangman"),
+        app_commands.Choice(name="Filler", value="filler"),
     ])
     async def test_game(
         self,
@@ -77,7 +78,8 @@ class TestGame(commands.Cog):
             "memory": "Memory",
             "2048": "2048",
             "minesweeper": "Minesweeper",
-            "hangman": "Hangman"
+            "hangman": "Hangman",
+            "filler": "Filler"
         }
         
         game_display_name = game_name_map.get(game_value, game_value)
@@ -142,6 +144,7 @@ class TestGame(commands.Cog):
                 from games.dm.twenty_forty_eight import TwentyFortyEight
                 from games.dm.minesweeper import Minesweeper
                 from games.dm.hangman import Hangman
+                from games.dm.filler import Filler
                 
                 game_map = {
                     "wordle": ("Wordle", Wordle),
@@ -150,7 +153,8 @@ class TestGame(commands.Cog):
                     "memory": ("Memory", Memory),
                     "2048": ("2048", TwentyFortyEight),
                     "minesweeper": ("Minesweeper", Minesweeper),
-                    "hangman": ("Hangman", Hangman)
+                    "hangman": ("Hangman", Hangman),
+                    "filler": ("Filler", Filler)
                 }
                 
                 game_display, game_class = game_map.get(game_value, (None, None))

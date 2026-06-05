@@ -78,6 +78,20 @@
       "max_wrong_guesses": 8,
       "words_file": "assets/configs/data/words.txt",
       "image_url": "https://i.imgur.com/example.png"
+    },
+    "Filler": {
+      "enabled": true,
+      "refresh_cooldown": 43200,
+      "button_cooldown": 1.5,
+      "turn_delay_ms": 1200,
+      "bot_delay_ms": 800,
+      "grid_size": 8,
+      "image_url": "https://i.imgur.com/example.png",
+      "colors": ["🟥", "🟦", "🟩", "🟨", "🟧", "🟪"],
+      "xp": {
+        "win_min": 100,
+        "win_max": 150
+      }
     }
   }
 }

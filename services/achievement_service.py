@@ -140,6 +140,10 @@ class AchievementService:
                 "SELECT COUNT(*) as count FROM users_hangman WHERE user_id = %s AND won = 'Won'",
                 (user_id_str,),
             ),
+            "Filler": (
+                "SELECT COUNT(*) as count FROM users_filler WHERE user_id = %s AND won = 'Won'",
+                (user_id_str,),
+            ),
         }
 
         query = win_queries.get(game_type)

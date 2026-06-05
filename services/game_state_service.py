@@ -15,6 +15,7 @@ class GameStateService:
         "memory": "users_memory",
         "minesweeper": "users_minesweeper",
         "hangman": "users_hangman",
+        "filler": "users_filler",
     }
 
     ACTIVE_DM_TABLES = [
@@ -24,6 +25,7 @@ class GameStateService:
         ("memory", "users_memory", "won"),
         ("minesweeper", "users_minesweeper", "won"),
         ("hangman", "users_hangman", "won"),
+        ("filler", "users_filler", "won"),
     ]
 
     @classmethod

@@ -186,7 +186,8 @@ class LogsView(discord.ui.View):
             'memory': 'users_memory',
             '2048': 'users_2048',
             'minesweeper': 'users_minesweeper',
-            'hangman': 'users_hangman'
+            'hangman': 'users_hangman',
+            'filler': 'users_filler'
         }
         
         all_logs = []
@@ -276,7 +277,22 @@ class LogsView(discord.ui.View):
                         g.refreshed_at,
                         g.dm_game
                 """
-            else:  # tictactoe
+            elif game_name == 'filler':
+                query = f"""
+                    SELECT 
+                        u.game_id,
+                        u.user_id,
+                        u.won as status,
+                        u.player_cells as score,
+                        u.started_at,
+                        u.ended_at,
+                        u.turns as moves,
+                        u.bot_cells as highest_tile,
+                        g.game_name,
+                        g.refreshed_at,
+                        g.dm_game
+                """
+            else:  # tictactoe, hangman
                 query = f"""
                     SELECT 
                         u.game_id,

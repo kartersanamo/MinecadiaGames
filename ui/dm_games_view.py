@@ -26,6 +26,8 @@ class DMGamesView(discord.ui.View):
             self.add_item(self.minesweeper_button())
         elif self.active == "hangman":
             self.add_item(self.hangman_button())
+        elif self.active == "filler":
+            self.add_item(self.filler_button())
     
     def view_more_button(self):
         button = discord.ui.Button(
@@ -397,6 +399,69 @@ class DMGamesView(discord.ui.View):
         button.callback = callback
         return button
 
+    def filler_button(self):
+        button = discord.ui.Button(
+            emoji="🟦",
+            label="Click Here To Play Filler",
+            style=discord.ButtonStyle.grey,
+            custom_id="filler_button",
+        )
+
+        async def callback(interaction: discord.Interaction):
+            logger = get_logger("UI")
+            try:
+                can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(
+                    interaction, "filler", self.config
+                )
+                if not can_play:
+                    await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
+                    return
+
+                embed = discord.Embed(
+                    title="Filler",
+                    description="Click the button below to begin a game of Filler!",
+                    color=discord.Color.from_str(self.config.get("config", "EMBED_COLOR")),
+                )
+                embed.add_field(
+                    name="How do I play?",
+                    value=(
+                        "You start in the **bottom-left** corner and the bot starts in the **top-right**. "
+                        "Each turn, pick one of six colors to capture adjacent cells of that color. "
+                        "You cannot pick your current color or the bot's current color. "
+                        "When no moves remain, whoever controls the most cells wins!\n\n"
+                        "**More cells = more XP on a win!**"
+                    ),
+                    inline=False,
+                )
+                dm_config = self.config.get("dm_games", {})
+                games = dm_config.get("games", {}) or dm_config.get("GAMES", {})
+                filler_config = games.get("Filler", {})
+                image_url = filler_config.get("IMAGE") or filler_config.get("image_url")
+                if image_url:
+                    embed.set_image(url=image_url)
+                logo_url = self.bot.app.embeds.get_logo_url(self.config.get("config", "LOGO"))
+                embed.set_footer(text=self.config.get("config", "FOOTER"), icon_url=logo_url)
+
+                view = StartFillerView(interaction, self.bot)
+                self.bot.add_view(view)
+                await interaction.response.send_message(embed=embed, ephemeral=True, view=view)
+            except Exception as e:
+                logger.error(f"Error in Filler button callback: {e}")
+                import traceback
+
+                logger.error(traceback.format_exc())
+                try:
+                    if not interaction.response.is_done():
+                        await interaction.response.send_message(
+                            "`❌` An error occurred. Please try again later.",
+                            ephemeral=True,
+                        )
+                except Exception:
+                    pass
+
+        button.callback = callback
+        return button
+
 from ui.dm_games_view_startwordleview import StartWordleView
 from ui.dm_games_view_starttictactoeview import StartTicTacToeView
 from ui.dm_games_view_startmemoryview import StartMemoryView
@@ -404,3 +469,4 @@ from ui.dm_games_view_startconnectfourview import StartConnectFourView
 from ui.dm_games_view_start2048view import Start2048View
 from ui.dm_games_view_startminesweeperview import StartMinesweeperView
 from ui.dm_games_view_starthangmanview import StartHangmanView
+from ui.dm_games_view_startfillerview import StartFillerView

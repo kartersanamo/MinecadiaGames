@@ -82,6 +82,31 @@
             }
         ]
     },
+    "Filler": {
+        "wins": [
+            {
+                "id": "filler_novice",
+                "name": "Filler Novice",
+                "description": "Win 30 games of Filler",
+                "threshold": 30,
+                "emoji": "🟥"
+            },
+            {
+                "id": "filler_intermediate",
+                "name": "Filler Intermediate",
+                "description": "Win 75 games of Filler",
+                "threshold": 75,
+                "emoji": "🟦"
+            },
+            {
+                "id": "filler_expert",
+                "name": "Filler Expert",
+                "description": "Win 150 games of Filler",
+                "threshold": 150,
+                "emoji": "🟩"
+            }
+        ]
+    },
     "Memory": {
         "wins": [
             {

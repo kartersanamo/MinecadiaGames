@@ -339,7 +339,8 @@ class AllTimeLeaderboardView(discord.ui.View):
             "Memory": ("users_memory", "won", "Won"),
             "2048": ("users_2048", "status", "Won"),
             "Minesweeper": ("users_minesweeper", "won", "Won"),
-            "Hangman": ("users_hangman", "won", "Won")
+            "Hangman": ("users_hangman", "won", "Won"),
+            "Filler": ("users_filler", "won", "Won")
         }
         
         # Chat games use xp_logs (every entry is a win)

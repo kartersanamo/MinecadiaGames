@@ -53,6 +53,12 @@ class TestDMGameSelectorView(discord.ui.View):
                 value="hangman",
                 description="Test Hangman game",
                 emoji="🪢"
+            ),
+            discord.SelectOption(
+                label="Filler",
+                value="filler",
+                description="Test Filler game",
+                emoji="🟦"
             )
         ]
         

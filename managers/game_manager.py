@@ -21,6 +21,7 @@ from games.dm.memory import Memory
 from games.dm.twenty_forty_eight import TwentyFortyEight
 from games.dm.minesweeper import Minesweeper
 from games.dm.hangman import Hangman
+from games.dm.filler import Filler
 
 
 def format_wait_time(seconds: int) -> str:
@@ -71,7 +72,8 @@ class GameManager:
             'Memory': Memory(self.bot),
             '2048': TwentyFortyEight(self.bot),
             'Minesweeper': Minesweeper(self.bot),
-            'Hangman': Hangman(self.bot)
+            'Hangman': Hangman(self.bot),
+            'Filler': Filler(self.bot)
         }
     
     async def _get_db(self):
@@ -423,7 +425,7 @@ class GameManager:
             from ui.dm_games_view import DMGamesView
             from ui.sendgames_view import SendGamesView
             
-            game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman"]
+            game_sequence = ["TicTacToe", "Wordle", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler"]
             new_dm_game = refreshed_at + 7200  # 2 hours from now
             
             rotation_display = " → ".join(

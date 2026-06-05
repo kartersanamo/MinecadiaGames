@@ -29,6 +29,7 @@ class StatisticsView(discord.ui.View):
         self.add_item(self.create_game_button("2048", "2048"))
         self.add_item(self.create_game_button("Minesweeper", "minesweeper"))
         self.add_item(self.create_game_button("Hangman", "hangman"))
+        self.add_item(self.create_game_button("Filler", "filler"))
         self.add_item(self.create_game_button("All Games", "all"))
         self.add_item(self.create_game_button("Monthly Stats", "monthly"))
         self.add_item(self.create_game_button("Game History", "history"))
@@ -48,7 +49,7 @@ class StatisticsView(discord.ui.View):
         buttons_per_row = 5
         button_index = [
             "Trivia", "Math Quiz", "Flag Guesser", "Unscramble", "Emoji Quiz", "Guess The Number",
-            "Wordle", "TicTacToe", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman",
+            "Wordle", "TicTacToe", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler",
             "All Games", "Monthly Stats", "Game History"
         ].index(label)
         return button_index // buttons_per_row
@@ -105,7 +106,8 @@ class StatisticsView(discord.ui.View):
             ("Memory", "users_memory", "won"),
             ("2048", "users_2048", "status"),
             ("Minesweeper", "users_minesweeper", "won"),
-            ("Hangman", "users_hangman", "won")
+            ("Hangman", "users_hangman", "won"),
+            ("Filler", "users_filler", "won")
         ]
         
         for game_name, table_name, status_field in dm_games:
@@ -300,7 +302,8 @@ class StatisticsView(discord.ui.View):
             "memory": "Memory",
             "2048": "2048",
             "minesweeper": "Minesweeper",
-            "hangman": "Hangman"
+            "hangman": "Hangman",
+            "filler": "Filler"
         }
         
         game_name = game_name_map.get(game_type.lower())
@@ -401,7 +404,8 @@ class StatisticsView(discord.ui.View):
             "memory": "users_memory",
             "2048": "users_2048",
             "minesweeper": "users_minesweeper",
-            "hangman": "users_hangman"
+            "hangman": "users_hangman",
+            "filler": "users_filler"
         }
         
         table_name = table_map.get(game_type.lower())
@@ -424,6 +428,8 @@ class StatisticsView(discord.ui.View):
             await self._show_minesweeper_stats(interaction, user)
         elif game_type == "hangman":
             await self._show_hangman_stats(interaction, user)
+        elif game_type == "filler":
+            await self._show_filler_stats(interaction, user)
     
     async def _show_wordle_stats(self, interaction: discord.Interaction, user):
         """Show Wordle-specific statistics"""
@@ -829,4 +835,68 @@ class StatisticsView(discord.ui.View):
         embed.set_thumbnail(url=user.display_avatar.url)
         logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
+        await interaction.followup.send(embed=embed, ephemeral=False)
+
+    async def _show_filler_stats(self, interaction: discord.Interaction, user):
+        """Show Filler-specific statistics"""
+        db = await DatabasePool.get_instance()
+
+        stats = await db.execute(
+            """
+            SELECT
+                COUNT(*) as total_games,
+                SUM(CASE WHEN won = 'Won' THEN 1 ELSE 0 END) as wins,
+                SUM(CASE WHEN won = 'Lost' THEN 1 ELSE 0 END) as losses,
+                SUM(CASE WHEN won = 'Tied' THEN 1 ELSE 0 END) as ties,
+                AVG(CASE WHEN won = 'Won' THEN player_cells ELSE NULL END) as avg_cells_won,
+                AVG(CASE WHEN won = 'Lost' THEN player_cells ELSE NULL END) as avg_cells_lost,
+                AVG(turns) as avg_turns
+            FROM users_filler
+            WHERE user_id = %s
+            """,
+            (str(self.user_id),),
+        )
+
+        if not stats or not stats[0]["total_games"]:
+            await interaction.followup.send("No Filler statistics found.", ephemeral=False)
+            return
+
+        stat = stats[0]
+        total = stat["total_games"]
+        wins = stat["wins"] or 0
+        losses = stat["losses"] or 0
+        ties = stat["ties"] or 0
+        win_rate = (wins / total * 100) if total > 0 else 0
+
+        embed = discord.Embed(
+            title=f"📊 Filler Statistics - {user.display_name}",
+            color=discord.Color.from_str(self.config.get("config", "EMBED_COLOR")),
+            timestamp=datetime.now(timezone.utc),
+        )
+
+        embed.add_field(
+            name="Overall Stats",
+            value=(
+                f"**Total Games:** {total:,}\n"
+                f"**Wins:** {wins}\n"
+                f"**Losses:** {losses}\n"
+                f"**Ties:** {ties}\n"
+                f"**Win Rate:** {win_rate:.1f}%"
+            ),
+            inline=False,
+        )
+
+        performance_lines = []
+        if stat["avg_cells_won"] is not None:
+            performance_lines.append(f"**Avg Cells (Won):** {stat['avg_cells_won']:.1f}")
+        if stat["avg_cells_lost"] is not None:
+            performance_lines.append(f"**Avg Cells (Lost):** {stat['avg_cells_lost']:.1f}")
+        if stat["avg_turns"] is not None:
+            performance_lines.append(f"**Avg Turns:** {stat['avg_turns']:.1f}")
+        if performance_lines:
+            embed.add_field(name="Performance", value="\n".join(performance_lines), inline=False)
+
+        embed.set_thumbnail(url=user.display_avatar.url)
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get("config", "LOGO"))
+        embed.set_footer(text=self.config.get("config", "FOOTER"), icon_url=logo_url)
         await interaction.followup.send(embed=embed, ephemeral=False)
