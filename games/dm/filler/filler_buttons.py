@@ -168,22 +168,25 @@ class FillerButtons(discord.ui.View):
             self.state.apply_move(OWNER_BOT, bot_move)
             await asyncio.sleep(self.bot_delay)
 
-    async def _check_valid_game(self, interaction: discord.Interaction) -> bool:
+    async def _check_valid_game(
+        self, interaction: discord.Interaction, *, deferred: bool = False
+    ) -> bool:
         if self.test_mode:
             return True
         last_game_id = await self.bot.app.games.get_last_game_id("filler")
         if self.game_id != last_game_id:
-            await interaction.response.send_message(
-                "`❌` Sorry, but this game has already ended. Please go to the leveling channel to begin another one!",
-                ephemeral=True,
+            msg = (
+                "`❌` Sorry, but this game has already ended. Please go to the leveling "
+                "channel to begin another one!"
             )
+            if deferred:
+                await interaction.followup.send(msg, ephemeral=True)
+            else:
+                await interaction.response.send_message(msg, ephemeral=True)
             return False
         return True
 
     async def handle_color_pick(self, interaction: discord.Interaction, color_idx: int):
-        if not await self._check_valid_game(interaction):
-            return
-
         if self.state.game_ended:
             await interaction.response.send_message(
                 "`❌` This game has already ended.",
@@ -215,7 +218,13 @@ class FillerButtons(discord.ui.View):
             )
             return
 
-        await interaction.response.defer()
+        try:
+            await interaction.response.defer()
+        except discord.NotFound:
+            return
+
+        if not await self._check_valid_game(interaction, deferred=True):
+            return
 
         async with self._move_lock:
             if self.state.game_ended or not self.state.is_player_turn:
