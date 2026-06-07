@@ -107,6 +107,19 @@
                 "win_min": 100,
                 "win_max": 150
             }
+        },
+        "Paintball": {
+            "enabled": true,
+            "vaulted": true,
+            "refresh_cooldown": 43200,
+            "button_cooldown": 1.0,
+            "reveal_delay_ms": 1500,
+            "lives": 3,
+            "image_url": "https://i.imgur.com/example.png",
+            "xp": {
+                "win_min": 40,
+                "win_max": 60
+            }
         }
     }
 }

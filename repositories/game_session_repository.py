@@ -18,6 +18,7 @@ GAME_TYPES = frozenset(
         "minesweeper",
         "hangman",
         "filler",
+        "paintball",
     }
 )
 
@@ -33,6 +34,8 @@ GAME_TYPE_ALIASES: Dict[str, str] = {
     "minesweeper": "minesweeper",
     "hangman": "hangman",
     "filler": "filler",
+    "paintball": "paintball",
+    "paint ball": "paintball",
 }
 
 LEGACY_STATUS_MAP = {

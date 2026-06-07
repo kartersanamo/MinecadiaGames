@@ -6,6 +6,7 @@ from .minesweeper import Minesweeper
 from .tictactoe import TicTacToe
 from .twenty_forty_eight import TwentyFortyEight
 from .wordle import Wordle
+from .paintball import Paintball
 
 __all__ = [
     "ConnectFour",
@@ -13,6 +14,7 @@ __all__ = [
     "Hangman",
     "Memory",
     "Minesweeper",
+    "Paintball",
     "TicTacToe",
     "TwentyFortyEight",
     "Wordle",
