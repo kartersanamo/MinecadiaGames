@@ -290,16 +290,17 @@ class GuessTheNumberButtons(discord.ui.View):
         return self._user_locks[user_id]
 
     def _get_base_xp_for_position(self, position: int) -> int:
+        # +10 vs other chat games: GTN needs many guesses per win (time-consuming).
         if position == 1:
-            return random.randint(50, 60)
+            return random.randint(60, 70)
         if position == 2:
-            return random.randint(40, 50)
+            return random.randint(50, 60)
         if position == 3:
-            return random.randint(30, 40)
+            return random.randint(40, 50)
         if position == 4:
-            return random.randint(20, 30)
+            return random.randint(30, 40)
         if position == 5:
-            return random.randint(10, 20)
+            return random.randint(20, 30)
 
         previous_final_xp = self.winners[-1]['xp'] if self.winners else int(20 * self.xp_multiplier)
         max_base_xp = max(1, int(previous_final_xp / self.xp_multiplier) - 1)
@@ -313,7 +314,8 @@ class GuessTheNumberButtons(discord.ui.View):
     def _calculate_xp(self, position: int, guesses: int) -> int:
         base_xp = self._get_base_xp_for_position(position)
         guess_bonus = max(0, (6 - guesses) * 2)
-        guess_penalty = max(0, (guesses - 5) * 2)
+        # Binary search usually needs 6–8 guesses; only penalize unusually long hunts.
+        guess_penalty = max(0, (guesses - 8) * 2)
         xp = int((base_xp + guess_bonus - guess_penalty) * self.xp_multiplier)
 
         if self.winners:
