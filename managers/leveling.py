@@ -278,37 +278,21 @@ class _LevelingManagerCore:
         source: str,
         bot: Optional[discord.Client]
     ):
-        """Log XP award to admin logs channel"""
-        if not bot:
-            return
-        
-        guild = bot.get_guild(self.config.get('config', 'GUILD_ID'))
-        if not guild:
-            return
-        
-        channel = guild.get_channel(self.config.get('config', 'ADMIN_LOGS'))
-        if not channel:
-            return
-        
-        embed = discord.Embed(
-            color=discord.Color.from_str(self.config.get('config', 'EMBED_COLOR')),
+        """Log XP award via Management audit HTTP API."""
+        from core.logging.http_client import post_audit_log
+
+        guild_id = self.config.get('config', 'GUILD_ID')
+        await post_audit_log(
+            event_type="games.xp_awarded",
             title="Experience Added",
-            description=(
-                f"`Source` {source}\n"
-                f"`User` {user.mention} ({user.name})\n"
-                f"`XP` {xp}"
-            ),
-            timestamp=datetime.now(timezone.utc)
+            summary=f"`Source` {source}\n`User` {user.mention} ({user.name})\n`XP` {xp}",
+            actor_id=user.id,
+            guild_id=guild_id,
+            source_bot="Games",
+            metadata={"xp": xp, "source": source},
+            route_admin=True,
+            immediate=True,
         )
-        embed.set_footer(
-            text=self.config.get('config', 'FOOTER'),
-            icon_url=bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
-        )
-        
-        try:
-            await channel.send(embed=embed)
-        except Exception as e:
-            self.logger.error(f"Failed to log XP to admin channel: {e}")
     
     def _log_xp_award(
         self,
