@@ -125,9 +125,14 @@ class Client(commands.Bot):
 
     @task("Sync Command Tree")
     async def sync_command_tree(self):
+        from core.guild_command_sync import sync_guild_commands
+
         try:
-            synced = await self.tree.sync()
-            log_tasks.info(f"Synced {len(synced)} commands")
+            await sync_guild_commands(
+                self,
+                config_guild_id=self.config.get("config", "GUILD_ID"),
+                log=log_tasks,
+            )
         except Exception as e:
             log_tasks.error(f"Failed to sync commands: {e}")
 
