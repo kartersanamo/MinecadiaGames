@@ -237,7 +237,7 @@ class Unscramble(ChatGame):
                     except Exception:
                         self.logger.error(f"Failed to delete unscramble image at {image_path}")
                     
-                    self.logger.info(msg = f"Unscramble game ended with {len(view.winners)}")
+                    self.logger.info(msg = f"Unscramble game ended with {len(view.winners)} winners")
 
             except discord.NotFound:
                 # Message was deleted, that's okay

@@ -165,7 +165,7 @@ class Trivia(ChatGame):
                     from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
 
-                    self.logger.info(msg = f"Trivia game ended with {len(view.winners)}")
+                    self.logger.info(msg = f"Trivia game ended with {len(view.winners)} winners")
             except discord.NotFound:
                 # Message was deleted, that's okay
                 pass
