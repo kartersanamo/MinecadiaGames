@@ -49,6 +49,13 @@ async def register_analytics(client) -> None:
 
 async def shutdown(client) -> None:
     try:
+        from assets.http.dashboard_http import stop_dashboard_http
+
+        await stop_dashboard_http()
+    except Exception as e:
+        log_tasks.error(f"Error stopping dashboard HTTP: {e}")
+
+    try:
         log_tasks.info("Bot shutting down - closing database pool")
         db = await DatabasePool.get_instance()
         if db is not None:

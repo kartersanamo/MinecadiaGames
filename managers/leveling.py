@@ -285,10 +285,13 @@ class _LevelingManagerCore:
         await post_audit_log(
             event_type="games.xp_awarded",
             title="Experience Added",
-            summary=f"`Source` {source}\n`User` {user.mention} ({user.name})\n`XP` {xp}",
-            actor_id=user.id,
+            target_id=user.id,
             guild_id=guild_id,
             source_bot="Games",
+            fields={
+                "Target": f"{user.mention} (`{user.id}`)",
+                "Details": f"Source: {source}\nXP: {xp}",
+            },
             metadata={"xp": xp, "source": source},
             route_admin=True,
             immediate=True,

@@ -182,6 +182,8 @@ class EmojiQuiz(ChatGame):
                     # Unregister game from registry
                     from services.chat_game_registry import registry
                     registry.unregister_game(message.id)
+
+                    self.logger.info(msg = f"Emoji Quiz game ended with {len(view.winners)}")
             except discord.NotFound:
                 # Message was deleted, that's okay
                 pass

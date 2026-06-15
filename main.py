@@ -129,9 +129,11 @@ class Client(commands.Bot):
 
         try:
             await sync_guild_commands(
-                self,
-                config_guild_id=self.config.get("config", "GUILD_ID"),
-                log=log_tasks,
+                bot = self,
+                config_guild_id = self.config.get("config", "GUILD_ID"),
+                log = log_tasks,
+                also_sync_global = False,
+                clear_global_after_guild = True
             )
         except Exception as e:
             log_tasks.error(f"Failed to sync commands: {e}")
@@ -170,7 +172,22 @@ class Client(commands.Bot):
 
         log_tasks.info(f"Logged in as {client.user} ({client.user.id})")
 
+    async def on_connect(self):
+        from core.liveness import mark_connected
+
+        mark_connected()
+        log_tasks.info("Discord gateway connected")
+
+    async def on_disconnect(self):
+        from core.liveness import mark_disconnected
+
+        mark_disconnected()
+        log_tasks.warning("Discord gateway disconnected — awaiting reconnect")
+
     async def on_resume(self):
+        from core.liveness import mark_connected
+
+        mark_connected()
         log_tasks.info("Bot connection resumed - checking game tasks")
         if self.game_manager:
             await game_tasks.ensure_game_tasks_running(self)

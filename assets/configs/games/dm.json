@@ -68,14 +68,14 @@
             "vaulted": false,
             "refresh_cooldown": 43200,
             "button_cooldown": 0.5,
-            "image_url": "https://i.imgur.com/example.png"
+            "image_url": ""
         },
         "Minesweeper": {
             "enabled": true,
             "vaulted": false,
             "refresh_cooldown": 43200,
             "button_cooldown": 0.5,
-            "image_url": "https://i.imgur.com/example.png",
+            "image_url": "",
             "NUM_MINES": 6
         },
         "Hangman": {
@@ -84,7 +84,7 @@
             "refresh_cooldown": 43200,
             "max_wrong_guesses": 8,
             "words_file": "assets/configs/data/words.txt",
-            "image_url": "https://i.imgur.com/example.png"
+            "image_url": ""
         },
         "Filler": {
             "enabled": true,
@@ -94,7 +94,7 @@
             "turn_delay_ms": 1200,
             "bot_delay_ms": 800,
             "grid_size": 8,
-            "image_url": "https://i.imgur.com/example.png",
+            "image_url": "",
             "colors": [
                 "🟥",
                 "🟦",
@@ -115,7 +115,7 @@
             "button_cooldown": 1.0,
             "reveal_delay_ms": 1500,
             "lives": 3,
-            "image_url": "https://i.imgur.com/example.png",
+            "image_url": "",
             "xp": {
                 "win_min": 40,
                 "win_max": 60

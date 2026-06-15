@@ -214,6 +214,8 @@ class FlagGuesser(ChatGame):
                             os.remove(cleanup_path)
                     except Exception as e:
                         self.logger.error(f"Error removing flag guesser image file: {e}")
+                    
+                    self.logger.info(msg = f"Flag Guesser game ended with {len(view.winners)}")
             except discord.NotFound:
                 # Message was deleted, that's okay
                 pass

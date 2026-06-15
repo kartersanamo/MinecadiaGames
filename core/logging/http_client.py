@@ -34,6 +34,7 @@ async def post_audit_log(
     severity: str = "info",
     source_bot: str = "External",
     metadata: dict[str, Any] | None = None,
+    fields: dict[str, str] | None = None,
     route_admin: bool = False,
     immediate: bool = False,
 ) -> str | None:
@@ -55,6 +56,7 @@ async def post_audit_log(
         "severity": severity,
         "source_bot": source_bot,
         "metadata": metadata or {},
+        "fields": fields or {},
         "route_admin": route_admin,
         "immediate": immediate,
     }

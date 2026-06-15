@@ -42,6 +42,9 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
         )
         return
 
+    if _server is not None:
+        await stop_dashboard_http()
+
     async def status(_request: web.Request) -> web.Response:
         gm = bot.game_manager
         return web.json_response(
@@ -261,7 +264,17 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
         return inner
 
     async def health(_request: web.Request) -> web.Response:
-        return web.json_response({"ok": True})
+        from core.liveness import stale_seconds
+
+        payload = {
+            "ok": True,
+            "ready": bot.is_ready(),
+            "closed": bot.is_closed(),
+            "eventLoopStaleSeconds": round(stale_seconds(), 1),
+        }
+        if bot.is_ready():
+            payload["latencyMs"] = round(bot.latency * 1000, 1)
+        return web.json_response(payload)
 
     app.router.add_get("/status", wrap(status))
     app.router.add_get("/health", health)
@@ -297,7 +310,18 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "127.0.0.1", _api_port())
-    await site.start()
+    try:
+        await site.start()
+    except OSError as exc:
+        await runner.cleanup()
+        if exc.errno == 98:
+            log.error(
+                "Dashboard HTTP port %s already in use — stop the other Games "
+                "bot instance or set GAMES_BOT_API_PORT",
+                _api_port(),
+            )
+            return
+        raise
     _server = runner
     log.info("Dashboard HTTP listening on 127.0.0.1:%s", _api_port())
 

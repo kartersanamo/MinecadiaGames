@@ -414,13 +414,13 @@ class WordleListener(commands.Cog):
         await self.wordle_game.update_letter_states(message.author.id, guess, colors)
         
         # Generate image
-        self.logger.info(f"WordleListener: Generating image for user {message.author.id}, game {game_id}")
+        # self.logger.info(f"WordleListener: Generating image for user {message.author.id}, game {game_id}")
         image_path = await self.wordle_game.generate_wordle_image(message.author.id, game_id)
         image_file = discord.File(image_path, filename="wordle.png")
         
         found_wordle_message = None
         message_count = 0
-        self.logger.info(f"WordleListener: Looking for Wordle message in history (limit=50)")
+        # self.logger.info(f"WordleListener: Looking for Wordle message in history (limit=50)")
         async for channel_message in message.channel.history(limit=50):
             message_count += 1
             if channel_message.embeds and channel_message.author.bot:
@@ -428,7 +428,7 @@ class WordleListener(commands.Cog):
                     title = channel_message.embeds[0].title
                     if "Wordle" in title and f"#{game_id}" in title:
                         found_wordle_message = channel_message
-                        self.logger.info(f"WordleListener: Found Wordle message with game_id {game_id}")
+                        # self.logger.info(f"WordleListener: Found Wordle message with game_id {game_id}")
                         break
                 except (IndexError, AttributeError):
                     pass
