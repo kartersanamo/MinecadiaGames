@@ -49,7 +49,7 @@ class ViewMore(discord.ui.View):
             )
             return
 
-        await interaction.followup.send(embed=result.embed, ephemeral=result.ephemeral)
+        await interaction.followup.send(embed=result.embed, ephemeral=True)
 
     @discord.ui.button(label="Help", emoji="❓", custom_id="leveling_help", style=discord.ButtonStyle.green, row=0)
     async def help_button(self, interaction: discord.Interaction, button: discord.ui.Button):
