@@ -18,6 +18,31 @@ class SendGames(commands.Cog):
         self.config = ConfigManager.get_instance()
         self.logger = get_logger("Tasks")
     
+    async def refresh_leveling_intro_view(self) -> None:
+        """Re-attach ViewMore so new buttons appear on the existing #Leveling intro message."""
+        try:
+            guild = self.bot.get_guild(self.config.get("config", "GUILD_ID"))
+            if not guild:
+                return
+
+            channel = guild.get_channel(self.config.get("config", "LEVELING_CHANNEL"))
+            if not channel:
+                return
+
+            from ui.sendgames_view import ViewMore
+
+            async for message in channel.history(limit=15):
+                if message.author.id != self.bot.user.id or not message.embeds:
+                    continue
+                title = message.embeds[0].title or ""
+                if "Leveling System" not in title:
+                    continue
+                await message.edit(view=ViewMore())
+                self.logger.info("Updated #Leveling intro message with latest buttons")
+                return
+        except Exception as e:
+            self.logger.error(f"Failed to refresh #Leveling intro view: {e}")
+
     @commands.Cog.listener()
     async def on_ready(self):
         if not hasattr(self, '_initialized'):
@@ -151,7 +176,7 @@ class SendGames(commands.Cog):
                     '**💡 Quick Tips**\n'
                     '• Use </level:1179528065643196557> to check your level and XP\n'
                     '• Play chat games and DM games to earn bonus XP\n'
-                    '• Claim your daily reward with </daily:1457414301663887443> to maintain your streak\n'
+                    '• Click **Claim Daily** below (or use </daily:1457414301663887443>) to maintain your streak\n'
                     '• Check your statistics with </statistics:1457409204829687820> to track your progress\n'
                     '• Check your milestones with </milestones:1457409204829687821> to track your progress\n'
                     'Click the **❓ Help** button below for detailed information and FAQs!'

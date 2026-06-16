@@ -149,6 +149,13 @@ class Client(commands.Bot):
         except Exception as e:
             log_tasks.error(f"Failed to register persistent views: {e}")
 
+        sendgames = self.get_cog("SendGames")
+        if sendgames:
+            try:
+                await sendgames.refresh_leveling_intro_view()
+            except Exception as e:
+                log_tasks.error(f"Failed to refresh #Leveling intro view: {e}")
+
         try:
             await self.restore_active_chat_games()
             log_tasks.info("Restored active chat games")

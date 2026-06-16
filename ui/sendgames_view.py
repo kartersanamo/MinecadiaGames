@@ -12,13 +12,45 @@ class ViewMore(discord.ui.View):
         import json
         with open(winners_path) as f:
             self.winners_data = json.load(f)
-        
-        # Add Changelog button (row 0)
-        self.add_item(self.changelog_button())
+
         # Add Rewards button (row 0)
         self.add_item(self.rewards_button())
-        # Help, All Time Leaderboard, Past Winners, Past Games are added via decorators
-    
+        # Help, Claim Daily, All Time Leaderboard, Past Winners, Past Games are added via decorators
+
+    @discord.ui.button(
+        label="Claim Daily",
+        emoji="🎁",
+        custom_id="leveling_daily_claim",
+        style=discord.ButtonStyle.primary,
+        row=0,
+    )
+    async def claim_daily_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        from core.logging.setup import get_logger
+        from services.daily_service import claim_daily
+
+        logger = get_logger("Commands")
+
+        if interaction.guild is None:
+            await interaction.response.send_message(
+                content="This button cannot be used in DMs!",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            result = await claim_daily(interaction.client, interaction.user, interaction.channel)
+        except Exception as exc:
+            logger.error("Daily button claim failed: %s", exc, exc_info=True)
+            await interaction.followup.send(
+                "`❌` Something went wrong claiming your daily reward. Please try again.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.followup.send(embed=result.embed, ephemeral=result.ephemeral)
+
     @discord.ui.button(label="Help", emoji="❓", custom_id="leveling_help", style=discord.ButtonStyle.green, row=0)
     async def help_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         help_embed = discord.Embed(
@@ -46,15 +78,6 @@ class ViewMore(discord.ui.View):
         logo_url = interaction.client.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         help_embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
         await interaction.response.send_message(embed=help_embed, ephemeral=True)
-    
-    def changelog_button(self):
-        return discord.ui.Button(
-            style=discord.ButtonStyle.url,
-            url="https://discord.com/channels/680569558754656280/1191466240909246564",
-            label="Changelog",
-            emoji="📜",
-            row=0
-        )
     
     def rewards_button(self):
         button = discord.ui.Button(
