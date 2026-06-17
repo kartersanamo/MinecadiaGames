@@ -7,3 +7,7 @@ logs/
 # Ephemeral images produced during games (boards, flags, unscramble, etc.)
 assets/Images/generated/*
 !assets/Images/generated/.gitkeep
+
+# Auto-generated diagrams (regenerate: python3 ../scripts/generate_bot_diagrams.py MinecadiaGames)
+docs/diagrams/*
+!docs/diagrams/.gitkeep

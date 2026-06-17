@@ -1,9 +1,9 @@
 """Process and Discord connection liveness monitoring.
 
-The asyncio event loop can freeze while the process stays alive (no logs, no chat
-games, bot appears offline). In-process task monitors cannot recover from that
-because they share the same loop. A background thread watches a monotonic heartbeat
-updated by a lightweight asyncio task and force-exits so run.sh can restart the bot.
+A frozen asyncio event loop leaves the process alive with no logs and a bot that
+appears offline. In-process asyncio tasks cannot recover from that. A background
+thread periodically pings the event loop via call_soon_threadsafe; if the loop
+does not respond, the process is killed so run.sh can restart it.
 """
 from __future__ import annotations
 
@@ -14,14 +14,15 @@ import threading
 import time
 from typing import Optional
 
+import discord
 from discord.ext import commands
 
-HEARTBEAT_INTERVAL = 30
-STALE_THRESHOLD = 180
-WATCHDOG_CHECK_INTERVAL = 30
+LOOP_PING_INTERVAL = 45
+LOOP_PING_TIMEOUT = 20
 DISCONNECT_RESTART_THRESHOLD = 300
-GATEWAY_CHECK_INTERVAL = 120
-GATEWAY_FAILURE_THRESHOLD = 3
+GATEWAY_CHECK_INTERVAL = 90
+GATEWAY_FAILURE_THRESHOLD = 2
+GATEWAY_LATENCY_LIMIT = 120.0
 
 _last_heartbeat = time.monotonic()
 _heartbeat_lock = threading.Lock()
@@ -29,6 +30,7 @@ _watchdog_started = False
 _disconnected_at: Optional[float] = None
 _gateway_failures = 0
 _liveness_task: Optional[asyncio.Task] = None
+_loop: Optional[asyncio.AbstractEventLoop] = None
 
 
 def touch_heartbeat() -> None:
@@ -59,19 +61,47 @@ def _force_restart(log: logging.Logger, bot_name: str, reason: str) -> None:
     os._exit(1)
 
 
-def _watchdog_thread(log: logging.Logger, bot_name: str) -> None:
+def _ping_event_loop(loop: asyncio.AbstractEventLoop) -> bool:
+    """Return True if the event loop processed a callback within LOOP_PING_TIMEOUT."""
+    event = threading.Event()
+    ping_ok = False
+
+    def _ping() -> None:
+        nonlocal ping_ok
+        touch_heartbeat()
+        ping_ok = True
+        event.set()
+
+    try:
+        loop.call_soon_threadsafe(_ping)
+    except RuntimeError:
+        return False
+
+    return event.wait(timeout=LOOP_PING_TIMEOUT) and ping_ok
+
+
+def _watchdog_thread(loop: asyncio.AbstractEventLoop, log: logging.Logger, bot_name: str) -> None:
     while True:
-        time.sleep(WATCHDOG_CHECK_INTERVAL)
-        stale = stale_seconds()
-        if stale > STALE_THRESHOLD:
+        time.sleep(LOOP_PING_INTERVAL)
+
+        if loop.is_closed():
+            _force_restart(log, bot_name, "Event loop closed unexpectedly")
+            return
+
+        if not _ping_event_loop(loop):
             _force_restart(
                 log,
                 bot_name,
-                f"Event loop watchdog: no heartbeat for {stale:.0f}s",
+                f"Event loop unresponsive for {LOOP_PING_TIMEOUT}s",
             )
+            return
 
 
-def _start_thread_watchdog(log: logging.Logger, bot_name: str) -> None:
+def _start_thread_watchdog(
+    loop: asyncio.AbstractEventLoop,
+    log: logging.Logger,
+    bot_name: str,
+) -> None:
     global _watchdog_started
     if _watchdog_started:
         return
@@ -79,35 +109,60 @@ def _start_thread_watchdog(log: logging.Logger, bot_name: str) -> None:
     touch_heartbeat()
     thread = threading.Thread(
         target=_watchdog_thread,
-        args=(log, bot_name),
+        args=(loop, log, bot_name),
         name=f"{bot_name}-watchdog",
         daemon=True,
     )
     thread.start()
-    log.info("[%s] Event loop watchdog started (stale threshold=%ss)", bot_name, STALE_THRESHOLD)
+    log.info(
+        "[%s] Event loop watchdog started (ping every %ss, timeout %ss)",
+        bot_name,
+        LOOP_PING_INTERVAL,
+        LOOP_PING_TIMEOUT,
+    )
+
+
+def _websocket_healthy(bot: commands.Bot) -> None:
+    ws = getattr(bot, "ws", None)
+    if ws is None:
+        raise RuntimeError("No gateway websocket")
+    if getattr(ws, "closed", False):
+        raise RuntimeError("Gateway websocket is closed")
+
+    latency = bot.latency
+    if latency == float("inf") or latency > GATEWAY_LATENCY_LIMIT:
+        raise RuntimeError(f"Gateway latency unhealthy: {latency}")
+
+
+async def _probe_discord(bot: commands.Bot) -> None:
+    if not bot.user:
+        raise RuntimeError("Bot user not available")
+
+    _websocket_healthy(bot)
+
+    # Cached guild lookups do not prove connectivity — always round-trip REST.
+    await asyncio.wait_for(bot.fetch_user(bot.user.id), timeout=15.0)
+
+    # Presence updates go through the gateway; catches zombie REST-only states.
+    activity = None
+    if bot.activity:
+        activity = bot.activity
+    await asyncio.wait_for(bot.change_presence(activity=activity), timeout=15.0)
 
 
 async def _verify_gateway(bot: commands.Bot, log: logging.Logger, bot_name: str) -> None:
     global _gateway_failures
 
-    guild_id = None
-    try:
-        guild_id = bot.config.get("config", "GUILD_ID")  # type: ignore[attr-defined]
-    except Exception:
-        pass
-
-    if not guild_id:
+    if not bot.is_ready():
         return
 
     try:
-        guild = bot.get_guild(int(guild_id))
-        if guild is None:
-            await asyncio.wait_for(bot.fetch_guild(int(guild_id)), timeout=15.0)
+        await _probe_discord(bot)
         _gateway_failures = 0
     except Exception as exc:
         _gateway_failures += 1
         log.warning(
-            "[%s] Gateway health check failed (%s/%s): %s",
+            "[%s] Discord health check failed (%s/%s): %s",
             bot_name,
             _gateway_failures,
             GATEWAY_FAILURE_THRESHOLD,
@@ -117,7 +172,7 @@ async def _verify_gateway(bot: commands.Bot, log: logging.Logger, bot_name: str)
             _force_restart(
                 log,
                 bot_name,
-                f"Gateway health check failed {_gateway_failures} times",
+                f"Discord health check failed {_gateway_failures} times",
             )
 
 
@@ -131,14 +186,6 @@ async def _liveness_loop(bot: commands.Bot, log: logging.Logger, bot_name: str) 
         if bot.is_ready():
             _disconnected_at = None
 
-            ws = getattr(bot, "ws", None)
-            if ws is not None and getattr(ws, "closed", False):
-                _force_restart(
-                    log,
-                    bot_name,
-                    "WebSocket closed while bot reports ready",
-                )
-
             now = time.monotonic()
             if now - last_gateway_check >= GATEWAY_CHECK_INTERVAL:
                 last_gateway_check = now
@@ -146,14 +193,15 @@ async def _liveness_loop(bot: commands.Bot, log: logging.Logger, bot_name: str) 
         else:
             if _disconnected_at is None:
                 _disconnected_at = time.time()
+                log.warning("[%s] Bot not ready — monitoring for reconnect", bot_name)
             elif time.time() - _disconnected_at > DISCONNECT_RESTART_THRESHOLD:
                 _force_restart(
                     log,
                     bot_name,
-                    f"Disconnected for {time.time() - _disconnected_at:.0f}s without reconnect",
+                    f"Not ready for {time.time() - _disconnected_at:.0f}s without reconnect",
                 )
 
-        await asyncio.sleep(HEARTBEAT_INTERVAL)
+        await asyncio.sleep(30)
 
 
 async def start_liveness_monitor(
@@ -162,10 +210,11 @@ async def start_liveness_monitor(
     log: logging.Logger,
     bot_name: str,
 ) -> None:
-    """Start thread watchdog and asyncio liveness checks."""
-    global _liveness_task
+    """Start thread watchdog and asyncio Discord health checks."""
+    global _liveness_task, _loop
 
-    _start_thread_watchdog(log, bot_name)
+    _loop = asyncio.get_running_loop()
+    _start_thread_watchdog(_loop, log, bot_name)
 
     if _liveness_task is not None and not _liveness_task.done():
         return

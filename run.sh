@@ -21,8 +21,10 @@ fi
 RESTART_DELAY="${MINECADIA_BOT_RESTART_DELAY:-5}"
 
 while true; do
+    set +e
     "$PYTHON" main.py
     code=$?
+    set -e
 
     if [ "$code" -eq 0 ]; then
         echo "$BOT_NAME exited cleanly." >&2
