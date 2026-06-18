@@ -63,10 +63,17 @@ class ChatGameAdminView(discord.ui.View):
             answer = original_state.get('word')
         elif self.game_type == "emoji_quiz":
             answer = original_state.get('correct_answer')
+        elif self.game_type == "fill_in_the_blank":
+            answer = original_state.get('correct_answer')
         elif self.game_type == "guess_the_number":
             answer = original_state.get('secret_number')
             if answer:
                 answer = f"The number is **{answer}**"
+
+        if not answer and game_data:
+            view = game_data.get('view')
+            if view and hasattr(view, 'correct_answer'):
+                answer = view.correct_answer
         
         # If answer not in original_state and game has ended, try to extract from embed
         if not answer and self.game_ended:
@@ -216,6 +223,8 @@ class ChatGameAdminView(discord.ui.View):
             from games.chat.unscramble import Unscramble
             from games.chat.emoji_quiz import EmojiQuiz
             from games.chat.guess_the_number import GuessTheNumber
+            from games.chat.fill_in_the_blank import FillInTheBlank
+            from services.quote_api_service import fetch_quote_puzzle
             
             game_map = {
                 "trivia": Trivia,
@@ -223,7 +232,8 @@ class ChatGameAdminView(discord.ui.View):
                 "flag_guesser": FlagGuesser,
                 "unscramble": Unscramble,
                 "emoji_quiz": EmojiQuiz,
-                "guess_the_number": GuessTheNumber
+                "guess_the_number": GuessTheNumber,
+                "fill_in_the_blank": FillInTheBlank,
             }
             
             game_class = game_map.get(self.game_type)
@@ -474,6 +484,72 @@ class ChatGameAdminView(discord.ui.View):
                     await interaction.followup.send("`✅` Game rerolled with new emoji question!", ephemeral=True)
                 else:
                     await interaction.followup.send("`❌` Could not get new emoji question.", ephemeral=True)
+
+            elif self.game_type == "fill_in_the_blank":
+                puzzle = await fetch_quote_puzzle()
+                if not puzzle:
+                    await interaction.followup.send(
+                        "`❌` Could not fetch a new quote. Check `API_NINJAS_KEY`.", ephemeral=True
+                    )
+                    return
+
+                embed = self.message.embeds[0]
+                for i, field in enumerate(embed.fields):
+                    if field.name == "Quote":
+                        embed.set_field_at(i, name="Quote", value=puzzle["quote_display"], inline=False)
+                    elif field.name == "Author":
+                        author_text = puzzle.get("author", "Unknown")
+                        if puzzle.get("work"):
+                            author_text = f"{author_text} — *{puzzle['work']}*"
+                        embed.set_field_at(i, name="Author", value=author_text, inline=False)
+
+                winners_idx = None
+                for i, field in enumerate(embed.fields):
+                    if field.name == "Winners":
+                        winners_idx = i
+                        break
+                if winners_idx is not None:
+                    embed.remove_field(winners_idx)
+
+                view = game_data.get('view')
+                if view:
+                    view.correct_answer = puzzle["correct_answer"]
+                    view.correct_clean = puzzle["correct_answer"].strip("'\"").lower()
+                    view.all_answers = puzzle["answers"][:4]
+                    view.winners = []
+                    view.winner_count = 0
+                    if hasattr(view, 'failed_users'):
+                        view.failed_users = set()
+
+                    answers = puzzle["answers"][:4]
+                    items = []
+                    for index, button in enumerate(view.children):
+                        if index < len(answers):
+                            button.label = answers[index][:80]
+                            button.disabled = False
+                            button.style = discord.ButtonStyle.grey
+                            items.append(button)
+
+                    view.clear_items()
+                    import random
+                    random.shuffle(items)
+                    for item in items:
+                        view.add_item(item)
+
+                    view.answer_map = {}
+                    for i in range(4):
+                        answer = answers[i] if i < len(answers) else f"Answer {i+1}"
+                        view.answer_map[f"fill_blank_{i}_{game_data['game_id']}"] = answer
+
+                original_state = game_data.get('original_state', {})
+                original_state['correct_answer'] = puzzle['correct_answer']
+                original_state['quote_display'] = puzzle['quote_display']
+                original_state['quote_original'] = puzzle.get('quote_original', '')
+                original_state['author'] = puzzle.get('author', '')
+                original_state['answers'] = puzzle['answers']
+
+                await self.message.edit(embed=embed, view=view)
+                await interaction.followup.send("`✅` Game rerolled with a new quote!", ephemeral=True)
             
             registry.log_activity(self.message.id, interaction.user.id, 'reroll', f'Game rerolled', True)
         

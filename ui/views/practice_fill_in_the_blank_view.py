@@ -1,0 +1,188 @@
+import discord
+from typing import Optional, Dict, List
+
+
+class PracticeFillInTheBlankView(discord.ui.View):
+    def __init__(
+        self,
+        puzzle: dict,
+        game_id: int,
+        bot,
+        config,
+        chat_config,
+        user_id: int,
+        session_data: Dict,
+        practice_cog,
+    ):
+        super().__init__(timeout=None)
+        self.correct_answer = puzzle["correct_answer"]
+        self.correct_clean = self._normalize(self.correct_answer)
+        self.all_answers = puzzle["answers"][:4]
+        self.quote_display = puzzle["quote_display"]
+        self.game_id = game_id
+        self.bot = bot
+        self.config = config
+        self.chat_config = chat_config
+        self.test_mode = True
+        self.user_id = user_id
+        self.session_data = session_data
+        self.practice_cog = practice_cog
+        self.message: Optional[discord.Message] = None
+        self.answered = False
+
+        for i in range(4):
+            answer = self.all_answers[i] if i < len(self.all_answers) else f"Answer {i+1}"
+            button = discord.ui.Button(
+                label=answer[:80],
+                style=discord.ButtonStyle.grey,
+                custom_id=f"practice_fill_blank_{i}_{game_id}",
+            )
+            button.callback = self.create_callback(answer)
+            self.add_item(button)
+
+        next_button = discord.ui.Button(
+            label="Next Quote",
+            style=discord.ButtonStyle.blurple,
+            emoji="➡️",
+            custom_id=f"practice_fill_next_{game_id}",
+            row=2,
+        )
+        next_button.callback = self.next_callback
+        self.add_item(next_button)
+
+        end_button = discord.ui.Button(
+            label="End Practice",
+            style=discord.ButtonStyle.red,
+            emoji="🛑",
+            custom_id=f"practice_fill_end_{game_id}",
+            row=2,
+        )
+        end_button.callback = self.end_callback
+        self.add_item(end_button)
+
+    @staticmethod
+    def _normalize(word: str) -> str:
+        return word.strip("'\"").lower()
+
+    def _matches(self, answer: str) -> bool:
+        return self._normalize(answer) == self.correct_clean
+
+    def _is_answer_button(self, item: discord.ui.Item) -> bool:
+        return isinstance(item, discord.ui.Button) and item.custom_id.startswith(
+            "practice_fill_blank_"
+        )
+
+    def create_callback(self, answer: str):
+        async def callback(interaction: discord.Interaction):
+            if interaction.user.id != self.user_id:
+                await interaction.response.send_message(
+                    "This is not your practice session!", ephemeral=True
+                )
+                return
+
+            if self.answered:
+                await interaction.response.send_message(
+                    "You've already answered this quote!", ephemeral=True
+                )
+                return
+
+            self.answered = True
+            self.session_data["games_played"] += 1
+
+            if self._matches(answer):
+                self.session_data["games_won"] += 1
+
+                import random
+
+                xp = random.randint(50, 60)
+                self.session_data["total_xp_would_have"] += xp
+
+                embed = self.message.embeds[0]
+                embed.add_field(
+                    name="Result",
+                    value=f"`✅` Correct! You would have earned `{xp}xp`!",
+                    inline=False,
+                )
+
+                for item in self.children:
+                    if self._is_answer_button(item):
+                        item.disabled = True
+                        if self._matches(item.label or ""):
+                            item.style = discord.ButtonStyle.green
+                        else:
+                            item.style = discord.ButtonStyle.grey
+
+                await self.message.edit(embed=embed, view=self)
+                await interaction.response.send_message(
+                    f"`✅` Correct! You would have earned `{xp}xp`!", ephemeral=True
+                )
+            else:
+                embed = self.message.embeds[0]
+                embed.add_field(
+                    name="Result",
+                    value=(
+                        f"`❌` Incorrect! The correct answer was: **{self.correct_answer}**"
+                    ),
+                    inline=False,
+                )
+
+                for item in self.children:
+                    if self._is_answer_button(item):
+                        item.disabled = True
+                        if self._matches(item.label or ""):
+                            item.style = discord.ButtonStyle.green
+                        elif self._normalize(item.label or "") == self._normalize(answer):
+                            item.style = discord.ButtonStyle.red
+                        else:
+                            item.style = discord.ButtonStyle.grey
+
+                await self.message.edit(embed=embed, view=self)
+                await interaction.response.send_message(
+                    f"`❌` Incorrect! The correct answer was: **{self.correct_answer}**",
+                    ephemeral=True,
+                )
+
+        return callback
+
+    async def next_callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "This is not your practice session!", ephemeral=True
+            )
+            return
+
+        if not self.answered:
+            await interaction.response.send_message(
+                "Please answer the current quote first!", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer()
+
+        try:
+            if self.message:
+                await self.message.delete()
+        except Exception:
+            pass
+
+        await self.practice_cog._send_chat_practice_game(
+            interaction.user,
+            self.session_data["game_type"],
+            self.session_data,
+        )
+
+    async def end_callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "This is not your practice session!", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer()
+
+        for item in self.children:
+            if isinstance(item, discord.ui.Button):
+                item.disabled = True
+
+        await self.message.edit(view=self)
+        await self.practice_cog.end_practice_session(self.user_id)

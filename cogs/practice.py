@@ -12,6 +12,7 @@ from ui.views.practice_math_quiz_view import PracticeMathQuizView
 from ui.views.practice_flag_guesser_view import PracticeFlagGuesserView
 from ui.views.practice_unscramble_view import PracticeUnscrambleView
 from ui.views.practice_emoji_quiz_view import PracticeEmojiQuizView
+from ui.views.practice_fill_in_the_blank_view import PracticeFillInTheBlankView
 
 class Practice(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -376,7 +377,7 @@ class Practice(commands.Cog):
             elif game_type == "guess_the_number":
                 await self._run_guess_the_number_practice(dm_channel, session_data)
             elif game_type == "fill_in_the_blank":
-                await game.run(dm_channel, test_mode=True)
+                await self._run_fill_in_the_blank_practice(dm_channel, session_data)
         except discord.Forbidden as e:
             if e.code == 50007:
                 user = dm_channel.recipient if hasattr(dm_channel, 'recipient') else None
@@ -393,6 +394,80 @@ class Practice(commands.Cog):
         except Exception as e:
             self.logger.error(f"Error running chat game practice: {e}", exc_info=True)
     
+    async def _run_fill_in_the_blank_practice(self, dm_channel: discord.DMChannel, session_data: Dict):
+        """Run a Fill in the Blank practice round in DMs."""
+        from services.quote_api_service import fetch_quote_puzzle
+        import random
+
+        user = dm_channel.recipient
+        puzzle = await fetch_quote_puzzle()
+        if not puzzle:
+            await self._safe_dm_send(
+                dm_channel,
+                "`❌` Could not load a quote. Check that `API_NINJAS_KEY` is set in `.env`.",
+            )
+            return
+
+        game_id = -999999
+        chat_config = self.config.get("chat_games")
+
+        view = PracticeFillInTheBlankView(
+            puzzle,
+            game_id,
+            self.bot,
+            self.config,
+            chat_config,
+            user.id,
+            session_data,
+            self,
+        )
+
+        embed = discord.Embed(
+            title="🧪 Practice Fill in the Blank",
+            description="Choose the word that fills in the blank!",
+            color=discord.Color.from_str(self.config.get("config", "EMBED_COLOR")),
+            timestamp=datetime.now(timezone.utc),
+        )
+        embed.add_field(name="Quote", value=puzzle["quote_display"], inline=False)
+
+        author_text = puzzle.get("author", "Unknown")
+        if puzzle.get("work"):
+            author_text = f"{author_text} — *{puzzle['work']}*"
+        embed.add_field(name="Author", value=author_text, inline=False)
+
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get("config", "LOGO"))
+        embed.set_footer(text=self.config.get("config", "FOOTER"), icon_url=logo_url)
+
+        answers = puzzle["answers"][:4]
+        items = []
+        for index, button in enumerate(view.children[:-2]):
+            if index < len(answers):
+                button.label = answers[index][:80]
+                items.append(button)
+
+        for item in items:
+            view.remove_item(item)
+
+        random.shuffle(items)
+        for item in items:
+            view.add_item(item)
+
+        try:
+            message = await dm_channel.send(embed=embed, view=view)
+            view.message = message
+            session_data["current_message"] = message
+            self.bot.add_view(view)
+        except discord.Forbidden as e:
+            if e.code == 50007:
+                user = dm_channel.recipient
+                await self._handle_dm_error(e, user)
+                if user.id in self.active_practice_sessions:
+                    try:
+                        del self.active_practice_sessions[user.id]
+                    except Exception:
+                        pass
+            raise
+
     async def _run_trivia_practice(self, dm_channel: discord.DMChannel, session_data: Dict):
         """Run a trivia practice game in DMs"""
         from games.chat.trivia import Trivia
