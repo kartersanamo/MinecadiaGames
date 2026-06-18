@@ -24,10 +24,10 @@ class SendGamesView(discord.ui.View):
         
         import asyncio
         db = await asyncio.wait_for(DatabasePool.get_instance(), timeout=5.0)
-        # Cast to ensure proper numeric sorting
+        # Numeric columns sort correctly without CAST once idx_leveling_rank exists
         rows = await asyncio.wait_for(
             db.execute(
-                "SELECT user_id, level, xp FROM leveling ORDER BY CAST(level AS UNSIGNED) DESC, CAST(xp AS UNSIGNED) DESC LIMIT 10"
+                "SELECT user_id, level, xp FROM leveling ORDER BY level DESC, xp DESC LIMIT 10"
             ),
             timeout=5.0
         )
@@ -80,9 +80,8 @@ class SendGamesView(discord.ui.View):
         milestones_manager = MilestonesManager()
         
         db = await DatabasePool.get_instance()
-        # Cast to ensure proper numeric sorting, limit to top 200 for performance
         rows = await db.execute(
-            "SELECT user_id, level, xp FROM leveling ORDER BY CAST(level AS UNSIGNED) DESC, CAST(xp AS UNSIGNED) DESC LIMIT 200"
+            "SELECT user_id, level, xp FROM leveling ORDER BY level DESC, xp DESC LIMIT 200"
         )
         
         if not rows:

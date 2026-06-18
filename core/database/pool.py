@@ -32,10 +32,21 @@ class DatabasePool:
     _lock: Optional[asyncio.Lock] = None
     _initializing: Optional[asyncio.Event] = None
     _init_task: Optional[asyncio.Task] = None
+
+    @staticmethod
+    def _env_pool_size(name: str, default: int) -> int:
+        raw = os.getenv(name)
+        if not raw:
+            return default
+        try:
+            value = int(raw)
+            return value if value > 0 else default
+        except ValueError:
+            return default
     
-    def __init__(self, min_size: int = 2, max_size: int = 10):
-        self.min_size = min_size
-        self.max_size = max_size
+    def __init__(self, min_size: int = None, max_size: int = None):
+        self.min_size = min_size if min_size is not None else self._env_pool_size("DB_POOL_MIN", 2)
+        self.max_size = max_size if max_size is not None else self._env_pool_size("DB_POOL_MAX", 10)
         self.pool: Optional[aiomysql.Pool] = None
         self.config = ConfigManager.get_instance()
         self._initialized = False
@@ -76,7 +87,11 @@ class DatabasePool:
                         ),
                         timeout=10.0
                     )
-                    logger.info("Database pool created successfully")
+                    logger.info(
+                        "Database pool created successfully (minsize=%s, maxsize=%s)",
+                        self.min_size,
+                        self.max_size,
+                    )
                     self._initialized = True
                     self._last_init_attempt = None  # Reset on success
                 except asyncio.TimeoutError:
@@ -147,6 +162,12 @@ class DatabasePool:
                 await cm.__aexit__(None, None, None)
             except Exception:
                 pass
+            import logging
+            logging.getLogger("DatabasePool").warning(
+                "Database pool exhausted or slow (timeout=%ss, maxsize=%s)",
+                timeout,
+                self.max_size,
+            )
             raise RuntimeError(f"Failed to acquire database connection from pool within {timeout} seconds - pool may be exhausted")
         except Exception as e:
             # Clean up on any error

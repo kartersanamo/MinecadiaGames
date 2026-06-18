@@ -49,7 +49,7 @@ class Level(commands.Cog):
         db = await asyncio.wait_for(DatabasePool.get_instance(), timeout=5.0)
         rows = await asyncio.wait_for(
             db.execute(
-                "SELECT * FROM leveling WHERE user_id = %s",
+                "SELECT user_id, xp, level, is_active, ever_played, updated_at FROM leveling WHERE user_id = %s",
                 (str(target_user.id),)
             ),
             timeout=5.0

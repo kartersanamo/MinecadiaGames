@@ -49,7 +49,7 @@ async def claim_daily(
     current_time = int(datetime.now(timezone.utc).timestamp())
 
     daily_data = await db.execute(
-        "SELECT * FROM daily_claims WHERE user_id = %s",
+        "SELECT user_id, last_claimed, streak FROM daily_claims WHERE user_id = %s",
         (user_id,),
     )
 

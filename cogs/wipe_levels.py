@@ -58,7 +58,7 @@ class WipeLevels(commands.Cog):
         
         db = await DatabasePool.get_instance()
         top_10_rows = await db.execute(
-            "SELECT * FROM leveling ORDER BY CAST(xp AS UNSIGNED) DESC LIMIT 10"
+            "SELECT user_id, xp, level, is_active, ever_played, updated_at FROM leveling ORDER BY xp DESC LIMIT 10"
         )
         
         top_users = {str(row["user_id"]): int(row["level"]) for row in top_10_rows}
@@ -146,7 +146,9 @@ class WipeLevels(commands.Cog):
             return await interaction.edit_original_response(content=f"❌ Failed to create a new ticket! {e}")
         
         try:
-            rows = await db.execute("SELECT * FROM leveling")
+            rows = await db.execute(
+                "SELECT user_id, xp, level, is_active, ever_played, updated_at FROM leveling"
+            )
             data_frame = pd.DataFrame(rows)
             temp_file = "leveling.csv"
             data_frame.to_csv(temp_file, index=False)
