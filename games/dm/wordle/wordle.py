@@ -115,7 +115,7 @@ class Wordle(DMGame):
             except Exception:
                 pass
             
-            self.logger.info(f"Wordle '{word}' ({user.name}#{user.discriminator})")
+            self.log_game_answer("Wordle", user, last_game_id, word, test_mode=test_mode)
             return True
         except Exception as e:
             self.logger.error(f"Wordle error: {e}")

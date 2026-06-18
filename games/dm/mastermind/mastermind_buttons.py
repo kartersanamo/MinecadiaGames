@@ -154,11 +154,14 @@ class MastermindButtons(discord.ui.View):
     def build_embed(self, title_suffix: str = "") -> discord.Embed:
         test_label = " 🧪 TEST GAME 🧪" if self.test_mode else ""
         reveal = self.state.game_ended
+        parts = self.state.render_embed_parts(self.colors, reveal_secret=reveal)
         embed = discord.Embed(
             title=f"Mastermind #{self.game_id}{test_label}{title_suffix}",
-            description=self.state.render_board(self.colors, reveal_secret=reveal),
+            description=parts["description"],
             color=discord.Color.from_str(self.config.get("config", "EMBED_COLOR")),
         )
+        embed.add_field(name="Guesses", value=parts["guesses"], inline=True)
+        embed.add_field(name="Feedback", value=parts["feedback"], inline=True)
         if not self.state.game_ended:
             embed.add_field(
                 name="How to play",

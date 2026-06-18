@@ -125,7 +125,7 @@ class Hangman(DMGame):
             if not test_mode:
                 await view._save_state()
             
-            self.logger.info(f"Hangman '{word}' ({user.name}#{user.discriminator})")
+            self.log_game_answer("Hangman", user, last_game_id, word, test_mode=test_mode)
             return True
         except Exception as e:
             self.logger.error(f"Hangman error: {e}")

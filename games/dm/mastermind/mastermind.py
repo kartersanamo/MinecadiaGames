@@ -47,6 +47,13 @@ class Mastermind(DMGame):
                     started_at=current_unix,
                 )
 
+            self.log_game_answer(
+                "Mastermind",
+                user,
+                last_game_id,
+                " ".join(view.colors[i] for i in view.state.secret),
+                test_mode=test_mode,
+            )
             self.logger.info(f"Mastermind ({user.name}#{user.discriminator})")
             return True
         except Exception as e:

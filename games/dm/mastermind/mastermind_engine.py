@@ -117,13 +117,67 @@ class MastermindState:
         return "?"
 
     def _format_guess_row(self, colors: List[str], row: List[int]) -> str:
-        pegs = [self._color_str(colors, idx) for idx in row]
-        while len(pegs) < self.code_length:
-            pegs.append("_")
-        return " ".join(pegs)
+        parts: List[str] = []
+        for i in range(self.code_length):
+            if i < len(row):
+                parts.append(self._color_str(colors, row[i]))
+            else:
+                # Backticks prevent Discord from treating _ as italic markup.
+                parts.append("`_`")
+        return " ".join(parts)
 
     def _format_feedback(self, black: int, white: int) -> str:
         return "⚫" * black + "⚪" * white
+
+    def render_embed_parts(
+        self, colors: List[str], *, reveal_secret: bool = False
+    ) -> dict:
+        """Build embed description + guess/feedback field text."""
+        description_lines: List[str] = []
+
+        if reveal_secret or self.game_ended:
+            secret_pegs = " ".join(self._color_str(colors, idx) for idx in self.secret)
+            description_lines.append(f"**Secret:** {secret_pegs}")
+
+        if self.game_ended:
+            if self.won:
+                description_lines.append(
+                    f"🎉 **You cracked the code in {self.guesses_used} "
+                    f"guess{'es' if self.guesses_used != 1 else ''}!**"
+                )
+            else:
+                description_lines.append("❌ **Out of guesses!** Better luck next time.")
+        else:
+            description_lines.append(
+                f"**Guesses left:** {self.guesses_remaining}/{self.max_guesses}"
+            )
+
+        guess_lines: List[str] = []
+        feedback_lines: List[str] = []
+
+        for i, (guess, (black, white)) in enumerate(
+            zip(self.guesses, self.feedback), start=1
+        ):
+            guess_lines.append(f"Guess `{i}` {self._format_guess_row(colors, guess)}")
+            feedback_lines.append(f"Guess `{i}` {self._format_feedback(black, white)}")
+
+        if not self.game_ended and self.guesses_remaining > 0:
+            guess_lines.append(
+                f"**Current:** {self._format_guess_row(colors, self.current_guess)}"
+            )
+            feedback_lines.append("**Current:** —")
+
+        return {
+            "description": "\n\n".join(description_lines) if description_lines else "\u200b",
+            "guesses": "\n".join(guess_lines) if guess_lines else "No guesses yet.",
+            "feedback": "\n".join(feedback_lines) if feedback_lines else "—",
+        }
+
+    def render_board(self, colors: List[str], *, reveal_secret: bool = False) -> str:
+        """Legacy single-block board text (used if embed fields are unavailable)."""
+        parts = self.render_embed_parts(colors, reveal_secret=reveal_secret)
+        lines = [parts["description"], "", "**Guesses**", parts["guesses"], "", "**Feedback**", parts["feedback"]]
+        return "\n".join(lines)
 
     def place_peg(self, color_idx: int) -> bool:
         """Place a peg. Returns True if a full row was just completed."""
@@ -158,39 +212,3 @@ class MastermindState:
             return False
         self.current_guess.pop()
         return True
-
-    def render_board(self, colors: List[str], *, reveal_secret: bool = False) -> str:
-        lines: List[str] = []
-
-        if reveal_secret or self.game_ended:
-            secret_pegs = " ".join(self._color_str(colors, idx) for idx in self.secret)
-            lines.append(f"**Secret:** {secret_pegs}")
-            lines.append("")
-
-        if self.guesses:
-            lines.append("**Guesses**")
-            for i, (guess, (black, white)) in enumerate(
-                zip(self.guesses, self.feedback), start=1
-            ):
-                row_text = self._format_guess_row(colors, guess)
-                feedback_text = self._format_feedback(black, white)
-                lines.append(f"`{i}` {row_text}   {feedback_text}")
-
-        if not self.game_ended and self.guesses_remaining > 0:
-            current = self._format_guess_row(colors, self.current_guess)
-            lines.append(f"**Current:** {current}")
-
-        if self.game_ended:
-            if self.won:
-                lines.append(
-                    f"\n🎉 **You cracked the code in {self.guesses_used} "
-                    f"guess{'es' if self.guesses_used != 1 else ''}!**"
-                )
-            else:
-                lines.append("\n❌ **Out of guesses!** Better luck next time.")
-        else:
-            lines.append(
-                f"\n**Guesses left:** {self.guesses_remaining}/{self.max_guesses}"
-            )
-
-        return "\n".join(lines)

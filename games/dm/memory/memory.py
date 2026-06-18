@@ -61,6 +61,13 @@ class Memory(DMGame):
                     started_at=current_unix,
                 )
             
+            self.log_game_answer(
+                "Memory",
+                user,
+                last_game_id,
+                " ".join(f"{i}:{view.card_values[i]}" for i in range(len(view.card_values))),
+                test_mode=test_mode,
+            )
             self.logger.info(f"Memory ({user.name}#{user.discriminator}){' [TEST MODE]' if test_mode else ''}")
             return True
         except Exception as e:

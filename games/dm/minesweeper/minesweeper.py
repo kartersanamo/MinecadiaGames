@@ -97,6 +97,13 @@ class Minesweeper(DMGame):
                 )
                 await state._save_state()
             
+            self.log_game_answer(
+                "Minesweeper",
+                user,
+                last_game_id,
+                ", ".join(f"({r + 1},{c + 1})" for r, c in sorted(mine_positions)),
+                test_mode=test_mode,
+            )
             self.logger.info(f"Minesweeper ({user.name}#{user.discriminator})")
             return True
         except Exception as e:

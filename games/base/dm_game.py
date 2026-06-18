@@ -60,6 +60,22 @@ class DMGame(BaseGame):
     def last_error(self) -> Optional[str]:
         """Get the last error message from can_play() if run() returned False"""
         return self._last_error
+
+    def log_game_answer(
+        self,
+        game_name: str,
+        user: discord.User,
+        game_id: int,
+        answer: str,
+        *,
+        test_mode: bool = False,
+    ) -> None:
+        """Log the hidden solution for a DM game to the console."""
+        test_label = " [TEST MODE]" if test_mode else ""
+        self.logger.info(
+            f"{game_name} #{game_id} answer for "
+            f"{user.name}#{user.discriminator} ({user.id}){test_label}: {answer}"
+        )
     
     async def _run_game(self, user: discord.User, game_name: str, test_mode: bool = False) -> bool:
         raise NotImplementedError("Subclasses must implement _run_game")
