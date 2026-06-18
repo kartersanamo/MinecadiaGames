@@ -345,7 +345,7 @@ class AllTimeLeaderboardView(discord.ui.View):
         }
         
         # Chat games use xp_logs (every entry is a win)
-        chat_games = ["Trivia", "Math Quiz", "Flag Guesser", "Unscramble", "Emoji Quiz"]
+        chat_games = ["Trivia", "Math Quiz", "Flag Guesser", "Unscramble", "Emoji Quiz", "Fill in the Blank"]
         
         # Normalize game name
         if game_name == "Tictactoe":

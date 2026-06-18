@@ -19,7 +19,7 @@ def _extract_correct_answer(game_type: str | None, original_state: dict) -> str 
     if not original_state:
         return None
     game_type = (game_type or "").lower()
-    if game_type in ("trivia", "math_quiz", "flag_guesser", "emoji_quiz"):
+    if game_type in ("trivia", "math_quiz", "flag_guesser", "emoji_quiz", "fill_in_the_blank"):
         return original_state.get("correct_answer")
     if game_type == "unscramble":
         return original_state.get("word")

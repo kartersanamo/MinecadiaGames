@@ -55,6 +55,8 @@ async def manage_chat_game(interaction: discord.Interaction, message: discord.Me
         game_type = "emoji_quiz"
     elif "Guess The Number" in title:
         game_type = "guess_the_number"
+    elif "Fill in the Blank" in title:
+        game_type = "fill_in_the_blank"
 
     if not game_type:
         await interaction.response.send_message(
@@ -98,6 +100,7 @@ async def manage_chat_game(interaction: discord.Interaction, message: discord.Me
         "unscramble": "Unscramble",
         "emoji_quiz": "Emoji Quiz",
         "guess_the_number": "Guess The Number",
+        "fill_in_the_blank": "Fill in the Blank",
     }
     game_name = game_name_map.get(game_type, game_type.title())
 

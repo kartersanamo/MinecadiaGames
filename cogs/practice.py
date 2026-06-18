@@ -32,6 +32,7 @@ class Practice(commands.Cog):
         app_commands.Choice(name="Unscramble", value="unscramble"),
         app_commands.Choice(name="Emoji Quiz", value="emoji_quiz"),
         app_commands.Choice(name="Guess The Number", value="guess_the_number"),
+        app_commands.Choice(name="Fill in the Blank", value="fill_in_the_blank"),
         app_commands.Choice(name="Wordle", value="wordle"),
         app_commands.Choice(name="TicTacToe", value="tictactoe"),
         app_commands.Choice(name="Connect Four", value="connect four"),
@@ -82,6 +83,7 @@ class Practice(commands.Cog):
             "unscramble": "Unscramble",
             "emoji_quiz": "Emoji Quiz",
             "guess_the_number": "Guess The Number",
+            "fill_in_the_blank": "Fill in the Blank",
             "wordle": "Wordle",
             "tictactoe": "TicTacToe",
             "connect four": "Connect Four",
@@ -108,7 +110,7 @@ class Practice(commands.Cog):
             )
         
         # Determine if it's a chat game or DM game
-        chat_games = ["trivia", "math_quiz", "flag_guesser", "unscramble", "emoji_quiz", "guess_the_number"]
+        chat_games = ["trivia", "math_quiz", "flag_guesser", "unscramble", "emoji_quiz", "guess_the_number", "fill_in_the_blank"]
         dm_games = ["wordle", "tictactoe", "connect four", "memory", "2048", "twenty forty eight", "minesweeper", "hangman", "filler", "paintball"]
         
         if game_value in chat_games:
@@ -273,6 +275,7 @@ class Practice(commands.Cog):
             from games.chat.trivia import Trivia
             from games.chat.emoji_quiz import EmojiQuiz
             from games.chat.guess_the_number import GuessTheNumber
+            from games.chat.fill_in_the_blank import FillInTheBlank
             
             game_map = {
                 "unscramble": Unscramble,
@@ -280,7 +283,8 @@ class Practice(commands.Cog):
                 "math_quiz": MathQuiz,
                 "trivia": Trivia,
                 "emoji_quiz": EmojiQuiz,
-                "guess_the_number": GuessTheNumber
+                "guess_the_number": GuessTheNumber,
+                "fill_in_the_blank": FillInTheBlank,
             }
             
             game_class = game_map.get(game_type.lower())
@@ -371,6 +375,8 @@ class Practice(commands.Cog):
                 await self._run_emoji_quiz_practice(dm_channel, session_data)
             elif game_type == "guess_the_number":
                 await self._run_guess_the_number_practice(dm_channel, session_data)
+            elif game_type == "fill_in_the_blank":
+                await game.run(dm_channel, test_mode=True)
         except discord.Forbidden as e:
             if e.code == 50007:
                 user = dm_channel.recipient if hasattr(dm_channel, 'recipient') else None

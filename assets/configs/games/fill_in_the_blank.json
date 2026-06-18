@@ -1,0 +1,27 @@
+{
+    "_comment": "Fill in the Blank chat game — quotes fetched live from API Ninjas (API_NINJAS_KEY in .env)",
+    "api": {
+        "url": "https://api.api-ninjas.com/v2/randomquotes",
+        "categories": "success,wisdom"
+    },
+    "min_word_length": 4,
+    "stopwords": [
+        "a", "an", "the", "or", "and", "to", "of", "in", "is", "it", "be", "as", "at",
+        "by", "for", "on", "with", "that", "this", "you", "your", "we", "our", "are",
+        "was", "were", "been", "have", "has", "had", "do", "does", "did", "will",
+        "would", "could", "should", "may", "might", "must", "can", "not", "no", "nor",
+        "but", "if", "so", "than", "then", "them", "they", "their", "there", "these",
+        "those", "what", "when", "where", "who", "whom", "which", "while", "how", "why",
+        "all", "each", "every", "both", "few", "more", "most", "other", "some", "such",
+        "only", "own", "same", "too", "very", "just", "also", "into", "over", "after",
+        "before", "between", "through", "during", "from", "up", "down", "out", "off",
+        "about", "again", "once", "here", "he", "she", "his", "her", "its", "my", "me",
+        "us", "him", "i"
+    ],
+    "fallback_words": [
+        "success", "wisdom", "courage", "faith", "hope", "dream", "journey", "truth",
+        "purpose", "vision", "strength", "passion", "growth", "change", "future",
+        "destiny", "believe", "achieve", "inspire", "overcome", "persist", "worthy",
+        "mindset", "legacy", "honor", "grace", "peace", "freedom", "power"
+    ]
+}

@@ -85,6 +85,7 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
         from games.chat.trivia import Trivia
         from games.chat.emoji_quiz import EmojiQuiz
         from games.chat.guess_the_number import GuessTheNumber
+        from games.chat.fill_in_the_blank import FillInTheBlank
 
         game_map = {
             "unscramble": Unscramble,
@@ -93,6 +94,7 @@ async def start_dashboard_http(bot: "MinecadiaBot") -> None:
             "trivia": Trivia,
             "emoji_quiz": EmojiQuiz,
             "guess_the_number": GuessTheNumber,
+            "fill_in_the_blank": FillInTheBlank,
         }
         game_class = game_map.get(game)
         if not game_class:

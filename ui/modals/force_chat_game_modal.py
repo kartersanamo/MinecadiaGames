@@ -14,7 +14,7 @@ class ForceChatGameModal(discord.ui.Modal, title="Force Send Chat Game"):
         
         self.game_type = discord.ui.TextInput(
             label="Game Type",
-            placeholder="unscramble, flag_guesser, math_quiz, trivia, emoji_quiz, guess_the_number",
+            placeholder="unscramble, flag_guesser, math_quiz, trivia, emoji_quiz, guess_the_number, fill_in_the_blank",
             default="trivia",
             required=True,
             max_length=20
@@ -59,6 +59,7 @@ class ForceChatGameModal(discord.ui.Modal, title="Force Send Chat Game"):
             from games.chat.trivia import Trivia
             from games.chat.emoji_quiz import EmojiQuiz
             from games.chat.guess_the_number import GuessTheNumber
+            from games.chat.fill_in_the_blank import FillInTheBlank
             
             game_map = {
                 "unscramble": Unscramble,
@@ -66,7 +67,8 @@ class ForceChatGameModal(discord.ui.Modal, title="Force Send Chat Game"):
                 "math_quiz": MathQuiz,
                 "trivia": Trivia,
                 "emoji_quiz": EmojiQuiz,
-                "guess_the_number": GuessTheNumber
+                "guess_the_number": GuessTheNumber,
+                "fill_in_the_blank": FillInTheBlank,
             }
             
             game_type = self.game_type.value.lower().strip()
@@ -74,7 +76,7 @@ class ForceChatGameModal(discord.ui.Modal, title="Force Send Chat Game"):
             
             if not game_class:
                 await interaction.followup.send(
-                    f"`❌` Invalid game type. Use: unscramble, flag_guesser, math_quiz, trivia, emoji_quiz, or guess_the_number",
+                    f"`❌` Invalid game type. Use: unscramble, flag_guesser, math_quiz, trivia, emoji_quiz, guess_the_number, or fill_in_the_blank",
                     ephemeral=True
                 )
                 return

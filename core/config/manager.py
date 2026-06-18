@@ -22,6 +22,7 @@ class ConfigManager:
         'trivia': 'games/trivia',
         'unscramble': 'games/unscramble',
         'emoji_quiz': 'games/emoji_quiz',
+        'fill_in_the_blank': 'games/fill_in_the_blank',
     }
     
     def __init__(self, config_dir: str = None):

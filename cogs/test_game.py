@@ -38,6 +38,7 @@ class TestGame(commands.Cog):
         app_commands.Choice(name="Unscramble", value="unscramble"),
         app_commands.Choice(name="Emoji Quiz", value="emoji_quiz"),
         app_commands.Choice(name="Guess The Number", value="guess_the_number"),
+        app_commands.Choice(name="Fill in the Blank", value="fill_in_the_blank"),
         app_commands.Choice(name="Wordle", value="wordle"),
         app_commands.Choice(name="TicTacToe", value="tictactoe"),
         app_commands.Choice(name="Connect Four", value="connect_four"),
@@ -72,6 +73,7 @@ class TestGame(commands.Cog):
             "unscramble": "Unscramble",
             "emoji_quiz": "Emoji Quiz",
             "guess_the_number": "Guess The Number",
+            "fill_in_the_blank": "Fill in the Blank",
             "wordle": "Wordle",
             "tictactoe": "TicTacToe",
             "connect_four": "Connect Four",
@@ -85,7 +87,7 @@ class TestGame(commands.Cog):
         game_display_name = game_name_map.get(game_value, game_value)
         
         # Determine if it's a chat game or DM game
-        chat_games = ["trivia", "math_quiz", "flag_guesser", "unscramble", "emoji_quiz"]
+        chat_games = ["trivia", "math_quiz", "flag_guesser", "unscramble", "emoji_quiz", "guess_the_number", "fill_in_the_blank"]
         is_chat_game = game_value in chat_games
         
         try:
@@ -105,6 +107,7 @@ class TestGame(commands.Cog):
                 from games.chat.unscramble import Unscramble
                 from games.chat.emoji_quiz import EmojiQuiz
                 from games.chat.guess_the_number import GuessTheNumber
+                from games.chat.fill_in_the_blank import FillInTheBlank
                 
                 game_map = {
                     "trivia": Trivia,
@@ -112,7 +115,8 @@ class TestGame(commands.Cog):
                     "flag_guesser": FlagGuesser,
                     "unscramble": Unscramble,
                     "emoji_quiz": EmojiQuiz,
-                    "guess_the_number": GuessTheNumber
+                    "guess_the_number": GuessTheNumber,
+                    "fill_in_the_blank": FillInTheBlank,
                 }
                 
                 game_class = game_map.get(game_value)

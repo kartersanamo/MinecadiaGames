@@ -14,6 +14,7 @@ from games.chat.math_quiz import MathQuiz
 from games.chat.trivia import Trivia
 from games.chat.emoji_quiz import EmojiQuiz
 from games.chat.guess_the_number import GuessTheNumber
+from games.chat.fill_in_the_blank import FillInTheBlank
 from games.dm.wordle import Wordle
 from games.dm.tictactoe import TicTacToe
 from games.dm.connect_four import ConnectFour
@@ -187,7 +188,7 @@ class GameManager:
                     await self.bot.wait_until_ready()
                 
                 self.last_chat_game_heartbeat = time.time()
-                choices = [Unscramble, FlagGuesser, MathQuiz, Trivia, EmojiQuiz, GuessTheNumber]
+                choices = [Unscramble, FlagGuesser, MathQuiz, Trivia, EmojiQuiz, GuessTheNumber, FillInTheBlank]
                 game_class = random.choice(choices)
                 
                 try:
@@ -551,7 +552,7 @@ class GameManager:
     async def force_send_chat_game(self):
         """Force send a new chat game immediately and refresh the timer."""
         try:
-            choices = [Unscramble, FlagGuesser, MathQuiz, Trivia, EmojiQuiz]
+            choices = [Unscramble, FlagGuesser, MathQuiz, Trivia, EmojiQuiz, FillInTheBlank]
             game_class = random.choice(choices)
             
             # Instantiate the game - this is where the error might occur
