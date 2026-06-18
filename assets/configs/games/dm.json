@@ -126,8 +126,8 @@
                 "🟪"
             ],
             "xp": {
-                "win_min": 40,
-                "win_max": 120
+                "win_min": 80,
+                "win_max": 240
             }
         },
         "Paintball": {

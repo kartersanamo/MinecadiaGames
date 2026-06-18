@@ -55,8 +55,8 @@ class MastermindButtons(discord.ui.View):
             )
 
         xp_cfg = game_config.get("xp") or game_config.get("WIN_XP") or {}
-        self.win_min = int(xp_cfg.get("win_min") or xp_cfg.get("LOWER", 40))
-        self.win_max = int(xp_cfg.get("win_max") or xp_cfg.get("UPPER", 120))
+        self.win_min = int(xp_cfg.get("win_min") or xp_cfg.get("LOWER", 80))
+        self.win_max = int(xp_cfg.get("win_max") or xp_cfg.get("UPPER", 240))
 
         for color_idx in range(len(self.colors)):
             button = discord.ui.Button(
