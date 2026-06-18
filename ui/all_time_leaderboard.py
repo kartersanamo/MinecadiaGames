@@ -70,6 +70,7 @@ class AllTimeLeaderboardView(discord.ui.View):
             "2048_wins": "2048 Wins",
             "minesweeper_wins": "Minesweeper Wins",
             "hangman_wins": "Hangman Wins",
+            "mastermind_wins": "Mastermind Wins",
             "2048_best_score": "2048 Best Score"
         }
         return titles.get(leaderboard_type, leaderboard_type.replace("_", " ").title())
@@ -96,7 +97,8 @@ class AllTimeLeaderboardView(discord.ui.View):
                 "memory_wins": "Memory",
                 "2048_wins": "2048",
                 "minesweeper_wins": "Minesweeper",
-                "hangman_wins": "Hangman"
+                "hangman_wins": "Hangman",
+                "mastermind_wins": "Mastermind"
             }
             game_name = game_name_map.get(leaderboard_type, leaderboard_type.replace("_wins", "").replace("_", " ").title())
             return await self._get_game_wins_leaderboard(db, game_name)
@@ -342,6 +344,7 @@ class AllTimeLeaderboardView(discord.ui.View):
             "Minesweeper": "minesweeper",
             "Hangman": "hangman",
             "Filler": "filler",
+            "Mastermind": "mastermind",
         }
         
         # Chat games use xp_logs (every entry is a win)

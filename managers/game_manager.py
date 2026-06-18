@@ -23,6 +23,7 @@ from games.dm.twenty_forty_eight import TwentyFortyEight
 from games.dm.minesweeper import Minesweeper
 from games.dm.hangman import Hangman
 from games.dm.filler import Filler
+from games.dm.mastermind import Mastermind
 from games.dm.paintball import Paintball
 from services.dm_rotation_service import (
     build_dm_rotation_embed_section,
@@ -81,6 +82,7 @@ class GameManager:
             'Minesweeper': Minesweeper(self.bot),
             'Hangman': Hangman(self.bot),
             'Filler': Filler(self.bot),
+            'Mastermind': Mastermind(self.bot),
             'Paintball': Paintball(self.bot)
         }
     

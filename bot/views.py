@@ -36,7 +36,7 @@ async def register_persistent_views(client) -> None:
 
     dummy_interaction = DummyInteraction()
 
-    game_options = ["wordle", "tictactoe", "memory", "connect four", "2048", "minesweeper", "hangman", "filler"]
+    game_options = ["wordle", "tictactoe", "memory", "connect four", "2048", "minesweeper", "hangman", "filler", "mastermind"]
     for game in game_options:
         client.add_view(DMGamesView(client, game))
 
@@ -49,9 +49,11 @@ async def register_persistent_views(client) -> None:
 
     from ui.dm_games_view_starthangmanview import StartHangmanView
     from ui.dm_games_view_startfillerview import StartFillerView
+    from ui.dm_games_view_startmastermindview import StartMastermindView
 
     client.add_view(StartHangmanView(dummy_interaction, client))
     client.add_view(StartFillerView(dummy_interaction, client))
+    client.add_view(StartMastermindView(dummy_interaction, client))
 
     client.add_view(ViewMore())
 

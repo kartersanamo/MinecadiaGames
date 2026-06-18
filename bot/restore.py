@@ -18,6 +18,7 @@ _RESTORE_GAME_TYPE_MAP = {
     "minesweeper": "minesweeper",
     "hangman": "hangman",
     "filler": "filler",
+    "mastermind": "mastermind",
     "paintball": "paintball",
 }
 
@@ -90,6 +91,7 @@ def parse_dm_game_from_embed_title(title: str) -> Optional[Tuple[str, int]]:
         "Minesweeper": "minesweeper",
         "Hangman": "hangman",
         "Filler": "filler",
+        "Mastermind": "mastermind",
         "Paintball": "paintball",
     }
     game_type = title_to_type.get(prefix)
@@ -372,6 +374,19 @@ async def restore_dm_game_view(client, game_type: str, game_id: int, user_id: in
             games = dm_config.get("GAMES", {}) or dm_config.get("games", {})
             game_config = games.get("Filler", {})
             view = FillerButtons(
+                game_id, client, config, game_config,
+                test_mode=False, saved_state=game_state,
+            )
+            view.player_id = user_id
+            return view
+
+        if game_type == "mastermind":
+            from games.dm.mastermind import MastermindButtons
+
+            dm_config = config.get("dm_games")
+            games = dm_config.get("GAMES", {}) or dm_config.get("games", {})
+            game_config = games.get("Mastermind", {})
+            view = MastermindButtons(
                 game_id, client, config, game_config,
                 test_mode=False, saved_state=game_state,
             )

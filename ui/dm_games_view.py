@@ -28,6 +28,8 @@ class DMGamesView(discord.ui.View):
             self.add_item(self.hangman_button())
         elif self.active == "filler":
             self.add_item(self.filler_button())
+        elif self.active == "mastermind":
+            self.add_item(self.mastermind_button())
     
     def view_more_button(self):
         button = discord.ui.Button(
@@ -462,6 +464,70 @@ class DMGamesView(discord.ui.View):
         button.callback = callback
         return button
 
+    def mastermind_button(self):
+        button = discord.ui.Button(
+            emoji="🎯",
+            label="Click Here To Play Mastermind",
+            style=discord.ButtonStyle.grey,
+            custom_id="mastermind_button",
+        )
+
+        async def callback(interaction: discord.Interaction):
+            logger = get_logger("UI")
+            try:
+                can_play, game_id, error = await self.bot.app.games.check_dm_game_requirements(
+                    interaction, "mastermind", self.config
+                )
+                if not can_play:
+                    await interaction.response.send_message(f"`❌` {error}", ephemeral=True)
+                    return
+
+                embed = discord.Embed(
+                    title="Mastermind",
+                    description="Click the button below to begin a game of Mastermind!",
+                    color=discord.Color.from_str(self.config.get("config", "EMBED_COLOR")),
+                )
+                embed.add_field(
+                    name="How do I play?",
+                    value=(
+                        "Crack the hidden 4-peg color code in **8 guesses or fewer**. "
+                        "Pick colors below to fill each row left to right — duplicates are allowed. "
+                        "When a row is complete, you get feedback automatically:\n"
+                        "⚫ = correct color and position\n"
+                        "⚪ = correct color, wrong position\n\n"
+                        "**Fewer guesses = more XP on a win!**"
+                    ),
+                    inline=False,
+                )
+                dm_config = self.config.get("dm_games", {})
+                games = dm_config.get("games", {}) or dm_config.get("GAMES", {})
+                mastermind_config = games.get("Mastermind", {})
+                image_url = mastermind_config.get("IMAGE") or mastermind_config.get("image_url")
+                if image_url:
+                    embed.set_image(url=image_url)
+                logo_url = self.bot.app.embeds.get_logo_url(self.config.get("config", "LOGO"))
+                embed.set_footer(text=self.config.get("config", "FOOTER"), icon_url=logo_url)
+
+                view = StartMastermindView(interaction, self.bot)
+                self.bot.add_view(view)
+                await interaction.response.send_message(embed=embed, ephemeral=True, view=view)
+            except Exception as e:
+                logger.error(f"Error in Mastermind button callback: {e}")
+                import traceback
+
+                logger.error(traceback.format_exc())
+                try:
+                    if not interaction.response.is_done():
+                        await interaction.response.send_message(
+                            "`❌` An error occurred. Please try again later.",
+                            ephemeral=True,
+                        )
+                except Exception:
+                    pass
+
+        button.callback = callback
+        return button
+
 from ui.dm_games_view_startwordleview import StartWordleView
 from ui.dm_games_view_starttictactoeview import StartTicTacToeView
 from ui.dm_games_view_startmemoryview import StartMemoryView
@@ -470,3 +536,4 @@ from ui.dm_games_view_start2048view import Start2048View
 from ui.dm_games_view_startminesweeperview import StartMinesweeperView
 from ui.dm_games_view_starthangmanview import StartHangmanView
 from ui.dm_games_view_startfillerview import StartFillerView
+from ui.dm_games_view_startmastermindview import StartMastermindView

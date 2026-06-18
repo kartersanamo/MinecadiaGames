@@ -108,6 +108,28 @@
                 "win_max": 150
             }
         },
+        "Mastermind": {
+            "enabled": true,
+            "vaulted": false,
+            "refresh_cooldown": 43200,
+            "button_cooldown": 1.0,
+            "image_url": "",
+            "max_guesses": 8,
+            "code_length": 4,
+            "num_colors": 6,
+            "colors": [
+                "🟥",
+                "🟧",
+                "🟨",
+                "🟩",
+                "🟦",
+                "🟪"
+            ],
+            "xp": {
+                "win_min": 40,
+                "win_max": 120
+            }
+        },
         "Paintball": {
             "enabled": true,
             "vaulted": true,

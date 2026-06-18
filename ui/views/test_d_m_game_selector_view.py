@@ -59,6 +59,12 @@ class TestDMGameSelectorView(discord.ui.View):
                 value="filler",
                 description="Test Filler game",
                 emoji="🟦"
+            ),
+            discord.SelectOption(
+                label="Mastermind",
+                value="mastermind",
+                description="Test Mastermind game",
+                emoji="🎯"
             )
         ]
         

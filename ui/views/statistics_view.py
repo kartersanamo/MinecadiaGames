@@ -30,6 +30,7 @@ class StatisticsView(discord.ui.View):
         self.add_item(self.create_game_button("Minesweeper", "minesweeper"))
         self.add_item(self.create_game_button("Hangman", "hangman"))
         self.add_item(self.create_game_button("Filler", "filler"))
+        self.add_item(self.create_game_button("Mastermind", "mastermind"))
         self.add_item(self.create_game_button("All Games", "all"))
         self.add_item(self.create_game_button("Monthly Stats", "monthly"))
         self.add_item(self.create_game_button("Game History", "history"))
@@ -49,7 +50,7 @@ class StatisticsView(discord.ui.View):
         buttons_per_row = 5
         button_index = [
             "Trivia", "Math Quiz", "Flag Guesser", "Unscramble", "Emoji Quiz", "Guess The Number",
-            "Wordle", "TicTacToe", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler",
+            "Wordle", "TicTacToe", "Connect Four", "Memory", "2048", "Minesweeper", "Hangman", "Filler", "Mastermind",
             "All Games", "Monthly Stats", "Game History"
         ].index(label)
         return button_index // buttons_per_row
@@ -108,6 +109,7 @@ class StatisticsView(discord.ui.View):
             ("Minesweeper", "minesweeper"),
             ("Hangman", "hangman"),
             ("Filler", "filler"),
+            ("Mastermind", "mastermind"),
         ]
 
         for game_name, game_type in dm_games:
@@ -299,7 +301,8 @@ class StatisticsView(discord.ui.View):
             "2048": "2048",
             "minesweeper": "Minesweeper",
             "hangman": "Hangman",
-            "filler": "Filler"
+            "filler": "Filler",
+            "mastermind": "Mastermind"
         }
         
         game_name = game_name_map.get(game_type.lower())
@@ -407,6 +410,8 @@ class StatisticsView(discord.ui.View):
             await self._show_hangman_stats(interaction, user)
         elif game_type == "filler":
             await self._show_filler_stats(interaction, user)
+        elif game_type == "mastermind":
+            await self._show_mastermind_stats(interaction, user)
     
     async def _show_wordle_stats(self, interaction: discord.Interaction, user):
         """Show Wordle-specific statistics"""
@@ -870,6 +875,64 @@ class StatisticsView(discord.ui.View):
             performance_lines.append(f"**Avg Cells (Lost):** {stat['avg_cells_lost']:.1f}")
         if stat["avg_turns"] is not None:
             performance_lines.append(f"**Avg Turns:** {stat['avg_turns']:.1f}")
+        if performance_lines:
+            embed.add_field(name="Performance", value="\n".join(performance_lines), inline=False)
+
+        embed.set_thumbnail(url=user.display_avatar.url)
+        logo_url = self.bot.app.embeds.get_logo_url(self.config.get("config", "LOGO"))
+        embed.set_footer(text=self.config.get("config", "FOOTER"), icon_url=logo_url)
+        await interaction.followup.send(embed=embed, ephemeral=False)
+
+    async def _show_mastermind_stats(self, interaction: discord.Interaction, user):
+        """Show Mastermind-specific statistics"""
+        db = await DatabasePool.get_instance()
+
+        stats = await db.execute(
+            """
+            SELECT
+                COUNT(*) AS total_games,
+                SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS losses,
+                AVG(CASE WHEN status = 'won' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.guesses_used')) AS UNSIGNED) ELSE NULL END) AS avg_guesses_won,
+                MIN(CASE WHEN status = 'won' THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(stats, '$.guesses_used')) AS UNSIGNED) ELSE NULL END) AS best_guesses
+            FROM game_sessions
+            WHERE user_id = %s AND game_type = 'mastermind'
+            """,
+            (self.user_id,),
+        )
+
+        if not stats or not stats[0]["total_games"]:
+            await interaction.followup.send("No Mastermind statistics found.", ephemeral=False)
+            return
+
+        stat = stats[0]
+        total = stat["total_games"]
+        wins = stat["wins"] or 0
+        losses = stat["losses"] or 0
+        win_rate = (wins / total * 100) if total > 0 else 0
+
+        embed = discord.Embed(
+            title=f"📊 Mastermind Statistics - {user.display_name}",
+            color=discord.Color.from_str(self.config.get("config", "EMBED_COLOR")),
+            timestamp=datetime.now(timezone.utc),
+        )
+
+        embed.add_field(
+            name="Overall Stats",
+            value=(
+                f"**Total Games:** {total:,}\n"
+                f"**Wins:** {wins}\n"
+                f"**Losses:** {losses}\n"
+                f"**Win Rate:** {win_rate:.1f}%"
+            ),
+            inline=False,
+        )
+
+        performance_lines = []
+        if stat["avg_guesses_won"] is not None:
+            performance_lines.append(f"**Avg Guesses (Won):** {stat['avg_guesses_won']:.1f}")
+        if stat["best_guesses"] is not None:
+            performance_lines.append(f"**Best Solve:** {int(stat['best_guesses'])} guesses")
         if performance_lines:
             embed.add_field(name="Performance", value="\n".join(performance_lines), inline=False)
 

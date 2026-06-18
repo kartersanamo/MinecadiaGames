@@ -98,6 +98,12 @@ class AllTimeLeaderboardSelect(discord.ui.Select):
                 emoji="🪢"
             ),
             discord.SelectOption(
+                label="Mastermind Wins",
+                value="mastermind_wins",
+                description="Total Mastermind games won",
+                emoji="🎯"
+            ),
+            discord.SelectOption(
                 label="2048 Best Score",
                 value="2048_best_score",
                 description="Best score achieved in 2048",
