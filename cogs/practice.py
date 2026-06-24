@@ -880,6 +880,7 @@ class Practice(commands.Cog):
         # Create practice view
         view = PracticeEmojiQuizView(
             correct_answer,
+            question_data,
             game_id,
             self.bot,
             self.config,

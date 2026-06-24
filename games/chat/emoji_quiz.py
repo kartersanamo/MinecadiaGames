@@ -8,6 +8,16 @@ from managers.leveling import LevelingManager
 from core.logging.setup import get_logger
 
 
+def build_accepted_answers(correct_answer: str, question_data: Optional[dict] = None) -> frozenset[str]:
+    """Lowercased accepted guesses: canonical answer plus any alternates."""
+    accepted = {correct_answer.strip().lower()}
+    if question_data:
+        for alt in question_data.get("alternate_answers", []) or []:
+            if alt and str(alt).strip():
+                accepted.add(str(alt).strip().lower())
+    return frozenset(accepted)
+
+
 class EmojiQuiz(ChatGame):
     def __init__(self, bot):
         super().__init__(bot)
@@ -210,7 +220,7 @@ class EmojiQuizButtons(discord.ui.View):
     ):
         super().__init__(timeout=None)
         self.correct_answer = correct_answer
-        self.answer_lower = correct_answer.strip().lower()
+        self.accepted_answers = build_accepted_answers(correct_answer, question_data)
         self.question_data = question_data
         self.xp_multiplier = xp_multiplier
         self.game_id = game_id
@@ -311,7 +321,7 @@ class EmojiQuizButtons(discord.ui.View):
         guesses = self.user_guesses[user_id]
         guess_lower = guess.strip().lower()
 
-        if guess_lower == self.answer_lower:
+        if guess_lower in self.accepted_answers:
             if user_id in [w['user_id'] for w in self.winners]:
                 await interaction.response.send_message("You've already won this game!", ephemeral=True)
                 return

@@ -4,9 +4,23 @@ from typing import Optional, Dict
 
 class PracticeEmojiQuizView(discord.ui.View):
     """Practice view for Emoji Quiz - message-based"""
-    def __init__(self, correct_answer: str, game_id: int, bot, config, chat_config, user_id: int, session_data: Dict, practice_cog):
+    def __init__(
+        self,
+        correct_answer: str,
+        question_data: dict,
+        game_id: int,
+        bot,
+        config,
+        chat_config,
+        user_id: int,
+        session_data: Dict,
+        practice_cog,
+    ):
         super().__init__(timeout=None)
-        self.correct_answer = correct_answer.lower().strip()
+        from games.chat.emoji_quiz import build_accepted_answers
+
+        self.correct_answer = correct_answer.strip()
+        self.accepted_answers = build_accepted_answers(correct_answer, question_data)
         self.game_id = game_id
         self.bot = bot
         self.config = config
@@ -35,14 +49,14 @@ class PracticeEmojiQuizView(discord.ui.View):
         answer = msg.content.strip().lower()
         
         # Delete message if it contains the answer
-        if self.correct_answer in answer:
+        if any(accepted in answer for accepted in self.accepted_answers):
             try:
                 await msg.delete()
             except Exception:
                 pass
         
-        # Check if exact match
-        if answer == self.correct_answer:
+        # Check if exact match (canonical or alternate spelling)
+        if answer in self.accepted_answers:
             self.answered = True
             self.session_data['games_played'] += 1
             self.session_data['games_won'] += 1

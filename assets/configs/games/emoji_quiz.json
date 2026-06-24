@@ -11,6 +11,7 @@
             "category": "Celebrities",
             "emojis": "🐝🔛🌊",
             "answer": "Beyoncé",
+            "alternate_answers": ["Beyonce"],
             "wrong_answers": ["Margot Robbie", "Justin Bieber", "David Beckham"]
         },
         {
