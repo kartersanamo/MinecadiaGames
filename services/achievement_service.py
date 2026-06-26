@@ -1,7 +1,10 @@
 import discord
 
+from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
 from managers.milestones import MilestonesManager
+
+GAMES_CHANNEL_ID = 1456658225964388504
 
 
 class AchievementService:
@@ -31,6 +34,56 @@ class AchievementService:
                 xp = base_xp
 
         return max(400, min(700, xp))
+
+    @classmethod
+    async def _announce_achievement_unlock(
+        cls,
+        user: discord.User,
+        achievement: dict,
+        milestone_xp: int,
+        resolved_emoji: str,
+        channel: discord.abc.Messageable | None,
+        bot,
+    ) -> None:
+        name = achievement.get("name", "Unknown")
+        public_message = (
+            f"🏆 **Achievement Unlocked!** {user.mention} earned: "
+            f"**{name}** {resolved_emoji} (+{milestone_xp} XP)"
+        )
+        dm_message = (
+            f"🏆 **Achievement Unlocked!** You earned: "
+            f"**{name}** {resolved_emoji} (+{milestone_xp} XP)"
+        )
+
+        config = ConfigManager.get_instance()
+        leveling_channel_id = config.get("config", "LEVELING_CHANNEL")
+        trigger_id = getattr(channel, "id", None) if channel else None
+
+        if trigger_id == leveling_channel_id:
+            try:
+                dm_ch = await user.create_dm()
+                await dm_ch.send(dm_message)
+            except (discord.Forbidden, discord.HTTPException):
+                games_ch = bot.get_channel(GAMES_CHANNEL_ID) if bot else None
+                if games_ch:
+                    try:
+                        await games_ch.send(public_message)
+                    except Exception:
+                        pass
+            return
+
+        if channel:
+            try:
+                await channel.send(public_message)
+                return
+            except (discord.Forbidden, discord.HTTPException):
+                pass
+
+        try:
+            dm_ch = await user.create_dm()
+            await dm_ch.send(dm_message)
+        except Exception:
+            pass
 
     @classmethod
     async def check_game_achievements(
@@ -80,23 +133,9 @@ class AchievementService:
                     else emoji_str
                 )
 
-                if channel:
-                    try:
-                        await channel.send(
-                            f"🏆 **Achievement Unlocked!** {user.mention} earned: "
-                            f"**{achievement.get('name', 'Unknown')}** {resolved_emoji} "
-                            f"(+{milestone_xp} XP)"
-                        )
-                    except Exception:
-                        try:
-                            dm_channel = await user.create_dm()
-                            await dm_channel.send(
-                                f"🏆 **Achievement Unlocked!** You earned: "
-                                f"**{achievement.get('name', 'Unknown')}** {resolved_emoji} "
-                                f"(+{milestone_xp} XP)"
-                            )
-                        except Exception:
-                            pass
+                await cls._announce_achievement_unlock(
+                    user, achievement, milestone_xp, resolved_emoji, channel, bot
+                )
 
         return new_achievements
 

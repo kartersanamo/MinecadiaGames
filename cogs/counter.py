@@ -14,6 +14,11 @@ from ui.views.safe_math_evaluator_view import SafeMathEvaluator
 class Counter(commands.Cog):
     COUNTING_CHANNEL_ID = 1455270125384241174
     WEBHOOK_URL = "https://REMOVED"
+    MUTE_DURATIONS_SECONDS = (
+        2 * 3600,           # 1st mute: 2 hours
+        24 * 3600,          # 2nd mute: 1 day
+        7 * 24 * 3600,      # 3rd+ mute: 1 week
+    )
     
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -30,6 +35,8 @@ class Counter(commands.Cog):
         self._deleting_for_edit: bool = False  # Flag to prevent double webhook on edit
         self.user_mistakes = {}  # {user_id: [timestamp, timestamp, ...]} - tracks mistakes with timestamps
         self.muted_users = {}  # {user_id: unmute_time} - tracks muted users and when to unmute them
+        self.user_mute_counts = {}  # {user_id: mute_count} - fallback if DB column unavailable
+        self._mute_count_column_ready = False
     
     def _debug_enabled(self) -> bool:
         """Check if counter debugging is enabled in config"""
@@ -75,6 +82,103 @@ class Counter(commands.Cog):
         
         # self._debug_log(f"[Counter] User {user_id} mistakes in last minute: {len(self.user_mistakes[user_id])}")
         return len(self.user_mistakes[user_id])
+
+    def _mute_duration_for_count(self, mute_count: int) -> int:
+        """Return mute duration in seconds for the given 1-based mute count."""
+        if mute_count <= 1:
+            return self.MUTE_DURATIONS_SECONDS[0]
+        if mute_count == 2:
+            return self.MUTE_DURATIONS_SECONDS[1]
+        return self.MUTE_DURATIONS_SECONDS[2]
+
+    @staticmethod
+    def _format_mute_duration(duration_seconds: int) -> str:
+        if duration_seconds >= 7 * 24 * 3600:
+            return "1 week"
+        if duration_seconds >= 24 * 3600:
+            return "1 day"
+        hours = duration_seconds // 3600
+        return f"{hours} hour{'s' if hours != 1 else ''}"
+
+    async def _ensure_mute_count_column(self) -> bool:
+        if self._mute_count_column_ready:
+            return True
+
+        try:
+            db = await asyncio.wait_for(self._get_db(), timeout=3.0)
+            rows = await asyncio.wait_for(
+                db.execute(
+                    "SELECT COUNT(*) AS column_count FROM information_schema.COLUMNS "
+                    "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'counting_users' "
+                    "AND COLUMN_NAME = 'mute_count'"
+                ),
+                timeout=3.0,
+            )
+            if rows and int(rows[0].get("column_count", 0)) == 0:
+                await asyncio.wait_for(
+                    db.execute(
+                        "ALTER TABLE counting_users "
+                        "ADD COLUMN mute_count INT UNSIGNED NOT NULL DEFAULT 0"
+                    ),
+                    timeout=5.0,
+                )
+                self.logger.info("[Counter] Added mute_count column to counting_users")
+            self._mute_count_column_ready = True
+            return True
+        except Exception as e:
+            self.logger.warning(f"[Counter] mute_count column unavailable, using in-memory counts: {e}")
+            return False
+
+    async def _increment_mute_count(self, guild_id: int, user_id: int) -> int:
+        """Increment and return the user's mute count (1-based)."""
+        if await self._ensure_mute_count_column():
+            try:
+                db = await asyncio.wait_for(self._get_db(), timeout=3.0)
+                await asyncio.wait_for(
+                    db.execute(
+                        "INSERT INTO counting_users "
+                        "(guild_id, user_id, total_counts, highest_count, mistakes, mute_count) "
+                        "VALUES (%s, %s, 0, 0, 0, 1) "
+                        "ON DUPLICATE KEY UPDATE mute_count = mute_count + 1",
+                        (str(guild_id), str(user_id)),
+                    ),
+                    timeout=3.0,
+                )
+                rows = await asyncio.wait_for(
+                    db.execute(
+                        "SELECT mute_count FROM counting_users "
+                        "WHERE guild_id = %s AND user_id = %s",
+                        (str(guild_id), str(user_id)),
+                    ),
+                    timeout=3.0,
+                )
+                if rows:
+                    return int(rows[0].get("mute_count", 1))
+            except Exception as e:
+                self.logger.error(f"[Counter] Failed to persist mute count for user {user_id}: {e}")
+
+        current = self.user_mute_counts.get(user_id, 0) + 1
+        self.user_mute_counts[user_id] = current
+        return current
+
+    async def _mute_for_counting_violation(
+        self,
+        member: discord.Member,
+        channel: discord.TextChannel,
+        guild_id: int,
+        reason: str,
+    ) -> tuple[int, str]:
+        """Apply an escalating counting-channel mute. Returns (seconds, label)."""
+        mute_count = await self._increment_mute_count(guild_id, member.id)
+        duration_seconds = self._mute_duration_for_count(mute_count)
+        duration_label = self._format_mute_duration(duration_seconds)
+        await self._mute_user(
+            member,
+            channel,
+            duration_seconds=duration_seconds,
+            reason=reason,
+        )
+        return duration_seconds, duration_label
     
     async def _mute_user(self, member: discord.Member, channel: discord.TextChannel, duration_seconds: int = 3600, reason: str = "Counting game violation") -> bool:
         """Mute a user in a specific channel by removing send_messages permission.
@@ -435,18 +539,20 @@ class Counter(commands.Cog):
                 
                 try:
                     if mistake_count >= 3:
-                        # 3rd mistake - mute for 1 hour
-                        # self.logger.warning(f"[Counter] User {user_id} reached 3 mistakes in 1 minute, muting for 1 hour")
-                        await self._reset_counter(message, "You made **3 mistakes in 1 minute**! You are muted for **1 hour**.")
+                        reset_reason = "You made **3 mistakes in 1 minute**!"
                         if message.guild:
                             member = message.guild.get_member(user_id)
                             if member:
-                                await self._mute_user(
+                                _, duration_label = await self._mute_for_counting_violation(
                                     member,
                                     message.channel,
-                                    duration_seconds=3600,
-                                    reason="3 mistakes in 1 minute"
+                                    guild_id,
+                                    reason="3 mistakes in 1 minute",
                                 )
+                                reset_reason += f" You are muted for **{duration_label}**."
+                        else:
+                            reset_reason += " You are muted."
+                        await self._reset_counter(message, reset_reason)
                     else:
                         # Record mistake but don't mute yet
                         await self._reset_counter(message, f"You can't count **twice in a row**. (Mistake {mistake_count}/3)")
@@ -467,24 +573,26 @@ class Counter(commands.Cog):
                     except Exception as e:
                         self.logger.error(f"[Counter] Error in reset_counter (acceptable range): {e}", exc_info=True)
                 else:
-                    # Outside acceptable range - IMMEDIATELY MUTE for 1 hour
+                    # Outside acceptable range - mute with escalating duration
                     # self.logger.warning(f"[Counter] User {user_id} entered number too far from expected: {result} vs {expected_number}")
                     
                     try:
-                        await self._reset_counter(
-                            message,
-                            f"Expected **{expected_number}**, but got **{result}** (too far away)! You are muted for **1 hour**."
+                        reset_reason = (
+                            f"Expected **{expected_number}**, but got **{result}** (too far away)!"
                         )
-                        # Mute the user immediately
                         if message.guild:
                             member = message.guild.get_member(user_id)
                             if member:
-                                await self._mute_user(
+                                _, duration_label = await self._mute_for_counting_violation(
                                     member,
                                     message.channel,
-                                    duration_seconds=3600,
-                                    reason="Number too far from expected"
+                                    guild_id,
+                                    reason="Number too far from expected",
                                 )
+                                reset_reason += f" You are muted for **{duration_label}**."
+                        else:
+                            reset_reason += " You are muted."
+                        await self._reset_counter(message, reset_reason)
                     except Exception as e:
                         self.logger.error(f"[Counter] Error handling large mistake mute: {e}", exc_info=True)
                 return

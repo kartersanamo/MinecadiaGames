@@ -17,8 +17,7 @@ class MinesweeperButtons(discord.ui.View):
         for r in range(row_offset, row_offset + 5):
             for c in range(COLS):
                 btn = discord.ui.Button(
-                    label="\u200b",
-                    emoji="⬛",
+                    label="",
                     style=discord.ButtonStyle.grey,
                     custom_id=f"minesweeper_{r}_{c}_{state.game_id}",
                     row=r - row_offset
