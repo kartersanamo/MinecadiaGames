@@ -17,7 +17,7 @@ class MinesweeperButtons(discord.ui.View):
         for r in range(row_offset, row_offset + 5):
             for c in range(COLS):
                 btn = discord.ui.Button(
-                    label="",
+                    emoji="<:TicTacToe:1190287916358967327>",
                     style=discord.ButtonStyle.grey,
                     custom_id=f"minesweeper_{r}_{c}_{state.game_id}",
                     row=r - row_offset
@@ -52,4 +52,4 @@ class MinesweeperButtons(discord.ui.View):
         elif pos in s.flagged:
             button.emoji, button.label, button.style = "🚩", "\u200b", discord.ButtonStyle.red
         else:
-            button.emoji, button.label, button.style = "⬛", "\u200b", discord.ButtonStyle.grey
+            button.emoji, button.label, button.style = "<:TicTacToe:1190287916358967327>", None, discord.ButtonStyle.grey
