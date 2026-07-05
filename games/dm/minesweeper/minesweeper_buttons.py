@@ -47,8 +47,7 @@ class MinesweeperButtons(discord.ui.View):
             elif val == 0:
                 button.emoji, button.label, button.style = None, "-", discord.ButtonStyle.secondary
             else:
-                number_emojis = {1: "1️⃣", 2: "2️⃣", 3: "3️⃣", 4: "4️⃣", 5: "5️⃣", 6: "6️⃣", 7: "7️⃣", 8: "8️⃣"}
-                button.emoji, button.label, button.style = number_emojis.get(val, str(val)), "\u200b", discord.ButtonStyle.green if val <= 2 else discord.ButtonStyle.blurple
+                button.emoji, button.label, button.style = None, str(val), discord.ButtonStyle.green if val <= 2 else discord.ButtonStyle.blurple
         elif pos in s.flagged:
             button.emoji, button.label, button.style = "🚩", "\u200b", discord.ButtonStyle.red
         else:
