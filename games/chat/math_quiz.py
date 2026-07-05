@@ -464,7 +464,7 @@ class MathQuizButtons(discord.ui.View):
         if self.winners:
             xp = min(xp, self.winners[-1]['xp'] - 1)
 
-        return max(0, xp)
+        return max(10, xp)
     
     def create_callback(self, answer: str):
         async def callback(interaction: discord.Interaction):

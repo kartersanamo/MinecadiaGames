@@ -323,7 +323,7 @@ class GuessTheNumberButtons(discord.ui.View):
         if self.winners:
             xp = min(xp, self.winners[-1]['xp'] - 1)
 
-        return max(0, xp)
+        return max(10, xp)
 
     async def handle_guess(self, interaction: discord.Interaction, guess: int):
         """Handle a user's guess"""

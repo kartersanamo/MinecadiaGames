@@ -284,7 +284,7 @@ class EmojiQuizButtons(discord.ui.View):
         if self.winners:
             xp = min(xp, self.winners[-1]['xp'] - 1)
 
-        return max(0, xp)
+        return max(10, xp)
     
     def create_guess_callback(self):
         """Create callback for the guess button"""
