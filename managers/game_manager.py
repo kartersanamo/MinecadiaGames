@@ -269,6 +269,17 @@ class GameManager:
                 self.logger.error(f"DM game loop error: {e}")
                 await asyncio.sleep(60)
     
+    def _get_chat_delay_bounds(self) -> tuple[int, int]:
+        delay_config = self.chat_config.get('DELAY', {}) or self.chat_config.get('delay', {})
+        is_weekend = datetime.now(timezone.utc).weekday() >= 5
+        if is_weekend:
+            min_delay = delay_config.get('weekend_min_seconds', 900)
+            max_delay = delay_config.get('weekend_max_seconds', 1500)
+        else:
+            min_delay = delay_config.get('LOWER') or delay_config.get('min_seconds', 1500)
+            max_delay = delay_config.get('UPPER') or delay_config.get('max_seconds', 2100)
+        return min_delay, max(min_delay, max_delay)
+
     async def _calc_chat_wait(self) -> int:
         try:
             db = await asyncio.wait_for(self._get_db(), timeout=5.0)
@@ -278,16 +289,11 @@ class GameManager:
             )
         except asyncio.TimeoutError:
             self.logger.warning("[GameManager] Database timeout in _calc_chat_wait, using default delay")
-            # Return a default wait time if database is slow (use min delay to avoid long waits)
-            delay_config = self.chat_config.get('DELAY', {}) or self.chat_config.get('delay', {})
-            min_delay = delay_config.get('LOWER') or delay_config.get('min_seconds', 1500)
-            # Use min_delay instead of max_delay to avoid waiting too long when DB is slow
+            min_delay, _ = self._get_chat_delay_bounds()
             return min_delay
         except Exception as e:
             self.logger.error(f"[GameManager] Database error in _calc_chat_wait: {e}")
-            # Return a default wait time if database fails (use min delay)
-            delay_config = self.chat_config.get('DELAY', {}) or self.chat_config.get('delay', {})
-            min_delay = delay_config.get('LOWER') or delay_config.get('min_seconds', 1500)
+            min_delay, _ = self._get_chat_delay_bounds()
             return min_delay
         
         if not rows:
@@ -297,16 +303,7 @@ class GameManager:
         now = int(datetime.now(timezone.utc).timestamp())
         time_since_last = now - last
         
-        # Support both old and new delay structure
-        delay_config = self.chat_config.get('DELAY', {})
-        if not delay_config:
-            delay_config = self.chat_config.get('delay', {})
-        min_delay = delay_config.get('LOWER') or delay_config.get('min_seconds', 1500)
-        max_delay = delay_config.get('UPPER') or delay_config.get('max_seconds', 2100)
-        
-        # Ensure delays are reasonable (25-35 minutes = 1500-2100 seconds)
-        min_delay = max(1500, min(min_delay, 2100))
-        max_delay = max(min_delay, min(max_delay, 2100))
+        min_delay, max_delay = self._get_chat_delay_bounds()
         
         delay = random.randint(min_delay, max_delay)
         

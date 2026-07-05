@@ -4,7 +4,9 @@
     "delay": {
         "min_seconds": 1500,
         "max_seconds": 2100,
-        "_comment": "Random delay between games in seconds"
+        "weekend_min_seconds": 900,
+        "weekend_max_seconds": 1500,
+        "_comment": "Random delay between games in seconds (weekdays 25-35m, weekends 15-25m)"
     },
     "game_duration": 600,
     "_comment_duration": "How long each game lasts in seconds (10 minutes)",
