@@ -3,6 +3,26 @@ from core.database.pool import DatabasePool
 from core.config.manager import ConfigManager
 from managers.milestones import MilestonesManager
 
+LEADERBOARD_TYPE_CHOICES = [
+    ("all_time_xp", "All Time XP"),
+    ("all_time_level", "All Time Level"),
+    ("trivia_wins", "Trivia Wins"),
+    ("math_quiz_wins", "Math Quiz Wins"),
+    ("flag_guesser_wins", "Flag Guesser Wins"),
+    ("unscramble_wins", "Unscramble Wins"),
+    ("emoji_quiz_wins", "Emoji Quiz Wins"),
+    ("tictactoe_wins", "TicTacToe Wins"),
+    ("wordle_wins", "Wordle Wins"),
+    ("connect_four_wins", "Connect Four Wins"),
+    ("memory_wins", "Memory Wins"),
+    ("2048_wins", "2048 Wins"),
+    ("minesweeper_wins", "Minesweeper Wins"),
+    ("hangman_wins", "Hangman Wins"),
+    ("mastermind_wins", "Mastermind Wins"),
+    ("2048_best_score", "2048 Best Score"),
+]
+
+
 class AllTimeLeaderboardView(discord.ui.View):
     def __init__(self, bot, guild: discord.Guild):
         super().__init__(timeout=None)
@@ -11,7 +31,13 @@ class AllTimeLeaderboardView(discord.ui.View):
         self.config = ConfigManager.get_instance()
         self.milestones_manager = MilestonesManager()
     
-    async def send_leaderboard(self, interaction: discord.Interaction, leaderboard_type: str = "all_time_xp"):
+    async def send_leaderboard(
+        self,
+        interaction: discord.Interaction,
+        leaderboard_type: str = "all_time_xp",
+        *,
+        ephemeral: bool = True,
+    ):
         """Send the all-time leaderboard"""
         # Note: interaction.response should already be deferred by the caller
         
@@ -23,7 +49,9 @@ class AllTimeLeaderboardView(discord.ui.View):
         )
         logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
         loading_embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
-        loading_msg = await interaction.followup.send(embed=loading_embed, ephemeral=True, wait=True)
+        loading_msg = await interaction.followup.send(
+            embed=loading_embed, ephemeral=ephemeral, wait=True
+        )
         
         # Get leaderboard data (this is the slow part)
         leaderboard_data = await self.get_all_time_leaderboard(leaderboard_type)
@@ -45,7 +73,11 @@ class AllTimeLeaderboardView(discord.ui.View):
         )
 
         paginator = AllTimeLeaderboardPaginator(
-            self, leaderboard_type, leaderboard_data, message=loading_msg
+            self,
+            leaderboard_type,
+            leaderboard_data,
+            message=loading_msg,
+            ephemeral=ephemeral,
         )
         
         # Edit the loading message with the actual leaderboard
@@ -56,8 +88,8 @@ class AllTimeLeaderboardView(discord.ui.View):
     def _get_leaderboard_title(self, leaderboard_type: str) -> str:
         """Get display title for leaderboard type"""
         titles = {
-            "all_time_xp": "Total XP",
-            "all_time_level": "Highest Level",
+            "all_time_xp": "All Time XP",
+            "all_time_level": "All Time Level",
             "trivia_wins": "Trivia Wins",
             "math_quiz_wins": "Math Quiz Wins",
             "flag_guesser_wins": "Flag Guesser Wins",
@@ -108,14 +140,13 @@ class AllTimeLeaderboardView(discord.ui.View):
             return []
     
     async def _get_all_time_xp_leaderboard(self, db: DatabasePool) -> list:
-        """Get all-time total XP leaderboard"""
-        # Sum all XP from xp_logs (this is all-time, not reset monthly)
-        # Limit to top 500 for performance
+        """Get all-time total XP leaderboard (every XP award ever logged)."""
         rows = await db.execute(
             """
-            SELECT user_id, SUM(xp) as total_xp
+            SELECT user_id, SUM(xp) AS total_xp
             FROM xp_logs
             GROUP BY user_id
+            HAVING total_xp > 0
             ORDER BY total_xp DESC
             LIMIT 500
             """
@@ -217,22 +248,39 @@ class AllTimeLeaderboardView(discord.ui.View):
         return leaderboard if leaderboard else ["No data available."]
     
     async def _get_all_time_level_leaderboard(self, db: DatabasePool) -> list:
-        """Global level = sum of each user's level at every monthly /wipe-levels."""
-        from managers.global_level import ensure_global_level_table
+        """All-time level = archived month-end levels + current monthly level."""
+        from managers.global_level import (
+            ensure_global_level_table,
+            ensure_winners_historical_for_missing_users,
+        )
 
         await ensure_global_level_table(db)
+        await ensure_winners_historical_for_missing_users(db)
         rows = await db.execute(
             """
-            SELECT user_id, global_level
-            FROM leveling_global
-            WHERE global_level > 0
-            ORDER BY global_level DESC
+            SELECT user_id, total_level
+            FROM (
+                SELECT
+                    l.user_id,
+                    COALESCE(lg.global_level, 0) + COALESCE(l.level, 0) AS total_level
+                FROM leveling l
+                LEFT JOIN leveling_global lg ON lg.user_id = l.user_id
+                UNION
+                SELECT
+                    lg.user_id,
+                    lg.global_level AS total_level
+                FROM leveling_global lg
+                LEFT JOIN leveling l ON l.user_id = lg.user_id
+                WHERE l.user_id IS NULL AND lg.global_level > 0
+            ) AS combined
+            WHERE total_level > 0
+            ORDER BY total_level DESC
             LIMIT 500
             """
         )
 
         if not rows:
-            return ["No data available. Levels are added here after each monthly wipe."]
+            return ["No data available."]
 
         user_ids = [str(row["user_id"]) for row in rows]
         
@@ -294,7 +342,7 @@ class AllTimeLeaderboardView(discord.ui.View):
         for index, row in enumerate(rows, 1):
             user_id = int(row["user_id"])
             user_id_str = str(user_id)
-            level = int(row["global_level"])
+            level = int(row["total_level"])
 
             user = self.bot.get_user(user_id)
             if not user and self.guild:
@@ -321,11 +369,11 @@ class AllTimeLeaderboardView(discord.ui.View):
             
             if user:
                 leaderboard.append(
-                    f"**{index}.** {badge_text}{user.mention} » Global Level {level}"
+                    f"**{index}.** {badge_text}{user.mention} » Level {level:,}"
                 )
             else:
                 leaderboard.append(
-                    f"**{index}.** {badge_text}<@{user_id}> » Global Level {level}"
+                    f"**{index}.** {badge_text}<@{user_id}> » Level {level:,}"
                 )
         
         return leaderboard if leaderboard else ["No data available."]
@@ -348,7 +396,26 @@ class AllTimeLeaderboardView(discord.ui.View):
         }
         
         # Chat games use xp_logs (every entry is a win)
-        chat_games = ["Trivia", "Math Quiz", "Flag Guesser", "Unscramble", "Emoji Quiz", "Fill in the Blank"]
+        chat_games = [
+            "Trivia",
+            "Math Quiz",
+            "Flag Guesser",
+            "Unscramble",
+            "Emoji Quiz",
+            "Fill in the Blank",
+            "Guess The Number",
+        ]
+        # DM games that only award XP on a win — xp_logs is reliable when sessions are missing
+        dm_xp_win_sources = {
+            "TicTacToe": "TicTacToe",
+            "Wordle": "Wordle",
+            "Connect Four": "Connect Four",
+            "Memory": "Memory",
+            "Minesweeper": "Minesweeper",
+            "Hangman": "Hangman",
+            "Mastermind": "Mastermind",
+            "Filler": "Filler",
+        }
         
         # Normalize game name
         if game_name == "Tictactoe":
@@ -368,18 +435,42 @@ class AllTimeLeaderboardView(discord.ui.View):
             )
         elif game_name in dm_game_types:
             game_type = normalize_game_type(dm_game_types[game_name])
+            xp_source = dm_xp_win_sources.get(game_name)
             try:
-                rows = await db.execute(
-                    """
-                    SELECT user_id, COUNT(*) AS wins
-                    FROM game_sessions
-                    WHERE game_type = %s AND status = 'won'
-                    GROUP BY user_id
-                    ORDER BY wins DESC
-                    LIMIT 500
-                    """,
-                    (game_type,),
-                )
+                if xp_source:
+                    rows = await db.execute(
+                        """
+                        SELECT user_id, MAX(wins) AS wins
+                        FROM (
+                            SELECT user_id, COUNT(*) AS wins
+                            FROM game_sessions
+                            WHERE game_type = %s AND status = 'won'
+                            GROUP BY user_id
+                            UNION ALL
+                            SELECT user_id, COUNT(*) AS wins
+                            FROM xp_logs
+                            WHERE source = %s
+                            GROUP BY user_id
+                        ) combined
+                        GROUP BY user_id
+                        HAVING wins > 0
+                        ORDER BY wins DESC
+                        LIMIT 500
+                        """,
+                        (game_type, xp_source),
+                    )
+                else:
+                    rows = await db.execute(
+                        """
+                        SELECT user_id, COUNT(*) AS wins
+                        FROM game_sessions
+                        WHERE game_type = %s AND status = 'won'
+                        GROUP BY user_id
+                        ORDER BY wins DESC
+                        LIMIT 500
+                        """,
+                        (game_type,),
+                    )
             except Exception as e:
                 from core.logging.setup import get_logger
                 logger = get_logger("UI")

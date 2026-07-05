@@ -76,6 +76,49 @@ async def archive_monthly_levels_to_global(
     return archived
 
 
+def _winners_path() -> Path:
+    return Path(__file__).parent.parent / "assets" / "configs" / "winners.json"
+
+
+def _winners_level_totals() -> dict[int, int]:
+    """Sum end-of-month levels from winners.json (top 10 per month only)."""
+    winners_path = _winners_path()
+    if not winners_path.is_file():
+        return {}
+
+    with open(winners_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    totals: dict[int, int] = {}
+    for users in (data.get("Months") or {}).values():
+        if not isinstance(users, dict):
+            continue
+        for user_id, level in users.items():
+            uid = int(user_id)
+            totals[uid] = totals.get(uid, 0) + max(1, int(level or 1))
+    return totals
+
+
+async def _insert_winners_total(
+    db: "DatabasePool",
+    uid: int,
+    total_level: int,
+    *,
+    now: int | None = None,
+) -> None:
+    now = now or int(time.time())
+    await db.execute(
+        """
+        INSERT INTO leveling_global (user_id, global_level, updated_at)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+          global_level = global_level + %s,
+          updated_at = %s
+        """,
+        (uid, total_level, now, total_level, now),
+    )
+
+
 async def backfill_global_levels_from_winners(db: "DatabasePool") -> int:
     """
     One-time partial backfill: winners.json only stores top 10 per month.
@@ -86,35 +129,15 @@ async def backfill_global_levels_from_winners(db: "DatabasePool") -> int:
     if existing and int(existing[0].get("c") or 0) > 0:
         return 0
 
-    winners_path = (
-        Path(__file__).parent.parent / "assets" / "configs" / "winners.json"
-    )
-    if not winners_path.is_file():
+    totals = _winners_level_totals()
+    if not totals:
         return 0
 
-    with open(winners_path, encoding="utf-8") as f:
-        data = json.load(f)
-
-    months = data.get("Months") or {}
     now = int(time.time())
     updated = 0
-    for _month, users in months.items():
-        if not isinstance(users, dict):
-            continue
-        for user_id, level in users.items():
-            uid = int(user_id)
-            month_level = max(1, int(level or 1))
-            await db.execute(
-                """
-                INSERT INTO leveling_global (user_id, global_level, updated_at)
-                VALUES (%s, %s, %s)
-                ON DUPLICATE KEY UPDATE
-                  global_level = global_level + %s,
-                  updated_at = %s
-                """,
-                (uid, month_level, now, month_level, now),
-            )
-            updated += 1
+    for uid, total_level in totals.items():
+        await _insert_winners_total(db, uid, total_level, now=now)
+        updated += 1
 
     if updated:
         logger.info(
@@ -122,3 +145,33 @@ async def backfill_global_levels_from_winners(db: "DatabasePool") -> int:
             updated,
         )
     return updated
+
+
+async def ensure_winners_historical_for_missing_users(db: "DatabasePool") -> int:
+    """
+    Insert winners.json totals for users missing from leveling_global.
+    Safe to run repeatedly; does not modify users already tracked.
+    """
+    await ensure_global_level_table(db)
+    totals = _winners_level_totals()
+    if not totals:
+        return 0
+
+    now = int(time.time())
+    inserted = 0
+    for uid, total_level in totals.items():
+        rows = await db.execute(
+            "SELECT 1 FROM leveling_global WHERE user_id = %s LIMIT 1",
+            (uid,),
+        )
+        if rows:
+            continue
+        await _insert_winners_total(db, uid, total_level, now=now)
+        inserted += 1
+
+    if inserted:
+        logger.info(
+            "[GlobalLevel] Seeded %s users from winners.json historical totals",
+            inserted,
+        )
+    return inserted

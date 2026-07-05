@@ -1,3 +1,4 @@
+import os
 import random
 import time
 from typing import Optional
@@ -13,7 +14,7 @@ from ui.views.safe_math_evaluator_view import SafeMathEvaluator
 
 class Counter(commands.Cog):
     COUNTING_CHANNEL_ID = 1455270125384241174
-    WEBHOOK_URL = "https://REMOVED"
+    COUNTING_WEBHOOK_NAME = "Counting Restore"
     MUTE_DURATIONS_SECONDS = (
         2 * 3600,           # 1st mute: 2 hours
         24 * 3600,          # 2nd mute: 1 day
@@ -37,6 +38,8 @@ class Counter(commands.Cog):
         self.muted_users = {}  # {user_id: unmute_time} - tracks muted users and when to unmute them
         self.user_mute_counts = {}  # {user_id: mute_count} - fallback if DB column unavailable
         self._mute_count_column_ready = False
+        self._counting_webhook: Optional[discord.Webhook] = None
+        self._webhook_url = (os.getenv("COUNTING_WEBHOOK_URL") or "").strip()
     
     def _debug_enabled(self) -> bool:
         """Check if counter debugging is enabled in config"""
@@ -266,26 +269,61 @@ class Counter(commands.Cog):
                 raise
         return self.db
     
+    async def _get_counting_webhook(self, channel: discord.TextChannel) -> Optional[discord.Webhook]:
+        if self._counting_webhook is not None:
+            return self._counting_webhook
+
+        bot_user = self.bot.user
+        if bot_user is None:
+            return None
+
+        try:
+            for webhook in await channel.webhooks():
+                if webhook.user and webhook.user.id == bot_user.id:
+                    self._counting_webhook = webhook
+                    return webhook
+
+            self._counting_webhook = await channel.create_webhook(
+                name=self.COUNTING_WEBHOOK_NAME,
+                reason="Restores deleted counting messages",
+            )
+            return self._counting_webhook
+        except (discord.Forbidden, discord.HTTPException) as e:
+            self.logger.error("[Counter] Cannot access or create counting webhook: %s", e)
+            return None
+
     async def _send_webhook_message(self, content: str, username: str, avatar_url: Optional[str]) -> Optional[int]:
         """Send a message via webhook with custom username and avatar, returns message ID"""
-        payload = {
+        channel = self.bot.get_channel(self.COUNTING_CHANNEL_ID)
+        if not isinstance(channel, discord.TextChannel):
+            return None
+
+        send_kwargs = {
             "content": content,
-            "username": username,
+            "username": username[:80] if username else discord.utils.MISSING,
+            "avatar_url": avatar_url or discord.utils.MISSING,
+            "wait": True,
         }
-        if avatar_url:
-            payload["avatar_url"] = avatar_url
-        
+
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(f"{self.WEBHOOK_URL}?wait=true", json=payload) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        return int(data.get("id", 0))
-                    else:
-                        self.logger.error(f"Webhook send failed: {resp.status}")
-                        return None
-        except Exception as e:
-            self.logger.error(f"Webhook error: {e}")
+            if self._webhook_url:
+                async with aiohttp.ClientSession() as session:
+                    webhook = discord.Webhook.from_url(self._webhook_url, session=session)
+                    message = await webhook.send(**send_kwargs)
+                    return message.id
+
+            webhook = await self._get_counting_webhook(channel)
+            if webhook is None:
+                return None
+
+            message = await webhook.send(**send_kwargs)
+            return message.id
+        except discord.NotFound:
+            self._counting_webhook = None
+            self.logger.error("[Counter] Counting webhook was deleted; will recreate on next attempt")
+            return None
+        except discord.HTTPException as e:
+            self.logger.error("Webhook error: %s", e)
             return None
     
     async def cog_load(self):

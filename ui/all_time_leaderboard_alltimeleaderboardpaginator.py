@@ -10,14 +10,22 @@ if TYPE_CHECKING:
     from ui.all_time_leaderboard import AllTimeLeaderboardView
 
 class AllTimeLeaderboardPaginator(Paginator):
-    def __init__(self, parent_view: AllTimeLeaderboardView, leaderboard_type: str, leaderboard_data: list, message: Optional[discord.Message] = None):
+    def __init__(
+        self,
+        parent_view: AllTimeLeaderboardView,
+        leaderboard_type: str,
+        leaderboard_data: list,
+        message: Optional[discord.Message] = None,
+        *,
+        ephemeral: bool = True,
+    ):
         super().__init__(timeout=900)
         self.parent_view = parent_view
         self.leaderboard_type = leaderboard_type
         self.title = f"🏆 All Time Leaderboard - {parent_view._get_leaderboard_title(leaderboard_type)}"
         self.data = leaderboard_data
         self.sep = 20  # 20 entries per page
-        self.ephemeral = True
+        self.ephemeral = ephemeral
         self._message = message  # Store message reference for editing
         
         from ui.all_time_leaderboard_alltimeleaderboardselect import AllTimeLeaderboardSelect
@@ -41,13 +49,15 @@ class AllTimeLeaderboardPaginator(Paginator):
     
     async def update_leaderboard_type(self, interaction: discord.Interaction, new_type: str):
         """Update the leaderboard type and refresh the display"""
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=self.ephemeral)
         
         # Get new leaderboard data
         leaderboard_data = await self.parent_view.get_all_time_leaderboard(new_type)
         
         if not leaderboard_data:
-            await interaction.followup.send("No leaderboard data available.", ephemeral=True)
+            await interaction.followup.send(
+                "No leaderboard data available.", ephemeral=self.ephemeral
+            )
             return
         
         # Update paginator

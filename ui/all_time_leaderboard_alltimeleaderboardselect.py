@@ -22,7 +22,7 @@ class AllTimeLeaderboardSelect(discord.ui.Select):
             discord.SelectOption(
                 label="All Time Level",
                 value="all_time_level",
-                description="Highest level achieved (calculated from total XP)",
+                description="Total levels earned across all months",
                 emoji="⭐"
             ),
             discord.SelectOption(
