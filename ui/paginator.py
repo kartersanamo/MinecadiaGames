@@ -478,7 +478,7 @@ class GameIdSelect(discord.ui.Select):
         if is_dm_game and game_data:
             status_counts = {}
             total_players = len(game_data)
-            completed = sum(1 for d in game_data if d.get('ended_at', 0) > 0)
+            completed = sum(1 for d in game_data if (d.get('ended_at') or 0) > 0)
             
             for data in game_data:
                 status = data.get('status', 'Unknown')
