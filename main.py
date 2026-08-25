@@ -38,7 +38,10 @@ class Client(commands.Bot):
     def __init__(self):
         setup_logging()
         self.config = ConfigManager.get_instance()
-        super().__init__(command_prefix=".", intents=discord.Intents.all())
+        intents = discord.Intents.default()
+        intents.members = True
+        intents.message_content = True
+        super().__init__(command_prefix=".", intents=intents)
         self.game_manager: Optional[GameManager] = None
         self.wordle_listener = None
         self.minesweeper_listener = None
