@@ -384,16 +384,48 @@ class GameManager:
         return None
 
     _DM_REFRESH_ALERT_SUFFIX = " has been refreshed!"
+    _DM_REFRESH_ALERT_MESSAGE_ID_KEY = "refresh_alert_message_id"
 
     async def _cleanup_dm_refresh_alerts(self, channel: discord.TextChannel) -> None:
-        """Refresh alerts are intentionally not scanned for message content."""
-        return
+        """Delete the previously sent refresh alert without reading message content."""
+        message_id = self.config.get(
+            "dm_games", self._DM_REFRESH_ALERT_MESSAGE_ID_KEY
+        )
+        if not message_id and self.last_dm_refresh_msg:
+            message_id = self.last_dm_refresh_msg.id
+        if not message_id:
+            self.last_dm_refresh_msg = None
+            return
 
-        if to_delete:
+        try:
+            message = await channel.fetch_message(int(message_id))
+            await message.delete()
             self.logger.info(
-                f"[GameManager] Deleted {len(to_delete)} stale DM refresh alert(s)"
+                "[GameManager] Deleted stale DM refresh alert %s",
+                message_id,
+            )
+        except discord.NotFound:
+            self.logger.info(
+                "[GameManager] Stale DM refresh alert %s was already deleted",
+                message_id,
+            )
+        except (discord.Forbidden, discord.HTTPException) as e:
+            self.logger.error(
+                "[GameManager] Could not delete stale DM refresh alert %s: %s",
+                message_id,
+                e,
+            )
+            return
+        except (TypeError, ValueError):
+            self.logger.error(
+                "[GameManager] Stored DM refresh alert ID is invalid: %r",
+                message_id,
             )
 
+        self.config.set(
+            "dm_games", self._DM_REFRESH_ALERT_MESSAGE_ID_KEY, None
+        )
+        self.dm_config[self._DM_REFRESH_ALERT_MESSAGE_ID_KEY] = None
         self.last_dm_refresh_msg = None
     
     async def _refresh_dm_game(self, game_name: str):
@@ -431,7 +463,10 @@ class GameManager:
                 content=f"🚨 {games_role.mention} {game_name.title()} has been refreshed!"
             )
             self.last_dm_refresh_msg = msg
-            
+            self.config.set(
+                "dm_games", self._DM_REFRESH_ALERT_MESSAGE_ID_KEY, msg.id
+            )
+
             # Update the top message with the new active game
             await self._update_leveling_channel_message(leveling_channel, game_name, refreshed_at)
         
