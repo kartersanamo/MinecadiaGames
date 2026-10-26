@@ -37,7 +37,7 @@ class Minesweeper(DMGame):
             initial_revealed = random.choice(non_mine_positions)
             
             from games.dm.minesweeper.minesweeper_state import MinesweeperState
-            from games.dm.minesweeper.minesweeper_buttons import MinesweeperButtons
+            from games.dm.minesweeper.minesweeper_buttons import MinesweeperButtons, FlagCellView
             state = MinesweeperState(
                 game_id=last_game_id,
                 board=board,
@@ -74,6 +74,9 @@ class Minesweeper(DMGame):
             
             message1 = await user.send(embed=embed, view=view_top)
             message2 = await user.send(view=view_bottom)
+            control_view = FlagCellView(state)
+            self.bot.add_view(control_view)
+            await user.send("Use the button below to flag or unflag a cell.", view=control_view)
             state.message1 = message1
             state.message2 = message2
             state.message1_id = message1.id

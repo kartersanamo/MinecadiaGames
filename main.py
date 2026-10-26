@@ -39,8 +39,6 @@ class Client(commands.Bot):
         setup_logging()
         self.config = ConfigManager.get_instance()
         intents = discord.Intents.default()
-        intents.members = True
-        intents.message_content = True
         super().__init__(command_prefix=".", intents=intents)
         self.game_manager: Optional[GameManager] = None
         self.wordle_listener = None
@@ -204,9 +202,6 @@ class Client(commands.Bot):
         log_tasks.info("Bot connection resumed - checking game tasks")
         if self.game_manager:
             await game_tasks.ensure_game_tasks_running(self)
-
-    async def on_message(self, message: discord.Message):
-        await listeners.on_message(self, message)
 
     async def close(self):
         await startup.shutdown(self)

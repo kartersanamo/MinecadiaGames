@@ -128,6 +128,25 @@ class MinesweeperState:
             else:
                 await self._save_state()
                 await self.update_both_messages()
+
+    async def handle_flag(self, interaction: discord.Interaction, row: int, col: int):
+        if self.game_over:
+            await interaction.response.send_message("This game has already ended!", ephemeral=True)
+            return
+        pos = (row, col)
+        if pos in self.revealed:
+            await interaction.response.send_message("You cannot flag a revealed cell.", ephemeral=True)
+            return
+        if pos in self.flagged:
+            self.flagged.remove(pos)
+            result = f"Unflagged row {row + 1}, col {col + 1}."
+        else:
+            self.flagged.add(pos)
+            result = f"Flagged row {row + 1}, col {col + 1}."
+        await interaction.response.defer()
+        await self._save_state()
+        await self.update_both_messages()
+        await interaction.followup.send(result, ephemeral=True)
     
     async def _handle_loss(self, interaction: discord.Interaction):
         self.game_over = True

@@ -326,4 +326,3 @@ class WipeLevels(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(WipeLevels(bot))
-

@@ -5,12 +5,36 @@ from typing import Optional
 import asyncio
 import aiohttp
 import discord
+from discord import app_commands
 from discord.ext import commands
 from core.config.manager import ConfigManager
 from core.database.pool import DatabasePool
 from managers.leveling import LevelingManager
 from core.logging.setup import get_logger
 from ui.views.safe_math_evaluator_view import SafeMathEvaluator
+
+
+class _CountSubmission:
+    """Message-shaped adapter for the interaction-based counting workflow."""
+    def __init__(self, interaction: discord.Interaction, content: str):
+        self._interaction = interaction
+        self.author = interaction.user
+        self.channel = interaction.channel
+        self.guild = interaction.guild
+        self.id = None
+        self.content = content
+        self.attachments = []
+        self.embeds = []
+
+    async def delete(self):
+        return None
+
+    async def reply(self, content: str, **kwargs):
+        return await self.channel.send(content)
+
+    async def add_reaction(self, emoji: str):
+        return None
+
 
 class Counter(commands.Cog):
     COUNTING_CHANNEL_ID = 1455270125384241174
@@ -496,14 +520,22 @@ class Counter(commands.Cog):
         except Exception as e:
             self.logger.error(f"[Counter] Unexpected error in _reset_counter: {e}", exc_info=True)
     
-    @commands.Cog.listener("on_message")
-    async def on_message(self, message: discord.Message):
+    @app_commands.command(name="count", description="Submit the next number in the counting channel")
+    @app_commands.describe(value="A number or safe arithmetic expression")
+    async def count(self, interaction: discord.Interaction, value: str):
+        """The counting game uses an explicit interaction instead of message content."""
+        if interaction.channel_id != self.COUNTING_CHANNEL_ID:
+            await interaction.response.send_message(
+                f"Please use this command in <#{self.COUNTING_CHANNEL_ID}>.", ephemeral=True
+            )
+            return
+        await interaction.response.defer(ephemeral=True)
+        response = await self._process_count(interaction, value)
+        await interaction.edit_original_response(content=response)
+
+    async def _process_count(self, interaction: discord.Interaction, value: str) -> str:
         try:
-            if message.author.bot:
-                return
-            
-            if message.channel.id != self.COUNTING_CHANNEL_ID:
-                return
+            message = _CountSubmission(interaction, value)
             
             # Check if user is muted
             if self._is_user_muted(message.author.id):
@@ -514,20 +546,21 @@ class Counter(commands.Cog):
                     await message.delete()
                 except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                     pass
-                return
+                return "You are currently muted."
             
             # Delete forwarded messages
-            if hasattr(message.flags, 'forwarded') and message.flags.forwarded:
+            message_flags = getattr(message, "flags", None)
+            if getattr(message_flags, "forwarded", False):
                 try:
                     await message.delete()
                 except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                     pass
-                return
+                return "That message could not be counted."
             
             if message.attachments or message.embeds:
-                return
+                return "That message could not be counted."
             
-            content = message.content.strip()
+            content = value.strip()
             # self.logger.info(f"[Counter] Processing message: '{content}' from {message.author.name} (ID: {message.author.id}), current last_number: {self.last_number}")
             
             # Try to evaluate as math expression first
@@ -545,23 +578,23 @@ class Counter(commands.Cog):
                         # self.logger.info(f"[Counter] Parsed '{content}' as plain number: {result}")
                     else:
                         # self.logger.info(f"[Counter] '{content}' is not a valid number or expression, ignoring")
-                        return  # Not a valid number or expression
+                        return "Please enter a valid number or arithmetic expression."
                 except (ValueError, IndexError, AttributeError) as e2:
                     # self.logger.info(f"[Counter] Failed to parse '{content}' as number: {e2}")
-                    return  # Not a number
+                    return "Please enter a valid number or arithmetic expression."
             
             if result is None:
                 # self.logger.warning(f"[Counter] Result is None for '{content}'")
-                return
+                return "Please enter a valid number or arithmetic expression."
             
             # Validate result
             if not isinstance(result, (int, float)):
                 # self.logger.warning(f"[Counter] Result is not a number: {result} (type: {type(result)})")
-                return
+                return "Please enter a valid number or arithmetic expression."
             
             if not float(result).is_integer():
                 # self.logger.info(f"[Counter] Result is not an integer: {result}, ignoring")
-                return
+                return "Please enter a whole number."
             
             result = int(result)
             # self.logger.info(f"[Counter] Validated number: {result}, expected: {self.last_number + 1}, last_user_id: {self.last_user_id}")
@@ -596,7 +629,7 @@ class Counter(commands.Cog):
                         await self._reset_counter(message, f"You can't count **twice in a row**. (Mistake {mistake_count}/3)")
                 except Exception as e:
                     self.logger.error(f"[Counter] Error in reset_counter (double count): {e}", exc_info=True)
-                return
+                return "Count reset: you cannot count twice in a row."
             
             if result != expected_number:
                 # Check if it's a valid number (within allowed difference)
@@ -633,25 +666,19 @@ class Counter(commands.Cog):
                         await self._reset_counter(message, reset_reason)
                     except Exception as e:
                         self.logger.error(f"[Counter] Error handling large mistake mute: {e}", exc_info=True)
-                return
+                return f"Count reset: expected **{expected_number}**, but received **{result}**."
             
             # self.logger.info(f"[Counter] ✅ Correct number {result}! Updating counter...")
             
             # Update in-memory state FIRST (before any async operations)
             self.last_number = result
             self.last_user_id = user_id
-            self.last_message_id = message.id
-            self.last_message_content = message.content.strip()
+            self.last_message_id = None
+            self.last_message_content = None
             self.last_message_author_name = message.author.display_name
             self.last_message_author_avatar = message.author.display_avatar.url if message.author.display_avatar else None
             
             # Add reaction FIRST (before database operations, so it happens even if DB hangs)
-            try:
-                await message.add_reaction("✅")
-                # self._debug_log(f"[Counter] Added ✅ reaction to message {message.id}")
-            except Exception as react_e:
-                self.logger.error(f"[Counter] Failed to add reaction: {react_e}", exc_info=True)
-            
             # Update database (with timeout to prevent hanging) - do this AFTER reaction
             try:
                 db = await asyncio.wait_for(self._get_db(), timeout=3.0)
@@ -703,88 +730,29 @@ class Counter(commands.Cog):
                     # self._debug_log(f"[Counter] Awarded XP to user {user_id}")
                 except Exception as xp_e:
                     self.logger.error(f"[Counter] Failed to award XP: {xp_e}", exc_info=True)
-                    
-        except Exception as e:
-            self.logger.error(f"[Counter] Unexpected error in on_message handler: {e}", exc_info=True)
-    
-    @commands.Cog.listener("on_message_edit")
-    async def on_message_edit(self, before: discord.Message, after: discord.Message):
-        if after.channel.id != self.COUNTING_CHANNEL_ID:
-            return
-        
-        if after.author.bot:
-            return
-        
-        # Check if this is the most recent counted message
-        if before.id == self.last_message_id and self.last_message_content:
-            # Store the info before deleting
-            original_content = self.last_message_content
-            author_name = before.author.display_name
-            author_avatar = before.author.display_avatar.url if before.author.display_avatar else None
-            
-            # Set flag to prevent on_message_delete from also sending a webhook
-            self._deleting_for_edit = True
-            try:
-                await after.delete()
-            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
-                pass
-            finally:
-                self._deleting_for_edit = False
-            
-            # Resend via webhook
-            new_msg_id = await self._send_webhook_message(original_content, author_name, author_avatar)
-            if new_msg_id:
-                self.last_message_id = new_msg_id
-                # Add the check reaction to the webhook message
-                try:
-                    channel = self.bot.get_channel(self.COUNTING_CHANNEL_ID)
-                    if channel:
-                        webhook_msg = await channel.fetch_message(new_msg_id)
-                        await webhook_msg.add_reaction("✅")
-                except Exception as e:
-                    self.logger.error(f"Failed to add reaction to webhook message: {e}")
-        else:
-            # Not the most recent count, just delete (no webhook needed)
-            self._deleting_for_edit = True
-            try:
-                await after.delete()
-            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
-                pass
-            finally:
-                self._deleting_for_edit = False
-    
-    @commands.Cog.listener("on_message_delete")
-    async def on_message_delete(self, message: discord.Message):
-        if message.channel.id != self.COUNTING_CHANNEL_ID:
-            return
-        
-        # Skip if this delete was triggered by on_message_edit (it handles the webhook itself)
-        if self._deleting_for_edit:
-            return
-        
-        # Check if this is the most recent counted message
-        if message.id == self.last_message_id and self.last_message_content:
-            # Resend via webhook with the original author's info
-            new_msg_id = await self._send_webhook_message(
-                self.last_message_content,
-                self.last_message_author_name,
-                self.last_message_author_avatar
+
+            self.last_message_content = content
+            self.last_message_id = await self._send_webhook_message(
+                content=content,
+                username=message.author.display_name,
+                avatar_url=message.author.display_avatar.url if message.author.display_avatar else None,
             )
-            if new_msg_id:
-                self.last_message_id = new_msg_id
-                # Add the check reaction to the webhook message
-                try:
-                    channel = self.bot.get_channel(self.COUNTING_CHANNEL_ID)
-                    if channel:
-                        webhook_msg = await channel.fetch_message(new_msg_id)
-                        await webhook_msg.add_reaction("✅")
-                except Exception as e:
-                    self.logger.error(f"Failed to add reaction to webhook message: {e}")
+            if self.last_message_id is None:
+                self.logger.error("[Counter] Count accepted but failed to resend the message through the webhook")
+
+            if self.last_message_id is None:
+                return "Count accepted, but the message could not be sent."
+            return "Count sent."
+
+        except Exception as e:
+            self.logger.error(f"[Counter] Unexpected error in count command: {e}", exc_info=True)
+            return "The count could not be processed."
     
-    @commands.command(name="resetcount")
-    @commands.has_permissions(administrator=True)
-    async def reset_count(self, ctx: commands.Context, value: int = 0):
-        guild_id = ctx.guild.id
+    @app_commands.command(name="resetcount", description="Reset the counting game")
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe(value="The number to reset to")
+    async def reset_count(self, interaction: discord.Interaction, value: int = 0):
+        guild_id = interaction.guild.id
         
         self.last_number = value
         self.last_user_id = None
@@ -795,7 +763,7 @@ class Counter(commands.Cog):
             (str(guild_id), value, value)
         )
         
-        await ctx.send(f"🔁 Counter reset to `{value}`.")
+        await interaction.response.send_message(f"🔁 Counter reset to `{value}`.")
 
 
 async def setup(bot: commands.Bot):

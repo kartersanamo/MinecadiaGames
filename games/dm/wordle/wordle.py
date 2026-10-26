@@ -107,7 +107,13 @@ class Wordle(DMGame):
             logo_url = self.bot.app.embeds.get_logo_url(self.config.get('config', 'LOGO'))
             embed.set_footer(text=self.config.get('config', 'FOOTER'), icon_url=logo_url)
             
-            await user.send(embed=embed, file=initial_image_file)
+            view = None
+            listener = getattr(self.bot, "wordle_listener", None)
+            if listener:
+                from games.dm.wordle.wordle_listener import WordleGuessView
+                view = WordleGuessView(listener)
+                self.bot.add_view(view)
+            await user.send(embed=embed, file=initial_image_file, view=view)
             
             # Clean up initial image after sending
             try:

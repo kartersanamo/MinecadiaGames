@@ -2,6 +2,19 @@ import discord
 from typing import Optional, Dict
 
 
+class _Answer:
+    def __init__(self, interaction, content):
+        self.author, self.channel, self.content = interaction.user, interaction.channel, content
+    async def delete(self): pass
+
+class _AnswerModal(discord.ui.Modal, title="Practice answer"):
+    answer = discord.ui.TextInput(label="Your answer", required=True, max_length=100)
+    def __init__(self, view):
+        super().__init__(); self.view = view
+    async def on_submit(self, interaction):
+        await interaction.response.defer()
+        await self.view.handle_message(_Answer(interaction, str(self.answer)))
+
 class PracticeEmojiQuizView(discord.ui.View):
     """Practice view for Emoji Quiz - message-based"""
     def __init__(
@@ -32,6 +45,9 @@ class PracticeEmojiQuizView(discord.ui.View):
         self.message: Optional[discord.Message] = None
         self.answered = False
         self.game_active = True
+        answer_button = discord.ui.Button(label="Submit answer", style=discord.ButtonStyle.green, custom_id=f"practice_answer_{game_id}")
+        answer_button.callback = self.answer_callback
+        self.add_item(answer_button)
         
         # Add Next and End Practice buttons
         next_button = discord.ui.Button(label="Next Question", style=discord.ButtonStyle.blurple, emoji="➡️", custom_id=f"practice_next_{game_id}", row=0)
@@ -41,6 +57,12 @@ class PracticeEmojiQuizView(discord.ui.View):
         end_button = discord.ui.Button(label="End Practice", style=discord.ButtonStyle.red, emoji="🛑", custom_id=f"practice_end_{game_id}", row=0)
         end_button.callback = self.end_callback
         self.add_item(end_button)
+
+    async def answer_callback(self, interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message("This is not your practice session!", ephemeral=True)
+            return
+        await interaction.response.send_modal(_AnswerModal(self))
     
     async def handle_message(self, msg: discord.Message):
         if self.answered or not self.game_active:

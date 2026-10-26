@@ -386,27 +386,8 @@ class GameManager:
     _DM_REFRESH_ALERT_SUFFIX = " has been refreshed!"
 
     async def _cleanup_dm_refresh_alerts(self, channel: discord.TextChannel) -> None:
-        """Delete all bot-sent DM refresh alerts in the leveling channel."""
-        to_delete: list[discord.Message] = []
-
-        async for message in channel.history(limit=100):
-            if message.author.id != self.bot.user.id:
-                continue
-            if not message.content.startswith("🚨"):
-                continue
-            if self._DM_REFRESH_ALERT_SUFFIX not in message.content:
-                continue
-            to_delete.append(message)
-
-        for message in to_delete:
-            try:
-                await message.delete()
-            except discord.NotFound:
-                pass
-            except Exception as e:
-                self.logger.warning(
-                    f"[GameManager] Failed to delete old refresh alert {message.id}: {e}"
-                )
+        """Refresh alerts are intentionally not scanned for message content."""
+        return
 
         if to_delete:
             self.logger.info(
@@ -594,4 +575,3 @@ class GameManager:
         except Exception as e:
             self.logger.error(f"Error force cycling DM game: {e}")
             return None
-

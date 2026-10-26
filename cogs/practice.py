@@ -832,27 +832,8 @@ class Practice(commands.Cog):
         # Register view and message listener
         self.bot.add_view(view)
         
-        # Set up message listener
-        def check(msg: discord.Message):
-            return (
-                msg.channel == dm_channel and
-                msg.author.id == user.id and
-                not msg.author.bot and
-                view.game_active
-            )
-        
-        try:
-            # Wait for answer with timeout
-            answer_msg = await self.bot.wait_for('message', check=check, timeout=300.0)
-            await view.handle_message(answer_msg)
-        except asyncio.TimeoutError:
-            # Timeout - disable buttons
-            view.game_active = False
-            for item in view.children:
-                if isinstance(item, discord.ui.Button):
-                    item.disabled = True
-            await message.edit(view=view)
-    
+        # Answers are submitted through the view modal.
+
     async def _run_emoji_quiz_practice(self, dm_channel: discord.DMChannel, session_data: Dict):
         """Run an emoji quiz practice game in DMs"""
         from games.chat.emoji_quiz import EmojiQuiz
@@ -907,29 +888,8 @@ class Practice(commands.Cog):
         # Register view and message listener
         self.bot.add_view(view)
         
-        # Set up message listener - keep listening until answer is correct or timeout
-        def check(msg: discord.Message):
-            return (
-                msg.channel == dm_channel and
-                msg.author.id == user.id and
-                not msg.author.bot and
-                view.game_active and
-                not view.answered
-            )
-        
-        try:
-            # Keep waiting for messages until answer is correct or timeout
-            while view.game_active and not view.answered:
-                answer_msg = await self.bot.wait_for('message', check=check, timeout=300.0)
-                await view.handle_message(answer_msg)
-        except asyncio.TimeoutError:
-            # Timeout - disable buttons
-            view.game_active = False
-            for item in view.children:
-                if isinstance(item, discord.ui.Button):
-                    item.disabled = True
-            await message.edit(view=view)
-    
+        # Answers are submitted through the view modal.
+
     async def _run_guess_the_number_practice(self, dm_channel: discord.DMChannel, session_data: Dict):
         """Run a Guess The Number practice game in DMs"""
         from games.chat.guess_the_number import GuessTheNumber, generate_game_range

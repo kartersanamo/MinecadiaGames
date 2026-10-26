@@ -73,9 +73,3 @@ async def _setup_hangman_listener(client) -> None:
     except Exception as e:
         log_tasks.error(f"Failed to load Hangman listener: {e}")
         log_tasks.error(traceback.format_exc())
-
-
-async def on_message(client, message) -> None:
-    if client.wordle_listener:
-        await client.wordle_listener.on_message(message)
-    await client.process_commands(message)

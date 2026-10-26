@@ -8,6 +8,39 @@ if TYPE_CHECKING:
 ROWS, COLS = 10, 5
 TOTAL_CELLS = ROWS * COLS  # 50
 TEST_MINESWEEPER_GAMES: Dict[int, dict] = {}  # user_id -> {'state': {...}, 'message1_id': int, 'message2_id': int}
+
+
+class FlagCellModal(discord.ui.Modal, title="Flag a Minesweeper cell"):
+    row = discord.ui.TextInput(label="Row (1-10)", min_length=1, max_length=2)
+    col = discord.ui.TextInput(label="Column (1-5)", min_length=1, max_length=1)
+
+    def __init__(self, state):
+        super().__init__()
+        self.state = state
+
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            row, col = int(self.row.value) - 1, int(self.col.value) - 1
+        except ValueError:
+            await interaction.response.send_message("Rows and columns must be numbers.", ephemeral=True)
+            return
+        if not (0 <= row < ROWS and 0 <= col < COLS):
+            await interaction.response.send_message("That cell is outside the board.", ephemeral=True)
+            return
+        await self.state.handle_flag(interaction, row, col)
+
+
+class FlagCellView(discord.ui.View):
+    def __init__(self, state):
+        super().__init__(timeout=None)
+        self.state = state
+
+    @discord.ui.button(label="Flag / unflag a cell", style=discord.ButtonStyle.secondary,
+                        custom_id="minesweeper_flag_cell")
+    async def flag(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(FlagCellModal(self.state))
+
+
 class MinesweeperButtons(discord.ui.View):
     """One of the two button grids (top rows 0-4 or bottom rows 5-9). 25 buttons each."""
     def __init__(self, state: MinesweeperState, row_offset: int):

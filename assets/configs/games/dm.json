@@ -65,7 +65,7 @@
         },
         "2048": {
             "enabled": true,
-            "vaulted": false,
+            "vaulted": true,
             "refresh_cooldown": 43200,
             "button_cooldown": 0.5,
             "image_url": ""

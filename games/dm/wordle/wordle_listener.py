@@ -9,6 +9,41 @@ from core.logging.setup import get_logger
 from repositories.game_session_repository import GameSessionRepository
 
 
+class _WordleSubmission:
+    def __init__(self, interaction: discord.Interaction, guess: str):
+        self.author = interaction.user
+        self.channel = interaction.channel
+        self.content = guess
+        self.guild = None
+        self.id = getattr(interaction.message, "id", None)
+
+    async def reply(self, content: str, **kwargs):
+        return await self.channel.send(content)
+
+
+class WordleGuessModal(discord.ui.Modal, title="Wordle guess"):
+    guess = discord.ui.TextInput(label="Five-letter word", min_length=5, max_length=5)
+
+    def __init__(self, listener):
+        super().__init__()
+        self.listener = listener
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        await self.listener.handle_guess_interaction(interaction, str(self.guess))
+
+
+class WordleGuessView(discord.ui.View):
+    def __init__(self, listener):
+        super().__init__(timeout=None)
+        self.listener = listener
+
+    @discord.ui.button(label="Submit guess", style=discord.ButtonStyle.primary,
+                        custom_id="wordle_submit_guess")
+    async def submit(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(WordleGuessModal(self.listener))
+
+
 def _wordle_row_from_session(row: dict) -> dict:
     stats = GameSessionRepository.parse_stats(row)
     return {
@@ -129,24 +164,14 @@ class WordleListener(commands.Cog):
             import traceback
             self.logger.error(traceback.format_exc())
     
-    async def on_message(self, message: discord.Message):
-        """Handle Wordle guess messages in DMs"""
-        # Log all messages to debug (remove once fixed)
-        if not message.author.bot:
-            pass
-            # self.logger.info(f"WordleListener.on_message called: channel_type={type(message.channel).__name__}, user={message.author.id}")
-        
-        if not isinstance(message.channel, discord.DMChannel) or message.author.bot:
-            return
-        
+    async def handle_guess_interaction(self, interaction: discord.Interaction, guess: str):
+        """Handle a guess submitted by the DM component/modal."""
         if not self.wordle_game:
-            # self.logger.warning("WordleListener: wordle_game is None")
             return
-
-        async with self._get_guess_lock(message.author.id):
-            if self._is_on_guess_cooldown(message.author.id):
+        async with self._get_guess_lock(interaction.user.id):
+            if self._is_on_guess_cooldown(interaction.user.id):
                 return
-            await self._handle_wordle_guess(message)
+            await self._handle_wordle_guess(_WordleSubmission(interaction, guess))
 
     async def _handle_wordle_guess(self, message: discord.Message):
         """Process a single Wordle guess (must run under the per-user guess lock)."""
