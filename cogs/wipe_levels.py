@@ -33,7 +33,7 @@ class WipeLevels(commands.Cog):
         db = await DatabasePool.get_instance()
         rows = await db.execute("SELECT COUNT(*) as count FROM tickets")
         return int(rows[0]['count']) + 1
-    
+
     @app_commands.command(name="wipe-levels", description="Wipes the levels of all users")
     @app_commands.describe(month="The current month and year EX: 'December 2024'")
     async def wipe_levels(self, interaction: discord.Interaction, month: str):
@@ -106,19 +106,28 @@ class WipeLevels(commands.Cog):
                 reward = positions.get(str(index + 1), '').split('» ')[-1]
                 user = interaction.guild.get_member(int(row['user_id']))
                 if not user:
-                    await interaction.followup.send(f"❌ Could not find user with ID {row['user_id']}")
-                    continue
+                    try:
+                        user = await interaction.guild.fetch_member(int(row['user_id']))
+                    except discord.NotFound:
+                        await interaction.followup.send(
+                            f"❌ Could not find user with ID {row['user_id']}"
+                        )
+                        continue
                 
                 name = index_to_place.get(index)
                 if not name:
                     continue
                 
+                channel_permissions = dict(permissions)
+                channel_permissions[user] = discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True
+                )
                 channel = await interaction.guild.create_text_channel(
                     category=category,
                     name=name,
-                    overwrites=permissions
+                    overwrites=channel_permissions
                 )
-                await channel.set_permissions(user, view_channel=True, send_messages=True)
                 
                 number = await self.get_number()
                 await db.execute_insert(
