@@ -224,8 +224,9 @@ class WipeLevels(commands.Cog):
         
         role = interaction.guild.get_role(1191076547113799771)
         if role:
-            for member in role.members:
-                await member.remove_roles(role, reason="New month of winners...")
+            self.logger.info(
+                "[WipeLevels] Skipping role-wide winner cleanup because member intent is disabled"
+            )
         
         # Award milestone to 1st place winner
         if top_10_rows:
